@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Solution Folder/">
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="FaceRacer.App/FaceRacerLive/FaceRacerLive.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+  <Project Path="FaceRacer.Server/FaceRacer/FaceRacer.csproj" />
+  <Project Path="FaceRacer.Shared/FaceRacer.Shared.csproj" />
+</Solution>

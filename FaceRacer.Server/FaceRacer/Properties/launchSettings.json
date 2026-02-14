@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FaceRacer": {
+      "commandName": "Project",
+      "commandLineArgs": "--TelegramMaxPosition=20"
+    }
+  }
+}

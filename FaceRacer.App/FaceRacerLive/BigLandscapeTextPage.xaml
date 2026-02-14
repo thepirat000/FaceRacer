@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="FaceRacerLive.BigLandscapeTextPage"
+    BackgroundColor="Black">
+
+    <Shell.TitleView>
+        <HorizontalStackLayout
+            HorizontalOptions="End"
+            VerticalOptions="End"
+            Margin="8"
+            Spacing="8">
+
+            <Picker x:Name="FontFamilyPicker"
+                    Title="Font"
+                    WidthRequest="90"
+                    Width="90"
+                    BackgroundColor="#292828"
+                    TextColor="Gray"
+                    SelectedIndexChanged="OnFontFamilyChanged">
+                <Picker.Items>
+                    <x:String>Sans</x:String>
+                    <x:String>Digital</x:String>
+                    <x:String>Atkinson</x:String>
+                    <x:String>Frutiger</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <Picker x:Name="TextColorPicker"
+                    Title="Color"
+                    WidthRequest="80"
+                    Width="80"
+                    BackgroundColor="#292828"
+                    TextColor="Gray"
+                    SelectedIndexChanged="OnTextColorChanged">
+                <Picker.Items>
+                    <x:String>White</x:String>
+                    <x:String>Yellow</x:String>
+                    <x:String>Green</x:String>
+                    <x:String>Cyan</x:String>
+                    <x:String>Red</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <Button Text="−"
+                    FontAttributes="Bold"
+                    WidthRequest="25"
+                    HeightRequest="40"
+                    Pressed="OnFontMinusPressed"
+                    Released="OnFontMinusReleased"
+                    BackgroundColor="#292828"
+                    TextColor="Gray" />
+
+            <Button Text="+"
+                    FontAttributes="Bold"
+                    WidthRequest="25"
+                    HeightRequest="40"
+                    Pressed="OnFontPlusPressed"
+                    Released="OnFontPlusReleased"
+                    BackgroundColor="#292828"
+                    TextColor="Gray" />
+        </HorizontalStackLayout>
+    </Shell.TitleView>
+
+    <Grid>
+        <Label x:Name="BigTextLabel"
+               Rotation="90"
+               AnchorX="0.5"
+               AnchorY="0.5"
+               Text="--:--.---"
+               TextColor="White"
+               FontAttributes="Bold"
+               HorizontalTextAlignment="Center"
+               VerticalTextAlignment="Center"
+               LineBreakMode="WordWrap"
+               MaxLines="2"
+               Padding="0"
+               FontFamily="Sans" />
+    </Grid>
+</ContentPage>
