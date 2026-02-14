@@ -3,7 +3,6 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
-**/appsettings.json
 docs/
 
 # User-specific files
@@ -429,3 +428,4 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+/FaceRacer.Server/FaceRacer/appsettings.json
