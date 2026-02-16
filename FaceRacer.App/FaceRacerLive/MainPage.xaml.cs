@@ -2,7 +2,6 @@
 using Android.Content;
 using Android.Views.InputMethods;
 #endif
-using FaceRacerLive.Dto;
 using FaceRacerLive.Monitor;
 using FaceRacerLive.ViewModels;
 
@@ -10,6 +9,8 @@ using System.IO.Compression;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Web;
+using FaceRacer.Shared;
+using FaceRacer.Shared.Dto;
 
 // ReSharper disable AsyncVoidEventHandlerMethod
 
@@ -27,7 +28,9 @@ namespace FaceRacerLive
 
         private readonly RaceMonitorPanelViewModel _vm;
 
-        private IRaceMonitorApi? _raceMonitorApi;
+        private RaceMonitorApi? _raceMonitorApi;
+
+        private SampleRaceSimulator? _raceMonitorSimulator;
 
         private CancellationTokenSource? _raceLoopCts;
 
@@ -51,6 +54,11 @@ namespace FaceRacerLive
 
             _vm = new RaceMonitorPanelViewModel();
             BindingContext = _vm;
+
+            MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                AppendConsole("Face Racer By ThePirat © 2026", Colors.LightGray, true);
+            });
         }
 
         protected override void OnAppearing()
@@ -73,9 +81,10 @@ namespace FaceRacerLive
                     return;
                 }
 
-                _raceMonitorApi = new RaceMonitorApi(httpClient);
+                _raceMonitorApi = new RaceMonitorApi(httpClient, AppSettings.CurrentSessionMonitorUrl);
 
-                AppendConsole("Face Racer By ThePirat © 2026", Colors.LightGray, true);
+                _raceMonitorSimulator = new SampleRaceSimulator();
+
                 AppendConsole($"Race monitor initialized", Colors.LimeGreen);
             }
             catch (Exception ex)
@@ -302,7 +311,7 @@ namespace FaceRacerLive
             {
                 Text = noDateTime ? message : $"[{DateTime.Now:HH\\:mm\\:ss}]: {message}",
                 TextColor = color,
-                FontSize = 10,
+                FontSize = 12,
                 LineBreakMode = LineBreakMode.CharacterWrap
             };
 
@@ -376,7 +385,7 @@ namespace FaceRacerLive
         {
             _previousSession = null;
 
-            RaceMonitorApi.ResetSimulation();
+            _raceMonitorApi!.Reset(AppSettings.CurrentSessionMonitorUrl);
 
             if (_raceLoopCts is null)
             {
@@ -397,21 +406,21 @@ namespace FaceRacerLive
             {
                 try
                 {
-                    var session = await _raceMonitorApi.GetCurrentSession(ct);
+                    var session = AppSettings.IsSimulation ? await _raceMonitorSimulator.GetCurrentSession(ct) : await _raceMonitorApi!.GetCurrentSession(ct);
 
                     await MainThread.InvokeOnMainThreadAsync(() =>
                     {
-                        _vm.UpdateFromSession(session);
+                        _vm.UpdateFromSession(session!);
                     });
 
                     if (SnifferCheckBox.IsChecked)
                     {
-                        await SaveResponse(session);
+                        await SaveResponse(session!);
                     }
 
                     if (AutoTrackCheckBox.IsChecked)
                     {
-                        await AutoCommandSession(session);
+                        await AutoCommandSession(session!);
                     }
                 }
                 catch (Exception ex)

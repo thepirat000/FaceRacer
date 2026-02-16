@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace FaceRacerLive.Dto;
+namespace FaceRacer.Shared.Dto;
 
 public class SessionRacerData
 {

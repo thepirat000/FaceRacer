@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace FaceRacerLive;
+namespace FaceRacer.Shared;
 
 internal sealed class FlexibleStringJsonConverter : JsonConverter<string?>
 {

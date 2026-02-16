@@ -1,7 +1,6 @@
 using System.IO.Compression;
 using System.Text.Json;
-
-using FaceRacerLive.Dto;
+using FaceRacer.Shared.Dto;
 
 namespace FaceRacerLive.Monitor;
 

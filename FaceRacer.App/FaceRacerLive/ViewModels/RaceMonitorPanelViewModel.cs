@@ -1,8 +1,7 @@
-﻿using FaceRacerLive.Dto;
-
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using FaceRacer.Shared.Dto;
 
 namespace FaceRacerLive.ViewModels
 {
@@ -93,11 +92,10 @@ namespace FaceRacerLive.ViewModels
             SessionStatusText = completed ? "Completed" : racerCount == 0 ? "N/A" : "Racing";
             SessionStatusColor = completed ? Colors.Gold : racerCount == 0 ? Colors.Gray : Colors.LimeGreen;
 
-            var p = Math.Clamp(
-                sessionData.current_high_lap.GetValueOrDefault() / (double)sessionData.total_laps_for_all.GetValueOrDefault(sessionData.current_high_lap.GetValueOrDefault(1)), 0, 100);
+            var sessionProgress = Math.Clamp(sessionData.current_high_lap.GetValueOrDefault() / (double)sessionData.total_laps_for_all.GetValueOrDefault(sessionData.current_high_lap.GetValueOrDefault(1)), 0, 100);
 
-            SessionProgress = p;
-            SessionProgressColor = p < 0.5 ? Colors.LimeGreen : p < 0.85 ? Colors.Gold : Colors.Red;
+            SessionProgress = sessionProgress;
+            SessionProgressColor = sessionProgress < 0.5 ? Colors.LimeGreen : sessionProgress < 0.85 ? Colors.Gold : Colors.Red;
 
             if (racerCount == 0)
             {
@@ -109,7 +107,11 @@ namespace FaceRacerLive.ViewModels
 
             // Baseline ordering (defines what "first match" means)
             var byPosition = (sessionData.body_data ?? new List<SessionRacerData>())
-                .OrderBy(r => r.position)
+                .OrderBy(r =>
+                {
+                    var orderBy = int.TryParse(r.position, out var pos) ? pos : 0;
+                    return orderBy;
+                })
                 .ToList();
 
             Racers.Clear();

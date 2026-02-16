@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
+using FaceRacer.Shared.Dto;
 
-using FaceRacerLive.Dto;
 #pragma warning disable S3358
 
 namespace FaceRacerLive.ViewModels;
