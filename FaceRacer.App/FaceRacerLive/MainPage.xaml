@@ -8,27 +8,48 @@
 
     <!-- Title toolbar -->
     <Shell.TitleView>
-        <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+        <Grid ColumnDefinitions="*,Auto,Auto,Auto"
               ColumnSpacing="6"
               Padding="8,0">
 
-            <!-- left icon -->
-            <!--<Image Grid.Column="0"
-                   Source="go_kart_logo_2.png"
-                   HeightRequest="24"
-                   WidthRequest="24"
-                   VerticalOptions="Center" />-->
-
             <!-- Title text  -->
-            <Label Grid.Column="1"
-                   Margin="-15,0,0,0"
-                   Text="Face Racer"
+            <Label Grid.Column="0"
+                   Margin="-10,0,0,0"
+                   Text="FR Live"
                    TextColor="MediumPurple"
                    VerticalOptions="Center"
                    LineBreakMode="TailTruncation"
                    FontAttributes="Bold" />
 
-            <!-- Sniffer toggle -->
+            <!-- Auto-track toggle -->
+            <HorizontalStackLayout Grid.Column="1"
+                                   Spacing="2"
+                                   VerticalOptions="Center">
+
+                <CheckBox x:Name="AutoTrackCheckBox"
+                          VerticalOptions="Center"
+                          Margin="-6,0,0,0" />
+
+                <Label x:Name="AutoTrackLabel"
+                       Margin="-10,0,0,0"
+                       Text="Auto"
+                       FontSize="12"
+                       VerticalOptions="Center">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding Source={x:Reference AutoTrackCheckBox}, Path=IsChecked}"
+                                     Value="True">
+                            <Setter Property="TextColor" Value="#ba0d0d" />
+                        </DataTrigger>
+                    </Label.Triggers>
+
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnAutoTrackLabelTapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </HorizontalStackLayout>
+
+            <!-- Rec. toggle -->
             <HorizontalStackLayout Grid.Column="2"
                                    Spacing="2"
                                    VerticalOptions="Center">
@@ -67,7 +88,7 @@
                 <CheckBox x:Name="LiveRaceCheckBox"
                           VerticalOptions="Center"
                           CheckedChanged="OnLiveRaceCheckedChanged"
-                          Margin="0,0,0,0" />
+                          Margin="-6,0,0,0" />
 
                 <Label x:Name="LiveLabel"
                        Text="Live"
@@ -95,55 +116,6 @@
     <ScrollView>
         <VerticalStackLayout Padding="10,16,10,0"
                              Spacing="12">
-
-            <!-- auto-track + name -->
-            <Grid ColumnDefinitions="Auto,Auto,*"
-                  ColumnSpacing="2"
-                  Margin="0,-19,0,0"
-                  VerticalOptions="Center"
-                  HeightRequest="45">
-                <CheckBox x:Name="AutoTrackCheckBox"
-                          VerticalOptions="Center" />
-
-                <Label Grid.Column="1"
-                       Text="Auto"
-                       FontSize="12"
-                       Margin="-10,0,0,0"
-                       VerticalOptions="Center"
-                       TextColor="{AppThemeBinding Light=DarkGray, Dark=Gray}">
-                    <Label.Triggers>
-                        <DataTrigger TargetType="Label"
-                                     Binding="{Binding Source={x:Reference AutoTrackCheckBox}, Path=IsChecked}"
-                                     Value="True">
-                            <Setter Property="TextColor" Value="#ba0d0d" />
-                        </DataTrigger>
-                    </Label.Triggers>
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnAutoTrackLabelTapped" />
-                    </Label.GestureRecognizers>
-                </Label>
-
-                <Border Grid.Column="2"
-                        Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
-                        StrokeThickness="1"
-                        StrokeShape="RoundRectangle 8"
-                        Margin="10,0,0,0"
-                        Padding="4,-3"
-                        VerticalOptions="Center"
-                        HorizontalOptions="Fill">
-                    <Entry x:Name="AutoTrackNameEditor"
-                           Text="{Binding AutoTrackByName}"
-                           Placeholder=""
-                           FontSize="11"
-                           HeightRequest="34"
-                           BackgroundColor="Transparent"
-                           TextColor="{AppThemeBinding Light=DarkGray, Dark=Gray}"
-                           HorizontalOptions="Fill"
-                           VerticalOptions="Center"
-                           MaxLength="50"
-                           ReturnType="Done" />
-                </Border>
-            </Grid>
 
             <Border Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
                     StrokeThickness="1"
@@ -195,8 +167,8 @@
 
             <Label x:Name="MicStatusLabel" Text="Idle" IsVisible="False" />
 
-            <!-- Presets Buttons -->
-            <HorizontalStackLayout Spacing="8" HorizontalOptions="Center">
+            <!-- Presets Buttons (hidden) -->
+            <HorizontalStackLayout Spacing="8" HorizontalOptions="Center" IsVisible="False">
                 <Button Text="🔵"
                         Clicked="OnPresetClicked"
                         CommandParameter="Próxima limpia"
@@ -263,20 +235,20 @@
 
                     <Label Grid.Column="0"
                            Text="{Binding SessionTitle}"
-                           FontSize="12"
+                           FontSize="14"
                            TextColor="{AppThemeBinding Light=Black, Dark=White}"
                            LineBreakMode="TailTruncation" />
 
                     <Label Grid.Column="1"
                            Text="{Binding KartsText}"
-                           FontSize="12"
+                           FontSize="14"
                            TextColor="{AppThemeBinding Light=DarkGray, Dark=LightGray}"
                            HorizontalTextAlignment="Center"
                            LineBreakMode="NoWrap" />
 
                     <Label Grid.Column="2"
                            Text="{Binding SessionStatusText}"
-                           FontSize="12"
+                           FontSize="14"
                            FontAttributes="Bold"
                            TextColor="{Binding SessionStatusColor}"
                            HorizontalTextAlignment="End"
@@ -300,7 +272,7 @@
                     Margin="0,0,0,0"
                     HorizontalOptions="Fill">
 
-                <Grid HeightRequest="275">
+                <Grid HeightRequest="340">
                     <CollectionView ItemsSource="{Binding Racers}" SelectionMode="None">
                         <CollectionView.ItemsLayout>
                             <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
@@ -310,12 +282,12 @@
                             <DataTemplate x:DataType="viewmodels:RacerRowViewModel">
                                 <Border StrokeThickness="0"
                                         StrokeShape="RoundRectangle 6"
-                                        Padding="6,3"
+                                        Padding="0,0,3,0"
                                         BackgroundColor="Transparent">
                                     <Border.Triggers>
                                         <DataTrigger TargetType="Border" Binding="{Binding IsHighlighted}" Value="True">
                                             <Setter Property="BackgroundColor"
-                                                    Value="{AppThemeBinding Light=#FFF5CC, Dark=#3A2F00}" />
+                                                    Value="{AppThemeBinding Light=#FFF5CC, Dark=#011566}" />
                                         </DataTrigger>
 
                                         <DataTrigger TargetType="Border" Binding="{Binding IsHighlighted}" Value="False">
@@ -325,7 +297,7 @@
 
                                     <Grid RowDefinitions="Auto,Auto"
                                           ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto"
-                                          ColumnSpacing="6"
+                                          ColumnSpacing="5"
                                           RowSpacing="1">
 
                                         <Label Grid.Row="0"
@@ -333,14 +305,14 @@
                                                Text="{Binding PositionText}"
                                                FontSize="12"
                                                FontAttributes="Bold"
-                                               WidthRequest="28"
-                                               HorizontalTextAlignment="End"
+                                               WidthRequest="20"
+                                               HorizontalTextAlignment="Start"
                                                VerticalTextAlignment="Center" />
 
                                         <Label Grid.Row="0"
                                                Grid.Column="1"
                                                Text="{Binding FullName}"
-                                               FontSize="9"
+                                               FontSize="11"
                                                LineBreakMode="TailTruncation"
                                                VerticalTextAlignment="Center">
                                             <Label.Triggers>
@@ -370,10 +342,16 @@
                                         <Label Grid.Row="0"
                                                Grid.Column="4"
                                                Text="{Binding LastTime}"
-                                               TextColor="{AppThemeBinding Light=DarkGray, Dark=Gray}"
-                                               FontSize="13"
+                                               TextColor="{AppThemeBinding Light=DarkGray, Dark=#adadad}"
+                                               FontSize="12"
                                                HorizontalTextAlignment="End"
-                                               VerticalTextAlignment="Center" />
+                                               VerticalTextAlignment="Center">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsHighlighted}" Value="True">
+                                                    <Setter Property="FontSize" Value="14" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
 
                                         <Label Grid.Row="0"
                                                Grid.Column="5"
@@ -381,7 +359,13 @@
                                                FontSize="14"
                                                FontAttributes="Bold"
                                                HorizontalTextAlignment="End"
-                                               VerticalTextAlignment="Center" />
+                                               VerticalTextAlignment="Center">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsHighlighted}" Value="True">
+                                                    <Setter Property="FontSize" Value="17" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
 
                                         <Label Grid.Row="0"
                                                Grid.Column="6"

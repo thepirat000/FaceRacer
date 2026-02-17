@@ -2,39 +2,124 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:FaceRacerLive.ViewModels"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              x:Class="FaceRacerLive.SettingsPage"
              Title="Settings"
              x:DataType="viewmodels:SettingsViewModel">
 
+    <ContentPage.Resources>
+        <Style x:Key="FormLabelStyle" TargetType="Label">
+            <Setter Property="TextColor" Value="{AppThemeBinding Light=#374151, Dark=#D1D5DB}" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
+        <Style x:Key="FormEntryStyle" TargetType="Entry">
+            <Setter Property="TextColor" Value="{AppThemeBinding Light=#111827, Dark=#F9FAFB}" />
+            <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light=#9CA3AF, Dark=#6B7280}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Margin" Value="0,2,0,0" />
+        </Style>
+
+        <Style x:Key="FormSectionStyle" TargetType="VerticalStackLayout">
+            <Setter Property="Spacing" Value="6" />
+            <Setter Property="Margin" Value="0,6,0,0" />
+        </Style>
+
+        <Style x:Key="FormEditorStyle" TargetType="Editor">
+            <Setter Property="TextColor" Value="{AppThemeBinding Light=#111827, Dark=#F9FAFB}" />
+            <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light=#9CA3AF, Dark=#6B7280}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Margin" Value="0,2,0,0" />
+            <Setter Property="AutoSize" Value="TextChanges" />
+        </Style>
+    </ContentPage.Resources>
+
     <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="12">
+        <VerticalStackLayout Padding="16" Spacing="14">
 
-            <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                <Label Text="Simulation" VerticalOptions="Center" />
-                <Switch IsToggled="{Binding IsSimulation}" VerticalOptions="Center" />
-            </HorizontalStackLayout>
+            <Frame Padding="12"
+                   CornerRadius="12"
+                   HasShadow="False"
+                   BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
+                   BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
 
-            <VerticalStackLayout Spacing="6">
-                <Label Text="Live interval (ms)" />
-                <Entry Text="{Binding IntervalMillisecondsLiveMonitorText}"
-                       Keyboard="Numeric"
-                       Placeholder="100 - 10000" />
-                <Label Text="Min: 100, Max: 10000" FontSize="12" TextColor="{AppThemeBinding Light=DarkGray, Dark=Gray}" />
-            </VerticalStackLayout>
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" RowDefinitions="Auto">
+                    <Label Text="Simulation"
+                           Style="{StaticResource FormLabelStyle}"
+                           VerticalOptions="Center" />
 
-            <VerticalStackLayout Spacing="6">
-                <Label Text="Current session monitor URL" />
-                <Entry Text="{Binding CurrentSessionMonitorUrl}"
-                       Keyboard="Url" />
-            </VerticalStackLayout>
+                    <Switch Grid.Column="1"
+                            IsToggled="{Binding IsSimulation}"
+                            HorizontalOptions="End"
+                            VerticalOptions="Center" />
+                </Grid>
+            </Frame>
+
+            <Frame Padding="12"
+                   CornerRadius="12"
+                   HasShadow="False"
+                   BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
+                   BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
+
+                <VerticalStackLayout Style="{StaticResource FormSectionStyle}">
+                    <Label Text="Monitor URL" Style="{StaticResource FormLabelStyle}" />
+
+                    <Editor Text="{Binding CurrentSessionMonitorUrl}"
+                            Keyboard="Url"
+                            Style="{StaticResource FormEditorStyle}"
+                            IsEnabled="True">
+                        <Editor.Triggers>
+                            <DataTrigger TargetType="Editor"
+                                         Binding="{Binding IsSimulation}"
+                                         Value="True">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light=#9CA3AF, Dark=#6B7280}" />
+                            </DataTrigger>
+                        </Editor.Triggers>
+                    </Editor>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame Padding="12"
+                   CornerRadius="12"
+                   HasShadow="False"
+                   BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
+                   BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
+
+                <VerticalStackLayout Style="{StaticResource FormSectionStyle}">
+                    <Label Text="Auto track full name" Style="{StaticResource FormLabelStyle}" />
+                    <Entry Text="{Binding AutoTrackFullName}"
+                           Placeholder="Full name"
+                           MaxLength="50"
+                           Style="{StaticResource FormEntryStyle}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame Padding="12"
+                   CornerRadius="12"
+                   HasShadow="False"
+                   BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
+                   BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
+
+                <VerticalStackLayout Style="{StaticResource FormSectionStyle}">
+                    <Label Text="Live interval (ms)" Style="{StaticResource FormLabelStyle}" />
+                    <Entry Text="{Binding IntervalMillisecondsLiveMonitorText}"
+                           Keyboard="Numeric"
+                           Placeholder="100 - 10000"
+                           Style="{StaticResource FormEntryStyle}" />
+                </VerticalStackLayout>
+            </Frame>
 
             <Label Text="{Binding ValidationError}"
                    TextColor="OrangeRed"
-                   FontSize="12" />
+                   FontSize="12"
+                   Margin="2,4,2,0" />
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,12,0,0">
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12" Margin="0,12,0,0">
                 <Button Text="Cancel" Grid.Column="0" Clicked="OnCancelClicked" />
-                <Button Text="Save" Grid.Column="1" Clicked="OnSaveClicked" />
+                <Button Text="Reset" Grid.Column="1" Clicked="OnResetClicked" />
+                <Button Text="Save" Grid.Column="2" Clicked="OnSaveClicked" />
             </Grid>
 
         </VerticalStackLayout>

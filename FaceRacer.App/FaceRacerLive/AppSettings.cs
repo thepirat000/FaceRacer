@@ -5,6 +5,7 @@
         private const string IsSimulationKey = "AppSettings.IsSimulation";
         private const string IntervalMillisecondsLiveMonitorKey = "AppSettings.IntervalMillisecondsLiveMonitor";
         private const string CurrentSessionMonitorUrlKey = "AppSettings.CurrentSessionMonitorUrl";
+        private const string AutoTrackFullNameKey = "AppSettings.AutoTrackFullName";
 
         public const bool IsSimulationDefault = false;
         public const int IntervalMillisecondsLiveMonitorDefault = 700;
@@ -29,6 +30,12 @@
 
         public static TimeSpan TimeoutForLiveRequest = TimeSpan.FromSeconds(15);
         public static string DefaultAutoTrackFullName = "Adriano Colombo";
+
+        public static string AutoTrackFullName
+        {
+            get => Preferences.Default.Get(AutoTrackFullNameKey, DefaultAutoTrackFullName);
+            set => Preferences.Default.Set(AutoTrackFullNameKey, (value ?? string.Empty).Trim());
+        }
 
         public static string CurrentSessionMonitorUrl
         {

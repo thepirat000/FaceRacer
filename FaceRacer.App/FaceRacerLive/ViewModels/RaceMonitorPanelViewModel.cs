@@ -9,7 +9,7 @@ namespace FaceRacerLive.ViewModels
     {
         public ObservableCollection<RacerRowViewModel> Racers { get; } = new();
 
-        private string _autoTrackByName = AppSettings.DefaultAutoTrackFullName;
+        private string _autoTrackByName = AppSettings.AutoTrackFullName;
         public string AutoTrackByName
         {
             get => _autoTrackByName;
@@ -109,9 +109,10 @@ namespace FaceRacerLive.ViewModels
             var byPosition = (sessionData.body_data ?? new List<SessionRacerData>())
                 .OrderBy(r =>
                 {
-                    var orderBy = int.TryParse(r.position, out var pos) ? pos : 0;
+                    var orderBy = int.TryParse(r.position, out var pos) ? pos : 99;
                     return orderBy;
                 })
+                .ThenBy(r => r.full_name)
                 .ToList();
 
             Racers.Clear();

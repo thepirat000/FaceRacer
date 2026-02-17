@@ -18,7 +18,17 @@ public partial class SettingsPage : ContentPage
 
     private async void OnCancelClicked(object? sender, EventArgs e)
     {
-		await Shell.Current.GoToAsync("..");
+        await Shell.Current.GoToAsync("..");
+    }
+
+    private void OnResetClicked(object? sender, EventArgs e)
+    {
+        AppSettings.IsSimulation = AppSettings.IsSimulationDefault;
+        AppSettings.IntervalMillisecondsLiveMonitor = AppSettings.IntervalMillisecondsLiveMonitorDefault;
+        AppSettings.CurrentSessionMonitorUrl = AppSettings.CurrentSessionMonitorUrlDefault;
+        AppSettings.AutoTrackFullName = AppSettings.DefaultAutoTrackFullName;
+
+        _vm.LoadFromAppSettings();
     }
 
     private async void OnSaveClicked(object? sender, EventArgs e)
@@ -28,6 +38,6 @@ public partial class SettingsPage : ContentPage
             return;
         }
 
-		await Shell.Current.GoToAsync("..");
+        await Shell.Current.GoToAsync("..");
     }
 }

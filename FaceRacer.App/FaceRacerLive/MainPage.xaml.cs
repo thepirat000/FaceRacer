@@ -65,6 +65,10 @@ namespace FaceRacerLive
         {
             base.OnAppearing();
 
+            // Settings can change while this page is not visible.
+            // Refresh tracked racer target (used by RaceMonitorPanelViewModel) when coming back.
+            _vm.AutoTrackByName = AppSettings.AutoTrackFullName;
+
             InitializeRaceMonitorApi();
         }
 
@@ -83,7 +87,7 @@ namespace FaceRacerLive
 
                 _raceMonitorApi = new RaceMonitorApi(httpClient, AppSettings.CurrentSessionMonitorUrl);
 
-                _raceMonitorSimulator = new SampleRaceSimulator();
+                _raceMonitorSimulator ??= new SampleRaceSimulator();
 
                 AppendConsole($"Race monitor initialized", Colors.LimeGreen);
             }
@@ -92,28 +96,7 @@ namespace FaceRacerLive
                 AppendConsole($"Race monitor init failed: {ex.Message}", Colors.OrangeRed);
             }
         }
-
-        private async void OnSendTextClicked(object? sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(this.InputTextEditor.Text))
-            {
-                return;
-            }
-
-            SendTextBtn.IsEnabled = false;
-
-            try
-            {
-                await SpeakHelper.Speak(this.InputTextEditor.Text);
-                AppendConsole(this.InputTextEditor.Text, Colors.LightGray);
-                InputTextEditor.Text = "";
-            }
-            finally
-            {
-                SendTextBtn.IsEnabled = true;
-            }
-        }
-
+        
         private void OnInputTextEditorUnfocused(object? sender, FocusEventArgs e)
         {
 #if ANDROID
@@ -147,6 +130,29 @@ namespace FaceRacerLive
             }
         }
 #endif
+
+        #region Audio 
+
+        private async void OnSendTextClicked(object? sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(this.InputTextEditor.Text))
+            {
+                return;
+            }
+
+            SendTextBtn.IsEnabled = false;
+
+            try
+            {
+                await SpeakHelper.Speak(this.InputTextEditor.Text);
+                AppendConsole(this.InputTextEditor.Text, Colors.LightGray);
+                InputTextEditor.Text = "";
+            }
+            finally
+            {
+                SendTextBtn.IsEnabled = true;
+            }
+        }
 
         private async void OnMicToggleClicked(object? sender, EventArgs e)
         {
@@ -288,6 +294,8 @@ namespace FaceRacerLive
             }
         }
 
+        #endregion
+
         private void OnConsoleClearClicked(object? sender, EventArgs e)
         {
             ConsoleStack.Clear();
@@ -311,7 +319,7 @@ namespace FaceRacerLive
             {
                 Text = noDateTime ? message : $"[{DateTime.Now:HH\\:mm\\:ss}]: {message}",
                 TextColor = color,
-                FontSize = 12,
+                FontSize = 10,
                 LineBreakMode = LineBreakMode.CharacterWrap
             };
 
@@ -385,7 +393,7 @@ namespace FaceRacerLive
         {
             _previousSession = null;
 
-            _raceMonitorApi!.Reset(AppSettings.CurrentSessionMonitorUrl);
+            _raceMonitorSimulator?.ResetSimulation();
 
             if (_raceLoopCts is null)
             {
@@ -612,7 +620,7 @@ namespace FaceRacerLive
             if ((racer.position != "-" && previousRacerData == null) || (sessionData.SessionNumber == _previousSession?.SessionNumber && previousRacerData.position != racer.position))
             {
                 // Position change for this racer since last check
-                var currentPosition = int.TryParse(racer?.position, out var curPosInt) ? curPosInt : 0;
+                var currentPosition = int.TryParse(racer?.position, out var curPosInt) ? curPosInt : 99;
                 var previousPosition = int.TryParse(previousRacerData?.position, out var positionInt) ? positionInt : 0;
                 var positionChange = currentPosition - previousPosition;
                 var direction = positionChange < 0 || previousPosition == 0 ? "up" : "down";
