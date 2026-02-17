@@ -11,8 +11,12 @@
         Title="Live"
         ContentTemplate="{DataTemplate faceRacerLive:MainPage}"
         Route="MainPage"/>
+    
+    <MenuItem Text="Ranking"
+              Clicked="OnRankingClicked" />
 
-	<MenuItem Text="Settings"
+    <MenuItem Text="Settings"
 			  Clicked="OnSettingsClicked" />
+
 
 </Shell>

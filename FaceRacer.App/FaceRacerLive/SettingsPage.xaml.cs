@@ -27,6 +27,7 @@ public partial class SettingsPage : ContentPage
         AppSettings.IntervalMillisecondsLiveMonitor = AppSettings.IntervalMillisecondsLiveMonitorDefault;
         AppSettings.CurrentSessionMonitorUrl = AppSettings.CurrentSessionMonitorUrlDefault;
         AppSettings.AutoTrackFullName = AppSettings.DefaultAutoTrackFullName;
+        AppSettings.MonitorRankingUrl = AppSettings.MonitorRankingUrlDefault;
 
         _vm.LoadFromAppSettings();
     }

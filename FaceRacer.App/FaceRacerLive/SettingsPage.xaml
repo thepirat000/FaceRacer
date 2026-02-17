@@ -36,7 +36,7 @@
     </ContentPage.Resources>
 
     <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="14">
+        <VerticalStackLayout Padding="12" Spacing="4">
 
             <Frame Padding="12"
                    CornerRadius="12"
@@ -78,6 +78,21 @@
                             </DataTrigger>
                         </Editor.Triggers>
                     </Editor>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame Padding="12"
+                   CornerRadius="12"
+                   HasShadow="False"
+                   BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
+                   BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
+
+                <VerticalStackLayout Style="{StaticResource FormSectionStyle}">
+                    <Label Text="Ranking URL" Style="{StaticResource FormLabelStyle}" />
+
+                    <Editor Text="{Binding MonitorRankingUrl}"
+                            Keyboard="Url"
+                            Style="{StaticResource FormEditorStyle}" />
                 </VerticalStackLayout>
             </Frame>
 

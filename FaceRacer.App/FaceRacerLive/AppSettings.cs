@@ -6,6 +6,7 @@
         private const string IntervalMillisecondsLiveMonitorKey = "AppSettings.IntervalMillisecondsLiveMonitor";
         private const string CurrentSessionMonitorUrlKey = "AppSettings.CurrentSessionMonitorUrl";
         private const string AutoTrackFullNameKey = "AppSettings.AutoTrackFullName";
+        private const string MonitorRankingUrlKey = "AppSettings.MonitorRankingUrl";
 
         public const bool IsSimulationDefault = false;
         public const int IntervalMillisecondsLiveMonitorDefault = 700;
@@ -13,6 +14,7 @@
         public const int IntervalMillisecondsLiveMonitorMax = 10000;
 
         public const string CurrentSessionMonitorUrlDefault = "http://192.168.10.174/ajax/monitors/current-session-monitor";
+        public const string MonitorRankingUrlDefault = "http://192.168.10.174/es/monitors/monitor-ranking";
 
         public static bool IsSimulation
         {
@@ -41,6 +43,12 @@
         {
             get => Preferences.Default.Get(CurrentSessionMonitorUrlKey, CurrentSessionMonitorUrlDefault);
             set => Preferences.Default.Set(CurrentSessionMonitorUrlKey, value ?? string.Empty);
+        }
+
+        public static string MonitorRankingUrl
+        {
+            get => Preferences.Default.Get(MonitorRankingUrlKey, MonitorRankingUrlDefault);
+            set => Preferences.Default.Set(MonitorRankingUrlKey, value ?? string.Empty);
         }
     }
 }

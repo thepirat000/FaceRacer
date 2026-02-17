@@ -1,6 +1,7 @@
 ﻿#if ANDROID
 using Android.Content;
 using Android.Views.InputMethods;
+
 #endif
 using FaceRacerLive.Monitor;
 using FaceRacerLive.ViewModels;
@@ -9,8 +10,12 @@ using System.IO.Compression;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Web;
+
 using FaceRacer.Shared;
 using FaceRacer.Shared.Dto;
+// ReSharper disable AsyncVoidLambda
+
+#pragma warning disable S2325
 
 // ReSharper disable AsyncVoidEventHandlerMethod
 
@@ -74,39 +79,38 @@ namespace FaceRacerLive
 
         private void InitializeRaceMonitorApi()
         {
-            try
+            if (_raceMonitorSimulator == null)
             {
-                var services = Application.Current?.Handler?.MauiContext?.Services;
-                var httpClient = services?.GetService<HttpClient>();
-
-                if (httpClient is null)
-                {
-                    AppendConsole("Race monitor init failed: HttpClient not available.", Colors.OrangeRed);
-                    return;
-                }
-
-                _raceMonitorApi = new RaceMonitorApi(httpClient, AppSettings.CurrentSessionMonitorUrl);
-
-                _raceMonitorSimulator ??= new SampleRaceSimulator();
-
-                AppendConsole($"Race monitor initialized", Colors.LimeGreen);
+                _raceMonitorSimulator = new SampleRaceSimulator();
             }
-            catch (Exception ex)
+
+            if (_raceMonitorApi == null || _raceMonitorApi.CurrentSessionMonitorUrl != AppSettings.CurrentSessionMonitorUrl)
             {
-                AppendConsole($"Race monitor init failed: {ex.Message}", Colors.OrangeRed);
+                try
+                {
+                    var services = Application.Current?.Handler?.MauiContext?.Services;
+
+                    var httpClient = services?.GetService<HttpClient>()!;
+
+                    _raceMonitorApi = new RaceMonitorApi(httpClient, AppSettings.CurrentSessionMonitorUrl);
+
+                    AppendConsole($"Race monitor initialized", Colors.LightGreen);
+                }
+                catch (Exception ex)
+                {
+                    AppendConsole($"Race monitor init failed: {ex.Message}", Colors.OrangeRed);
+                }
             }
         }
         
         private void OnInputTextEditorUnfocused(object? sender, FocusEventArgs e)
         {
-#if ANDROID
-            HideAndroidKeyboard();
-#endif
+            HideKeyboard();
         }
 
-#if ANDROID
-        private static void HideAndroidKeyboard()
+        private static void HideKeyboard()
         {
+#if ANDROID
             try
             {
                 var activity = Platform.CurrentActivity;
@@ -116,20 +120,20 @@ namespace FaceRacerLive
                 }
 
                 var imm = (InputMethodManager?)activity.GetSystemService(Context.InputMethodService);
-                var token = activity.CurrentFocus?.WindowToken ?? activity.Window?.DecorView?.WindowToken;
+                var token = activity.CurrentFocus?.WindowToken ?? activity.Window?.DecorView.WindowToken;
 
                 if (imm is not null && token is not null)
                 {
                     imm.HideSoftInputFromWindow(token, HideSoftInputFlags.None);
-                    activity.Window?.DecorView?.ClearFocus();
+                    activity.Window?.DecorView.ClearFocus();
                 }
             }
             catch
             {
                 // ignore (best-effort)
             }
-        }
 #endif
+        }
 
         #region Audio 
 
@@ -414,7 +418,7 @@ namespace FaceRacerLive
             {
                 try
                 {
-                    var session = AppSettings.IsSimulation ? await _raceMonitorSimulator.GetCurrentSession(ct) : await _raceMonitorApi!.GetCurrentSession(ct);
+                    var session = AppSettings.IsSimulation ? await _raceMonitorSimulator!.GetCurrentSession(ct) : await _raceMonitorApi!.GetCurrentSession(ct);
 
                     await MainThread.InvokeOnMainThreadAsync(() =>
                     {
@@ -604,23 +608,23 @@ namespace FaceRacerLive
 
         private async Task AutoCommandTrackedRacer(SessionData sessionData, SessionRacerData racer)
         {
-            var previousRacerData = _previousSession?.body_data?.FirstOrDefault(r => r.full_name == racer.full_name);
+            var previousRacerData = _previousSession?.body_data.FirstOrDefault(r => r.full_name == racer.full_name);
 
-            if ((racer.last_time != "-" && previousRacerData == null) || (sessionData.SessionNumber == _previousSession?.SessionNumber && previousRacerData.passed < racer.passed))
+            if ((racer.last_time != "-" && previousRacerData == null) || (sessionData.SessionNumber == _previousSession?.SessionNumber && previousRacerData?.passed < racer.passed))
             {
                 // New lap completed by this racer since last check
                 var message = $"Racer {racer.full_name} completed lap {racer.passed} in {racer.last_time} (best: {racer.best_time}).";
                 AppendConsole($"Auto: {message}", Colors.LightBlue);
                 var isBestLap = racer.best_time != "-" && racer.last_time == racer.best_time;
-                var command = $"{racer.last_time!.Replace(".", ":")}; {(racer.passed == racer.total ? "última" : "")} {(isBestLap ? "mejor" : "")} vuelta {racer.passed}";
+                var command = $"{racer.last_time.Replace(".", ":")}; {(racer.passed == racer.total ? "última" : "")} {(isBestLap ? "mejor" : "")} vuelta {racer.passed}";
                 InputTextEditor.Text = command;
                 await SpeakTextAndClearAsync(command);
             }
 
-            if ((racer.position != "-" && previousRacerData == null) || (sessionData.SessionNumber == _previousSession?.SessionNumber && previousRacerData.position != racer.position))
+            if ((racer.position != "-" && previousRacerData == null) || (sessionData.SessionNumber == _previousSession?.SessionNumber && previousRacerData?.position != racer.position))
             {
                 // Position change for this racer since last check
-                var currentPosition = int.TryParse(racer?.position, out var curPosInt) ? curPosInt : 99;
+                var currentPosition = int.TryParse(racer.position, out var curPosInt) ? curPosInt : 99;
                 var previousPosition = int.TryParse(previousRacerData?.position, out var positionInt) ? positionInt : 0;
                 var positionChange = currentPosition - previousPosition;
                 var direction = positionChange < 0 || previousPosition == 0 ? "up" : "down";

@@ -33,6 +33,13 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         set => Set(ref _autoTrackFullName, value);
     }
 
+    private string _monitorRankingUrl = string.Empty;
+    public string MonitorRankingUrl
+    {
+        get => _monitorRankingUrl;
+        set => Set(ref _monitorRankingUrl, value);
+    }
+
     private string? _validationError;
     public string? ValidationError
     {
@@ -46,6 +53,7 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         IntervalMillisecondsLiveMonitorText = AppSettings.IntervalMillisecondsLiveMonitor.ToString();
         CurrentSessionMonitorUrl = AppSettings.CurrentSessionMonitorUrl;
         AutoTrackFullName = AppSettings.AutoTrackFullName;
+        MonitorRankingUrl = AppSettings.MonitorRankingUrl;
         ValidationError = null;
     }
 
@@ -69,6 +77,7 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         AppSettings.IntervalMillisecondsLiveMonitor = ms;
         AppSettings.CurrentSessionMonitorUrl = (CurrentSessionMonitorUrl ?? string.Empty).Trim();
         AppSettings.AutoTrackFullName = (AutoTrackFullName ?? string.Empty).Trim();
+        AppSettings.MonitorRankingUrl = (MonitorRankingUrl ?? string.Empty).Trim();
 
         return true;
     }

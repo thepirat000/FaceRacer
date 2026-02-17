@@ -25,6 +25,7 @@ public static class MauiProgram
             });
 #if ANDROID
         builder.Services.AddSingleton<IMicToSpeakerService, MicToSpeakerService>();
+        Platforms.Android.MonitorRankingWebViewHandler.EnableZoom();
 #endif
 
 #if DEBUG

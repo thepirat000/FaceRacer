@@ -8,6 +8,8 @@ public sealed class RaceMonitorApi
     private readonly HttpClient _httpClient;
     private string _currentSessionMonitorUrl;
 
+    public string CurrentSessionMonitorUrl => _currentSessionMonitorUrl;
+
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true
