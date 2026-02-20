@@ -9,13 +9,16 @@
 
     <ShellContent
         Title="Live"
+        FlyoutIcon="live.png"
         ContentTemplate="{DataTemplate faceRacerLive:MainPage}"
         Route="MainPage"/>
-    
+
     <MenuItem Text="Ranking"
+              IconImageSource="ranking.png"
               Clicked="OnRankingClicked" />
 
     <MenuItem Text="Settings"
+              IconImageSource="settings.png"
 			  Clicked="OnSettingsClicked" />
 
 
