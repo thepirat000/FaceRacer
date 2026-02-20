@@ -264,7 +264,7 @@
                 </Grid>
             </Border>
 
-            <!-- Top racers list -->
+            <!-- Racers list -->
             <Border Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
                     StrokeThickness="1"
                     StrokeShape="RoundRectangle 8"
@@ -303,9 +303,9 @@
                                         <Label Grid.Row="0"
                                                Grid.Column="0"
                                                Text="{Binding PositionText}"
-                                               FontSize="12"
+                                               FontSize="11"
                                                FontAttributes="Bold"
-                                               WidthRequest="20"
+                                               WidthRequest="28"
                                                HorizontalTextAlignment="Start"
                                                VerticalTextAlignment="Center" />
 

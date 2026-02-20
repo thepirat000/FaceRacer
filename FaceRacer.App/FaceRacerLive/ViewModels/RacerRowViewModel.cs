@@ -7,13 +7,32 @@ namespace FaceRacerLive.ViewModels;
 
 internal sealed class RacerRowViewModel : INotifyPropertyChanged
 {
-    private readonly SessionRacerData _model;
+    private SessionRacerData _model;
     private readonly RaceMonitorPanelViewModel _parentModel;
 
     public RacerRowViewModel(SessionRacerData racerData, RaceMonitorPanelViewModel parentModel)
     {
         _model = racerData;
         _parentModel = parentModel;
+    }
+
+    public void UpdateModel(SessionRacerData racerData)
+    {
+        // Keep the same VM instance so CollectionView can reuse the row visuals.
+        // FullName is used as identity (assumed stable/unique per race).
+        _model = racerData;
+
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PositionText)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FullName)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Kart)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(KartColor)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LapText)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastTime)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BestTime)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ArrowIcon)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ArrowColor)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LapProgress)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsHighlighted)));
     }
 
     public bool IsHighlighted =>

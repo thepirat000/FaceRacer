@@ -9,6 +9,8 @@ namespace FaceRacerLive.ViewModels
     {
         public ObservableCollection<RacerRowViewModel> Racers { get; } = new();
 
+        private readonly Dictionary<string, RacerRowViewModel> _racerByFullName = new(StringComparer.Ordinal);
+
         private string _autoTrackByName = AppSettings.AutoTrackFullName;
         public string AutoTrackByName
         {
@@ -73,6 +75,8 @@ namespace FaceRacerLive.ViewModels
         {
             Racers.Clear();
 
+            _racerByFullName.Clear();
+
             TrackedRacerFullName = null;
 
             SessionTitle = "Session #—";
@@ -115,11 +119,8 @@ namespace FaceRacerLive.ViewModels
                 .ThenBy(r => r.full_name)
                 .ToList();
 
-            Racers.Clear();
-            foreach (var r in byPosition)
-            {
-                Racers.Add(new RacerRowViewModel(r, this));
-            }
+            // Incremental update to minimize UI churn (prevents blinking on Windows, reduces work on Android)
+            ApplyIncrementalRacerUpdate(byPosition);
 
             // Pick ONE tracked match (or none), and refresh highlight flags
             RefreshTrackedRacerAndUi();
@@ -141,6 +142,110 @@ namespace FaceRacerLive.ViewModels
                         Racers.Move(currentIndex, i);
                     }
                 }
+            }
+        }
+
+        private void ApplyIncrementalRacerUpdate(List<SessionRacerData> byPosition)
+        {
+            // Add/update in dictionary
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+
+            foreach (var racerData in byPosition)
+            {
+                var fullName = racerData.full_name;
+                if (string.IsNullOrWhiteSpace(fullName))
+                {
+                    continue;
+                }
+
+                seen.Add(fullName);
+
+                if (_racerByFullName.TryGetValue(fullName, out var existingVm))
+                {
+                    existingVm.UpdateModel(racerData);
+                    continue;
+                }
+
+                var vm = new RacerRowViewModel(racerData, this);
+                _racerByFullName[fullName] = vm;
+                Racers.Add(vm);
+            }
+
+            // Remove racers that are no longer present
+            for (var i = Racers.Count - 1; i >= 0; i--)
+            {
+                var vm = Racers[i];
+                if (!seen.Contains(vm.FullName))
+                {
+                    Racers.RemoveAt(i);
+                    _racerByFullName.Remove(vm.FullName);
+                }
+            }
+
+            // Reorder to match byPosition (tracked racer will be re-pinned afterwards)
+            var expectedCount = Math.Min(byPosition.Count, Racers.Count);
+            var orderMatches = true;
+            for (var i = 0; i < expectedCount; i++)
+            {
+                var expectedName = byPosition[i].full_name;
+                if (!string.Equals(Racers[i].FullName, expectedName, StringComparison.Ordinal))
+                {
+                    orderMatches = false;
+                    break;
+                }
+            }
+
+            if (orderMatches && Racers.Count == byPosition.Count)
+            {
+                return;
+            }
+
+            // Build index map once, then keep it updated as we move items.
+            var indexByName = new Dictionary<string, int>(Racers.Count, StringComparer.Ordinal);
+            for (var i = 0; i < Racers.Count; i++)
+            {
+                indexByName[Racers[i].FullName] = i;
+            }
+
+            for (var targetIndex = 0; targetIndex < byPosition.Count && targetIndex < Racers.Count; targetIndex++)
+            {
+                var fullName = byPosition[targetIndex].full_name;
+                if (string.IsNullOrWhiteSpace(fullName))
+                {
+                    continue;
+                }
+
+                if (!indexByName.TryGetValue(fullName, out var currentIndex))
+                {
+                    continue;
+                }
+
+                if (currentIndex == targetIndex)
+                {
+                    continue;
+                }
+
+                var item = Racers[currentIndex];
+                Racers.Move(currentIndex, targetIndex);
+
+                // Update the shifted range in the index map.
+                if (currentIndex > targetIndex)
+                {
+                    for (var i = targetIndex; i <= currentIndex; i++)
+                    {
+                        indexByName[Racers[i].FullName] = i;
+                    }
+                }
+                else
+                {
+                    for (var i = currentIndex; i <= targetIndex; i++)
+                    {
+                        indexByName[Racers[i].FullName] = i;
+                    }
+                }
+
+                // Ensure moved item points to its new index
+                indexByName[item.FullName] = targetIndex;
             }
         }
 

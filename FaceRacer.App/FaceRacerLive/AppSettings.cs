@@ -2,13 +2,13 @@
 {
     public class AppSettings
     {
-        private const string IsSimulationKey = "AppSettings.IsSimulation";
+        private static bool _isSimulationRuntime;
+
         private const string IntervalMillisecondsLiveMonitorKey = "AppSettings.IntervalMillisecondsLiveMonitor";
         private const string CurrentSessionMonitorUrlKey = "AppSettings.CurrentSessionMonitorUrl";
         private const string AutoTrackFullNameKey = "AppSettings.AutoTrackFullName";
         private const string MonitorRankingUrlKey = "AppSettings.MonitorRankingUrl";
 
-        public const bool IsSimulationDefault = false;
         public const int IntervalMillisecondsLiveMonitorDefault = 700;
         public const int IntervalMillisecondsLiveMonitorMin = 1;
         public const int IntervalMillisecondsLiveMonitorMax = 10000;
@@ -18,8 +18,8 @@
 
         public static bool IsSimulation
         {
-            get => Preferences.Default.Get(IsSimulationKey, IsSimulationDefault);
-            set => Preferences.Default.Set(IsSimulationKey, value);
+            get => _isSimulationRuntime;
+            set => _isSimulationRuntime = value;
         }
 
         public static int IntervalMillisecondsLiveMonitor
@@ -30,7 +30,7 @@
                 Math.Clamp(value, IntervalMillisecondsLiveMonitorMin, IntervalMillisecondsLiveMonitorMax));
         }
 
-        public static TimeSpan TimeoutForLiveRequest = TimeSpan.FromSeconds(15);
+        public static TimeSpan TimeoutForLiveRequest = TimeSpan.FromSeconds(10);
         public static string DefaultAutoTrackFullName = "Adriano Colombo";
 
         public static string AutoTrackFullName

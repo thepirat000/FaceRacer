@@ -418,7 +418,9 @@ namespace FaceRacerLive
             {
                 try
                 {
-                    var session = AppSettings.IsSimulation ? await _raceMonitorSimulator!.GetCurrentSession(ct) : await _raceMonitorApi!.GetCurrentSession(ct);
+                    var sessions = SimulationSessionStore.TryGetSessions();
+                    var hasSimulation = sessions is { Count: > 0 };
+                    var session = hasSimulation ? _raceMonitorSimulator!.GetCurrentSession() : await _raceMonitorApi!.GetCurrentSession(ct);
 
                     await MainThread.InvokeOnMainThreadAsync(() =>
                     {

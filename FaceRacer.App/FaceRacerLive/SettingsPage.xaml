@@ -38,7 +38,7 @@
     <ScrollView>
         <VerticalStackLayout Padding="12" Spacing="4">
 
-            <Frame Padding="12"
+            <Frame Padding="12,5,12,5"
                    CornerRadius="12"
                    HasShadow="False"
                    BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
@@ -51,12 +51,29 @@
 
                     <Switch Grid.Column="1"
                             IsToggled="{Binding IsSimulation}"
+                            Toggled="OnSimulationToggled"
                             HorizontalOptions="End"
                             VerticalOptions="Center" />
                 </Grid>
             </Frame>
 
-            <Frame Padding="12"
+            <Frame Padding="12,5,12,5"
+                   CornerRadius="12"
+                   HasShadow="False"
+                   BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
+                   BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#111827}"
+                   IsVisible="{Binding IsSimulation}">
+
+                <VerticalStackLayout Style="{StaticResource FormSectionStyle}">
+                    <Button Text="Select a zip file" Clicked="OnSelectSimulationZipClicked" />
+
+                    <Label Text="{Binding SimulationZipStatus}"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light=#374151, Dark=#D1D5DB}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame Padding="12,5,12,5"
                    CornerRadius="12"
                    HasShadow="False"
                    BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
@@ -81,7 +98,7 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <Frame Padding="12"
+            <Frame Padding="12,5,12,5"
                    CornerRadius="12"
                    HasShadow="False"
                    BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
@@ -96,7 +113,7 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <Frame Padding="12"
+            <Frame Padding="12,5,12,5"
                    CornerRadius="12"
                    HasShadow="False"
                    BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
@@ -111,7 +128,7 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <Frame Padding="12"
+            <Frame Padding="12,5,12,5"
                    CornerRadius="12"
                    HasShadow="False"
                    BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"

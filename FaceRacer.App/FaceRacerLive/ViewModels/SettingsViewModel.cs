@@ -47,6 +47,13 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         private set => Set(ref _validationError, value);
     }
 
+    private string? _simulationZipStatus;
+    public string? SimulationZipStatus
+    {
+        get => _simulationZipStatus;
+        set => Set(ref _simulationZipStatus, value);
+    }
+
     public void LoadFromAppSettings()
     {
         IsSimulation = AppSettings.IsSimulation;
@@ -54,6 +61,9 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         CurrentSessionMonitorUrl = AppSettings.CurrentSessionMonitorUrl;
         AutoTrackFullName = AppSettings.AutoTrackFullName;
         MonitorRankingUrl = AppSettings.MonitorRankingUrl;
+        SimulationZipStatus = IsSimulation
+            ? FaceRacerLive.Monitor.SimulationSessionStore.TryGetZipFileName()
+            : null;
         ValidationError = null;
     }
 

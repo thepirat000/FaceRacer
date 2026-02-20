@@ -15,7 +15,20 @@ internal static class SampleRaceZipReader
     {
         await using var zipStream = await FileSystem.OpenAppPackageFileAsync(zipMauiAssetPath);
 
-        await using var archive = new ZipArchive(zipStream, ZipArchiveMode.Read, leaveOpen: false);
+        return await ReadAllSessionsFromZipAsync(zipStream, leaveOpen: false, cancellationToken);
+    }
+
+    public static Task<List<SessionData>> ReadAllSessionsFromZipAsync(Stream zipStream, CancellationToken cancellationToken = default)
+        => ReadAllSessionsFromZipAsync(zipStream, leaveOpen: false, cancellationToken);
+
+    private static async Task<List<SessionData>> ReadAllSessionsFromZipAsync(Stream zipStream, bool leaveOpen, CancellationToken cancellationToken = default)
+    {
+        if (zipStream is null)
+        {
+            throw new ArgumentNullException(nameof(zipStream));
+        }
+
+        await using var archive = new ZipArchive(zipStream, ZipArchiveMode.Read, leaveOpen);
 
         var sessions = new List<SessionData>(capacity: archive.Entries.Count);
 
