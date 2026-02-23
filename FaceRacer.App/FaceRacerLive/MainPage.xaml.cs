@@ -59,6 +59,16 @@ namespace FaceRacerLive
                     LiveRaceCheckBox.IsChecked = isLive;
                 });
             };
+            _state.AutoTrackChanged = isAuto =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    if (AutoTrackCheckBox.IsChecked != isAuto)
+                    {
+                        AutoTrackCheckBox.IsChecked = isAuto;
+                    }
+                });
+            };
 
             _micToSpeaker = serviceCollection?.GetService<IMicToSpeakerService>();
 
@@ -71,6 +81,7 @@ namespace FaceRacerLive
 
             _vm = _state.Panel;
             BindingContext = _vm;
+            AutoTrackCheckBox.IsChecked = _state.IsAutoTrackEnabled;
 
             MainThread.InvokeOnMainThreadAsync(() =>
             {
@@ -449,7 +460,7 @@ namespace FaceRacerLive
                         await SaveResponse(session!);
                     }
 
-                    if (AutoTrackCheckBox.IsChecked)
+                    if (_state.IsAutoTrackEnabled)
                     {
                         await AutoCommandSession(session!);
                     }
@@ -682,5 +693,13 @@ namespace FaceRacerLive
         }
 
         private string? GetCurrentTrackedRacerBestTimeText() => _vm.Racers.FirstOrDefault(r => r.IsHighlighted)?.BestTime;
+
+        private void OnAutoTrackCheckedChanged(object sender, CheckedChangedEventArgs e)
+        {
+            if (_state.IsAutoTrackEnabled != e.Value)
+            {
+                _state.IsAutoTrackEnabled = e.Value;
+            }
+        }
     }
 }

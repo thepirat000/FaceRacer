@@ -8,7 +8,7 @@
     x:DataType="viewmodels:TrackedRacerViewModel">
 
     <Shell.TitleView>
-        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6" Padding="8,0" >
+        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6" Padding="8,0" >
             <Label Grid.Column="0"
                    Margin="-8,0,0,0"
                    Text="Tracked Racer"
@@ -18,9 +18,31 @@
                    FontAttributes="Bold" />
 
             <HorizontalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
-                <CheckBox x:Name="LiveCheckBox" VerticalOptions="Center" CheckedChanged="OnLiveCheckedChanged" Margin="-6,0,0,0" />
-                <Label Text="Live" FontSize="12" Margin="-10,0,0,0" VerticalOptions="Center" />
+                <CheckBox x:Name="AutoTrackCheckBox" VerticalOptions="Center" CheckedChanged="OnAutoTrackCheckedChanged" Margin="-6,0,0,0" />
+                <Label Text="Auto" FontSize="12" Margin="-10,0,0,0" VerticalOptions="Center" >
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding Source={x:Reference AutoTrackCheckBox}, Path=IsChecked}"
+                                     Value="True">
+                            <Setter Property="TextColor" Value="#ba0d0d" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
             </HorizontalStackLayout>
+
+            <HorizontalStackLayout Grid.Column="2" Spacing="6" VerticalOptions="Center">
+                <CheckBox x:Name="LiveCheckBox" VerticalOptions="Center" CheckedChanged="OnLiveCheckedChanged" Margin="-6,0,0,0" />
+                <Label Text="Live" FontSize="12" Margin="-10,0,0,0" VerticalOptions="Center" >
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding Source={x:Reference LiveCheckBox}, Path=IsChecked}"
+                                     Value="True">
+                            <Setter Property="TextColor" Value="#27ba0d" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </HorizontalStackLayout>
+
         </Grid>
     </Shell.TitleView>
 
@@ -132,7 +154,14 @@
                                            VerticalTextAlignment="Center"
                                            WidthRequest="18" />
                                 </Grid>
-                            </VerticalStackLayout>
+                                <Label Text="{Binding BestDeltaPrevText}"
+                                       FontSize="10"
+                                       TextColor="#d42237"
+                                       LineBreakMode="TailTruncation"
+                                       HorizontalTextAlignment="Center"
+                                       Margin="0,0,0,0" />
+
+							</VerticalStackLayout>
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border" Binding="{Binding IsLastTimeHot}" Value="True">
                                     <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FFF5CC, Dark=#011566}" />
@@ -154,7 +183,7 @@
                                             <Span Text="Best (" />
                                             <Span Text="{Binding BestLapNumber}" />
                                             <Span Text=")" />
-                                            </FormattedString>
+                                        </FormattedString>
                                     </Label.FormattedText>
                                 </Label>
                                 <Label Text="{Binding BestTime}"
@@ -163,6 +192,12 @@
                                        FontAttributes="Bold"
                                        HorizontalTextAlignment="Center"
                                        TextColor="Lime" />
+                                <Label Text="{Binding BestDeltaNextText}"
+                                       FontSize="10"
+                                       TextColor="Lime"
+                                       LineBreakMode="TailTruncation"
+                                       HorizontalTextAlignment="Center"
+                                       Margin="0,-4,0,0" />
                             </VerticalStackLayout>
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border" Binding="{Binding IsBestTimeHot}" Value="True">
@@ -185,8 +220,9 @@
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                         <Label Grid.Column="0"
                                Text="Laps"
-                               FontSize="16"
-                               FontAttributes="Bold" />
+                               FontSize="14"
+                               TextColor="LightGray"
+                               />
 
                         <Button Grid.Column="1"
                                 Text="Clear"

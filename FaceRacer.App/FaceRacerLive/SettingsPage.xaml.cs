@@ -92,7 +92,7 @@ public partial class SettingsPage : ContentPage
 
         try
         {
-            _vm.SimulationZipStatus = "Select a zip file...";
+            _vm.SimulationZipStatus = "Loading zip file...";
 
             var zipTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
             {

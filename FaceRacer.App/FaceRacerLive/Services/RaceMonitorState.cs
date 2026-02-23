@@ -18,4 +18,20 @@ internal sealed class RaceMonitorState
         get;
         set;
     }
+    private bool _isAutoTrackEnabled;
+
+    public bool IsAutoTrackEnabled
+    {
+        get => _isAutoTrackEnabled;
+        set
+        {
+            if (_isAutoTrackEnabled != value)
+            {
+                _isAutoTrackEnabled = value;
+                AutoTrackChanged?.Invoke(value);
+            }
+        }
+    }
+
+    public Action<bool>? AutoTrackChanged { get; set; }
 }

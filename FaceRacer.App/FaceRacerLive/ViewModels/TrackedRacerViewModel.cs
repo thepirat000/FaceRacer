@@ -11,6 +11,33 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
 
     public ICommand ClearLapsCommand { get; }
 
+    private string _bestDeltaNextText = "-";
+    private string _bestDeltaPrevText = "-";
+    public string BestDeltaNextText
+    {
+        get => _bestDeltaNextText;
+        private set
+        {
+            if (_bestDeltaNextText != value)
+            {
+                _bestDeltaNextText = value;
+                OnChanged(nameof(BestDeltaNextText));
+            }
+        }
+    }
+    public string BestDeltaPrevText
+    {
+        get => _bestDeltaPrevText;
+        private set
+        {
+            if (_bestDeltaPrevText != value)
+            {
+                _bestDeltaPrevText = value;
+                OnChanged(nameof(BestDeltaPrevText));
+            }
+        }
+    }
+
     public TrackedRacerViewModel()
     {
         ClearLapsCommand = new Command(ClearLaps);
@@ -167,6 +194,45 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
             return;
         }
 
+        // Compute best time deltas for next and previous racer
+        BestDeltaNextText = "-";
+        BestDeltaPrevText = "-";
+        if (sessionData.body_data != null && racer != null)
+        {
+            // Order by position (numeric)
+            var ordered = sessionData.body_data
+                .Where(r => !string.IsNullOrWhiteSpace(r.position))
+                .OrderBy(r => int.TryParse(r.position, out var pos) ? pos : 999)
+                .ToList();
+
+            var trackedIndex = ordered.FindIndex(r => string.Equals(r.full_name, trackedFullName, StringComparison.Ordinal));
+            double trackedBest = 0;
+            bool trackedValid = TryParseLapTimeSeconds(racer.best_time, out trackedBest);
+
+            // Next racer (position+1)
+            if (trackedIndex >= 0 && trackedIndex + 1 < ordered.Count)
+            {
+                var next = ordered[trackedIndex + 1];
+                double nextBestSeconds = 0;
+                bool nextValid = TryParseLapTimeSeconds(next.best_time, out nextBestSeconds);
+                string diff = (trackedValid && nextValid)
+                    ? (nextBestSeconds - trackedBest).ToString("+0.000;-0.000", System.Globalization.CultureInfo.InvariantCulture)
+                    : "-";
+                BestDeltaNextText = $"{diff} (#{next.position} {next.full_name})";
+            }
+
+            // Previous racer (position-1)
+            if (trackedIndex > 0)
+            {
+                var prev = ordered[trackedIndex - 1];
+                double prevBestSeconds = 0;
+                bool prevValid = TryParseLapTimeSeconds(prev.best_time, out prevBestSeconds);
+                string diff = (trackedValid && prevValid)
+                    ? (prevBestSeconds - trackedBest).ToString("+0.000;-0.000", System.Globalization.CultureInfo.InvariantCulture)
+                    : "-";
+                BestDeltaPrevText = $"{diff} (#{prev.position} {prev.full_name})";
+            }
+        }
         HasRacer = true;
         PositionText = $"#{racer.position}";
         FullName = racer.full_name ?? "—";
