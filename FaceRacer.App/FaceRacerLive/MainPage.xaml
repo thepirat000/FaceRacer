@@ -14,7 +14,7 @@
 
             <!-- Title text  -->
             <Label Grid.Column="0"
-                   Margin="-10,0,0,0"
+                   Margin="-8,0,0,0"
                    Text="FR Live"
                    TextColor="MediumPurple"
                    VerticalOptions="Center"

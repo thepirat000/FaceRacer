@@ -13,6 +13,10 @@
         ContentTemplate="{DataTemplate faceRacerLive:MainPage}"
         Route="MainPage"/>
 
+    <MenuItem Text="Tracked racer"
+              Clicked="OnTrackedRacerClicked"
+              IconImageSource="running_track.png"/>
+
     <MenuItem Text="Ranking"
               IconImageSource="ranking.png"
               Clicked="OnRankingClicked" />

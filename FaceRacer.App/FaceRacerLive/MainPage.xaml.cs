@@ -4,6 +4,7 @@ using Android.Views.InputMethods;
 
 #endif
 using FaceRacerLive.Monitor;
+using FaceRacerLive.Services;
 using FaceRacerLive.ViewModels;
 
 using System.IO.Compression;
@@ -31,6 +32,7 @@ namespace FaceRacerLive
         private bool _consoleAutoScroll = true;
         private const double ConsoleBottomEpsilon = 8.0;
 
+        private readonly RaceMonitorState _state;
         private readonly RaceMonitorPanelViewModel _vm;
 
         private RaceMonitorApi? _raceMonitorApi;
@@ -48,6 +50,16 @@ namespace FaceRacerLive
 
             var serviceCollection = Application.Current?.Handler?.MauiContext?.Services;
 
+            _state = serviceCollection?.GetService<RaceMonitorState>() ?? new RaceMonitorState();
+
+            _state.LiveChanged = isLive =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    LiveRaceCheckBox.IsChecked = isLive;
+                });
+            };
+
             _micToSpeaker = serviceCollection?.GetService<IMicToSpeakerService>();
 
             if (_micToSpeaker is null)
@@ -57,7 +69,7 @@ namespace FaceRacerLive
                 PttBtn.IsEnabled = false;
             }
 
-            _vm = new RaceMonitorPanelViewModel();
+            _vm = _state.Panel;
             BindingContext = _vm;
 
             MainThread.InvokeOnMainThreadAsync(() =>
@@ -360,6 +372,8 @@ namespace FaceRacerLive
         {
             await Task.Yield();
 
+            _state.IsLive = e.Value;
+
             if (e.Value)
             {
                 if (_raceMonitorApi is null)
@@ -425,6 +439,9 @@ namespace FaceRacerLive
                     await MainThread.InvokeOnMainThreadAsync(() =>
                     {
                         _vm.UpdateFromSession(session!);
+
+                        // Keep tracked racer page state in sync with the same session updates.
+                        _state.Tracked.UpdateFromSession(session!, _vm.TrackedRacerFullName);
                     });
 
                     if (SnifferCheckBox.IsChecked)

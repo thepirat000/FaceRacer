@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
+using FaceRacerLive.Services;
+
 
 namespace FaceRacerLive;
 
@@ -22,6 +24,7 @@ public static class MauiProgram
                 fonts.AddFont("digital-7.ttf", "Digital");
                 fonts.AddFont("AtkinsonHyperlegibleNext-ExtraBold.ttf", "Atkinson");
                 fonts.AddFont("Frutiger_bold.ttf", "Frutiger");
+                fonts.AddFont("SpaceMono-Regular.ttf", "SpaceMono");
             });
 #if ANDROID
         builder.Services.AddSingleton<IMicToSpeakerService, MicToSpeakerService>();
@@ -36,6 +39,8 @@ public static class MauiProgram
         {
             x.Timeout = AppSettings.TimeoutForLiveRequest;
         });
+
+        builder.Services.AddSingleton<RaceMonitorState>();
 
         var app = builder.Build();
 

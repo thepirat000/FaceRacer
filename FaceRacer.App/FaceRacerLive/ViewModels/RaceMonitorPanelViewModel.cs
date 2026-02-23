@@ -32,6 +32,12 @@ namespace FaceRacerLive.ViewModels
             private set => Set(ref field, value);
         }
 
+        public SessionData? LastSessionData
+        {
+            get;
+            private set => Set(ref field, value);
+        }
+
         private string _sessionTitle = "Session #—";
         public string SessionTitle
         {
@@ -78,6 +84,7 @@ namespace FaceRacerLive.ViewModels
             _racerByFullName.Clear();
 
             TrackedRacerFullName = null;
+            LastSessionData = null;
 
             SessionTitle = "Session #—";
             KartsText = "Karts: —";
@@ -88,6 +95,8 @@ namespace FaceRacerLive.ViewModels
 
         public void UpdateFromSession(SessionData sessionData)
         {
+            LastSessionData = sessionData;
+
             var racerCount = sessionData.body_data?.Count ?? 0;
 
             KartsText = $"Karts: {racerCount}";
