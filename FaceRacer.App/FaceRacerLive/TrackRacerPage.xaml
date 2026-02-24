@@ -27,6 +27,9 @@
                             <Setter Property="TextColor" Value="#ba0d0d" />
                         </DataTrigger>
                     </Label.Triggers>
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnAutoTrackLabelTapped" />
+                    </Label.GestureRecognizers>
                 </Label>
             </HorizontalStackLayout>
 
@@ -40,6 +43,9 @@
                             <Setter Property="TextColor" Value="#27ba0d" />
                         </DataTrigger>
                     </Label.Triggers>
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnLiveLabelTapped" />
+                    </Label.GestureRecognizers>
                 </Label>
             </HorizontalStackLayout>
 
@@ -130,7 +136,7 @@
                                      BackgroundColor="{AppThemeBinding Light=#E0E0E0, Dark=#303030}" />
 
                         <!-- Last and Best times -->
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
                             <Border Grid.Column="0"
                                     StrokeThickness="0"
                                     StrokeShape="RoundRectangle 10"
@@ -214,7 +220,7 @@
                                 </VerticalStackLayout>
                                 <Border.Triggers>
                                     <DataTrigger TargetType="Border" Binding="{Binding IsBestTimeHot}" Value="True">
-                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FFF5CC, Dark=#011566}" />
+                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FFF5CC, Dark=#016643}" />
                                     </DataTrigger>
                                 </Border.Triggers>
                             </Border>
@@ -223,8 +229,8 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Lap times list -->
-                <Grid ColumnDefinitions="50*,50*" ColumnSpacing="10">
+                <!-- Lap times list & Average -->
+                <Grid ColumnDefinitions="50*,50*" ColumnSpacing="2">
                     <Border 
                         Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
                         BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
@@ -233,21 +239,14 @@
                         StrokeShape="RoundRectangle 8"
                         Padding="10">
 
-                        <VerticalStackLayout Spacing="8">
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <VerticalStackLayout Spacing="4">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                 <Label Grid.Column="0"
                                    Text="Laps"
-                                   FontSize="14"
-                                   TextColor="LightGray"/>
-
-                                <Button Grid.Column="1"
-                                    Text="Clear"
-                                    Padding="0,0"
-                                    HeightRequest="24"
-                                    MinimumHeightRequest="24"
-                                    WidthRequest="60"
-                                    FontSize="12"
-                                    Command="{Binding ClearLapsCommand}" />
+                                   FontSize="11"
+                                   TextColor="LightGray"
+                                   HorizontalTextAlignment="Center"
+                                   />
                             </Grid>
 
                             <CollectionView 
@@ -270,19 +269,23 @@
                                                 </DataTrigger>
                                             </Border.Triggers>
 
-                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="2">
                                                 <Label Grid.Column="0"
-                                                   Text="{Binding LapNumber}"
-                                                   FontSize="14"
+                                                   Text="{Binding LapNumber, StringFormat='{0}.'}"
+                                                   FontSize="11"
                                                    VerticalTextAlignment="Center"
                                                    TextColor="{AppThemeBinding Light=DarkGray, Dark=LightGray}" />
                                                 <Label Grid.Column="1"
                                                    Text="{Binding Time}"
-                                                   FontFamily="Atkinson"
-                                                   FontSize="14"
+                                                   FontSize="13"
                                                    VerticalTextAlignment="Center"
                                                    FontAttributes="Bold" />
                                                 <Label Grid.Column="2"
+                                                       Text="{Binding DiffPrevious}"
+                                                       TextColor="Gray"
+                                                       FontSize="12"
+                                                       VerticalTextAlignment="Center" />
+                                                <Label Grid.Column="3"
                                                    Text="{Binding ArrowIcon}"
                                                    FontSize="16"
                                                    FontAttributes="Bold"
@@ -298,7 +301,7 @@
                         </VerticalStackLayout>
                     </Border>
 
-                    <VerticalStackLayout Grid.Column="1">
+                    <VerticalStackLayout Grid.Column="1" Spacing="8">
                         <Border 
                             Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
                             BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
@@ -325,6 +328,15 @@
 
 
                         </Border>
+
+                        <Button Text="Clear"
+                                Padding="0,0"
+                                HeightRequest="24"
+                                MinimumHeightRequest="24"
+                                WidthRequest="60"
+                                FontSize="12"
+                                HorizontalOptions="End"
+                                Command="{Binding ClearLapsCommand}" />
 
                     </VerticalStackLayout>
 

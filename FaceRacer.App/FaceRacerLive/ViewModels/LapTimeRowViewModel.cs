@@ -4,12 +4,13 @@ namespace FaceRacerLive.ViewModels;
 
 internal sealed class LapTimeRowViewModel : INotifyPropertyChanged
 {
-    public LapTimeRowViewModel(int lapNumber, string time, string arrowIcon, Color arrowColor)
+    public LapTimeRowViewModel(int lapNumber, string time, string diffPrevious, string arrowIcon, Color arrowColor)
     {
         LapNumber = lapNumber;
         Time = time;
         ArrowIcon = arrowIcon;
         ArrowColor = arrowColor;
+        DiffPrevious = diffPrevious;
     }
 
     public int LapNumber { get; }
@@ -17,6 +18,8 @@ internal sealed class LapTimeRowViewModel : INotifyPropertyChanged
 
     public string ArrowIcon { get; }
     public Color ArrowColor { get; }
+
+    public string DiffPrevious { get; }
 
     public bool IsFastest
     {

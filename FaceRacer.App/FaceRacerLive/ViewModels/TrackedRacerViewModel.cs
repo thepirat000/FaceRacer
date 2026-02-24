@@ -296,12 +296,12 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
 
         if (lastChanged)
         {
-            StartHotFlag(ref _lastTimeHotCts, nameof(IsLastTimeHot), v => IsLastTimeHot = v);
+            StartHotFlag(ref _lastTimeHotCts, nameof(IsLastTimeHot), v => IsLastTimeHot = v, 1);
         }
 
         if (bestChanged)
         {
-            StartHotFlag(ref _bestTimeHotCts, nameof(IsBestTimeHot), v => IsBestTimeHot = v);
+            StartHotFlag(ref _bestTimeHotCts, nameof(IsBestTimeHot), v => IsBestTimeHot = v, 3);
         }
 
         TryAppendLap(racer, sessionData.SessionNumber);
@@ -358,14 +358,14 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         {
             return;
         }
-
+        
         var completedLapNumber = Math.Max(1, passed - 1);
 
         if (_lastRecordedSession is not null && sessionNumber is not null && !string.Equals(_lastRecordedSession, sessionNumber, StringComparison.Ordinal))
         {
             ClearForNewSession(sessionNumber);
         }
-
+        
         if (_lastRecordedRacer is not null && !string.Equals(_lastRecordedRacer, racer.full_name, StringComparison.Ordinal))
         {
             // Tracked racer changed within same session: keep info panel, reset laps list.
@@ -388,9 +388,18 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
             return;
         }
 
-        Laps.Add(new LapTimeRowViewModel(completedLapNumber, lastTime, ArrowIcon, ArrowColor));
+        // Calculate the difference between this lap time but the previous lap, if available, to show it as a delta in the UI.
+        string diffPreviousText = "";
+        if (Laps.Count > 0 && TryParseLapTimeSeconds(Laps[^1].Time, out var secondsPreviousLap) && TryParseLapTimeSeconds(lastTime, out var secondsCurrentLap))
+        {
+            var diffPrevious = secondsCurrentLap - secondsPreviousLap;
+            diffPreviousText = diffPrevious.ToString("+0.000;-0.000", System.Globalization.CultureInfo.InvariantCulture);
+        }
+        
 
-        RefreshFastestLapHighlight();
+        Laps.Add(new LapTimeRowViewModel(completedLapNumber, lastTime, diffPreviousText, ArrowIcon, ArrowColor));
+
+        RefreshLap();
 
         _lastRecordedSession = sessionNumber;
         _lastRecordedRacer = racer.full_name;
@@ -421,7 +430,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
 
         if (removedAny)
         {
-            RefreshFastestLapHighlight();
+            RefreshLap();
         }
     }
 
@@ -438,7 +447,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         return double.TryParse(normalized, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out seconds);
     }
 
-    private void RefreshFastestLapHighlight()
+    private void RefreshLap()
     {
         double? best = null;
 
@@ -483,7 +492,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
 
     private void OnChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-    private void StartHotFlag(ref CancellationTokenSource? cts, string propertyName, Action<bool> setter)
+    private void StartHotFlag(ref CancellationTokenSource? cts, string propertyName, Action<bool> setter, int seconds)
     {
         cts?.Cancel();
         cts?.Dispose();
@@ -498,7 +507,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         {
             try
             {
-                await Task.Delay(TimeSpan.FromSeconds(3), token);
+                await Task.Delay(TimeSpan.FromSeconds(seconds), token);
             }
             catch (TaskCanceledException)
             {

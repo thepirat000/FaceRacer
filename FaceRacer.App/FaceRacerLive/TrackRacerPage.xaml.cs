@@ -65,6 +65,11 @@ public partial class TrackRacerPage : ContentPage
         _state.LiveChanged?.Invoke(e.Value);
     }
 
+    private void OnLiveLabelTapped(object? sender, TappedEventArgs e)
+    {
+        LiveCheckBox.IsChecked = !LiveCheckBox.IsChecked;
+    }
+
     private void OnAutoTrackCheckedChanged(object? sender, CheckedChangedEventArgs e)
     {
         if (_syncingAuto)
@@ -72,5 +77,10 @@ public partial class TrackRacerPage : ContentPage
             return;
         }
         _state.IsAutoTrackEnabled = e.Value;
+    }
+
+    private void OnAutoTrackLabelTapped(object? sender, TappedEventArgs e)
+    {
+        AutoTrackCheckBox.IsChecked = !AutoTrackCheckBox.IsChecked;
     }
 }
