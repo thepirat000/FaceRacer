@@ -66,6 +66,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         OnChanged(nameof(BestTime));
         OnChanged(nameof(LastTime));
         OnChanged(nameof(LapText));
+        OnChanged(nameof(LapTimesGraphDrawable));
     }
 
     public string? SessionNumber
@@ -186,9 +187,24 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
     private string? _lastRecordedSession;
     private string? _lastRecordedRacer;
 
+    public LapTimesGraphDrawable LapTimesGraphDrawable
+    {
+        get
+        {
+            var lapTimes = Laps?.Select(l => TryGetLapTimeSeconds(l.Time, 0)).ToList() ?? [];
+            return new LapTimesGraphDrawable(lapTimes);
+        }
+    }
+
     public void UpdateFromSession(SessionData sessionData, string? trackedFullName)
     {
         UpdateSessionProgress(sessionData);
+
+        if (sessionData.SessionNumber == null)
+        {
+            ClearForNewSession(null);
+            return;
+        }
 
         if (sessionData.SessionNumber != null
             && _lastRecordedSession != null
@@ -264,14 +280,14 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         Kart = racer.kart ?? "—";
         LapText = $"{racer.passed}/{racer.total}";
         LapProgress = ComputeLapProgress(racer.percentage);
-        var nextBest = racer.best_time ?? "-";
-        var nextLast = racer.last_time ?? "-";
+        var best = racer.best_time ?? "-";
+        var last = racer.last_time ?? "-";
 
-        var lastChanged = !string.Equals(LastTime, nextLast, StringComparison.Ordinal) && nextLast != "-";
-        var bestChanged = !string.Equals(BestTime, nextBest, StringComparison.Ordinal) && nextBest != "-";
-
-        BestTime = nextBest;
-        LastTime = nextLast;
+        var lastChanged = !string.Equals(LastTime, last, StringComparison.Ordinal) && last != "-";
+        var bestChanged = !string.Equals(BestTime, best, StringComparison.Ordinal) && best != "-";
+        
+        BestTime = TryParseLapTimeSeconds(best, out var bestSeconds) ? bestSeconds.ToString("0.000") : "-";
+        LastTime = TryParseLapTimeSeconds(last, out var lastSeconds) ? lastSeconds.ToString("0.000") : "-";
         _kartColor = racer.kart_color;
 
         ArrowIcon = racer.arrow == "green" ? "▲" : racer.arrow == "red" ? "▼" : "·";
@@ -434,6 +450,16 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         }
     }
 
+    private static double TryGetLapTimeSeconds(string time, double defaultValue = 0)
+    {
+        if (TryParseLapTimeSeconds(time, out var seconds))
+        {
+            return seconds;
+        }
+
+        return defaultValue;
+    }
+
     private static bool TryParseLapTimeSeconds(string time, out double seconds)
     {
         seconds = 0;
@@ -443,8 +469,27 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
             return false;
         }
 
-        var normalized = time.Trim().Replace(':', '.');
-        return double.TryParse(normalized, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out seconds);
+        var normalized = time.Trim();
+
+        // Try "ss.fff" format
+        if (double.TryParse(normalized, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out seconds))
+        {
+            return true;
+        }
+
+        // Try "m:ss.fff" format
+        var parts = normalized.Split(':');
+        if (parts.Length == 2)
+        {
+            if (int.TryParse(parts[0], out var min) &&
+                double.TryParse(parts[1], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var sec))
+            {
+                seconds = min * 60 + sec;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void RefreshLap()
@@ -488,6 +533,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
 
         OnChanged(nameof(BestLapNumber));
         OnChanged(nameof(LastLapNumber));
+        OnChanged(nameof(LapTimesGraphDrawable));
     }
 
     private void OnChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

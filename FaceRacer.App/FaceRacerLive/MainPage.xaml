@@ -138,7 +138,7 @@
             </Border>
 
             <!-- MIC controls -->
-            <Grid ColumnDefinitions="*,auto,auto,auto"
+            <Grid ColumnDefinitions="*,auto,auto,auto,auto"
                   ColumnSpacing="12">
 
                 <Button x:Name="SendTextBtn"
@@ -148,22 +148,30 @@
                         Clicked="OnSendTextClicked"
                         HorizontalOptions="Fill" />
 
+                <Button x:Name="TrackRacerBtn"
+                        Text="Track"
+                        Grid.Column="1"
+                        Clicked="OnTrackClicked"
+                        HorizontalOptions="Fill" />
+
                 <Button x:Name="ShowTextBtn"
                         Text="Show"
-                        Grid.Column="1"
+                        Grid.Column="2"
                         Clicked="OnShowTextClicked"
                         HorizontalOptions="Fill" />
 
                 <Button x:Name="MicToggleBtn"
-                        Grid.Column="2"
+                        Grid.Column="3"
                         Text="Mic On"
+                        FontSize="11"
                         Clicked="OnMicToggleClicked" />
 
                 <Button x:Name="PttBtn"
-                        Grid.Column="3"
+                        Grid.Column="4"
                         Text="PTT"
                         Pressed="OnPttPressed"
-                        Released="OnPttReleased" />
+                        Released="OnPttReleased"
+                        IsVisible="False" />
             </Grid>
 
             <Label x:Name="MicStatusLabel" Text="Idle" IsVisible="False" />

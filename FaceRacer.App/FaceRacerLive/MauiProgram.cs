@@ -1,8 +1,9 @@
 ﻿using CommunityToolkit.Maui;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
 
+using FaceRacerLive.Monitor;
 using FaceRacerLive.Services;
+
+using Microsoft.Extensions.Logging;
 
 
 namespace FaceRacerLive;
@@ -41,6 +42,7 @@ public static class MauiProgram
         });
 
         builder.Services.AddSingleton<RaceMonitorState>();
+        builder.Services.AddSingleton<SampleRaceSimulator>();
 
         var app = builder.Build();
 

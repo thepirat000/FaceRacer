@@ -670,6 +670,11 @@ namespace FaceRacerLive
 
         #endregion
 
+        private async void OnTrackClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync(nameof(TrackRacerPage));
+        }
+
         private async void OnShowTextClicked(object sender, EventArgs e)
         {
             string? text;

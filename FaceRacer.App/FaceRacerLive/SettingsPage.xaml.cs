@@ -7,8 +7,9 @@ public partial class SettingsPage : ContentPage
 {
     private readonly SettingsViewModel _vm;
     private bool _handlingSimulationToggle;
+    private readonly SampleRaceSimulator _simulator;
 
-    public SettingsPage()
+    public SettingsPage(SampleRaceSimulator simulator)
     {
         InitializeComponent();
 
@@ -16,6 +17,7 @@ public partial class SettingsPage : ContentPage
         _vm.LoadFromAppSettings();
 
         BindingContext = _vm;
+        _simulator = simulator;
     }
 
     private async void OnCancelClicked(object? sender, EventArgs e)
@@ -124,6 +126,8 @@ public partial class SettingsPage : ContentPage
             var sessions = await SampleRaceZipReader.ReadAllSessionsFromZipAsync(stream);
 
             SimulationSessionStore.SetSessions(sessions, result.FileName);
+
+            _simulator.ResetSimulation();
 
             _vm.SimulationZipStatus = $"Loaded {sessions.Count} steps from '{result.FileName}'.";
 

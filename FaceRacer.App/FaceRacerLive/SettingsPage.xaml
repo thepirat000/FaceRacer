@@ -36,9 +36,9 @@
     </ContentPage.Resources>
 
     <ScrollView>
-        <VerticalStackLayout Padding="12" Spacing="4">
+        <VerticalStackLayout Padding="8" Spacing="0">
 
-            <Frame Padding="12,5,12,5"
+            <Frame Padding="12,0,12,0"
                    CornerRadius="12"
                    HasShadow="False"
                    BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
@@ -113,7 +113,7 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <Frame Padding="12,5,12,5"
+            <Frame Padding="12,0,12,0"
                    CornerRadius="12"
                    HasShadow="False"
                    BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
@@ -128,7 +128,7 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <Frame Padding="12,5,12,5"
+            <Frame Padding="12,0,12,0"
                    CornerRadius="12"
                    HasShadow="False"
                    BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
@@ -148,7 +148,7 @@
                    FontSize="12"
                    Margin="2,4,2,0" />
 
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12" Margin="0,12,0,0">
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12" Margin="0,20,0,0">
                 <Button Text="Cancel" Grid.Column="0" Clicked="OnCancelClicked" />
                 <Button Text="Reset" Grid.Column="1" Clicked="OnResetClicked" />
                 <Button Text="Save" Grid.Column="2" Clicked="OnSaveClicked" />

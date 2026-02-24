@@ -57,8 +57,8 @@
         <Grid ColumnDefinitions="*" RowDefinitions="Auto,Auto" RowSpacing="6">
 
             <Label Grid.Row="0"
-                   Text="{Binding SessionNumber, StringFormat='#{0}'}"
-                   FontSize="16"
+                   Text="{Binding SessionNumber, StringFormat='Session #{0}'}"
+                   FontSize="18"
                    FontAttributes="Bold"
                    VerticalTextAlignment="End"
                    HorizontalTextAlignment="Center"
@@ -146,6 +146,7 @@
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                         <Label Grid.Column="0" 
                                                HorizontalTextAlignment="Center" 
+                                               Margin="0,-5,0,0"
                                                FontSize="11">
                                             <Label.FormattedText>
                                                 <FormattedString>
@@ -159,7 +160,6 @@
                                            Text="{Binding LastTime}"
                                            Padding="4,25,0,0"
                                            FontSize="27"
-                                           FontFamily="Atkinson"
                                            TextColor="White" 
                                            HorizontalTextAlignment="Center"
                                            />
@@ -195,6 +195,7 @@
                                     Padding="5,10,5,10">
                                 <VerticalStackLayout Spacing="2">
                                     <Label FontSize="11"
+                                           Margin="0,-5,0,0"
                                            TextColor="{AppThemeBinding Light=DarkGray, Dark=LightGray}"
                                            HorizontalTextAlignment="Center">
                                         <Label.FormattedText>
@@ -206,7 +207,6 @@
                                         </Label.FormattedText>
                                     </Label>
                                     <Label Text="{Binding BestTime}"
-                                           FontFamily="Atkinson"
                                            FontSize="32"
                                            FontAttributes="Bold"
                                            HorizontalTextAlignment="Center"
@@ -242,11 +242,11 @@
                         <VerticalStackLayout Spacing="4">
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                 <Label Grid.Column="0"
-                                   Text="Laps"
-                                   FontSize="11"
-                                   TextColor="LightGray"
-                                   HorizontalTextAlignment="Center"
-                                   />
+                                       Margin="0,-5,0,0"
+                                       Text="Laps"
+                                       FontSize="11"
+                                       TextColor="LightGray"
+                                       HorizontalTextAlignment="Center" />
                             </Grid>
 
                             <CollectionView 
@@ -316,17 +316,32 @@
                                 <Label FontSize="11"
                                        TextColor="{AppThemeBinding Light=DarkGray, Dark=LightGray}"
                                        Text="Average"
+                                       Margin="0,-5,0,0"
                                        HorizontalTextAlignment="Center">
                                     
                                 </Label>
                                 <Label Text="{Binding AverageLapTime}"
-                                       FontFamily="Atkinson"
                                        FontSize="24"
                                        HorizontalTextAlignment="Center"
                                        TextColor="LightGray" />
                             </VerticalStackLayout>
 
 
+                        </Border>
+
+                        <Border Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
+                                BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 8"
+                                MaximumHeightRequest="80"
+                                HeightRequest="80"
+                                VerticalOptions="Start"
+                                Padding="10">
+                            <GraphicsView
+                                x:Name="LapTimesGraph"
+                                HeightRequest="80"
+                                Margin="0,0,0,0"
+                                Drawable="{Binding LapTimesGraphDrawable}" />
                         </Border>
 
                         <Button Text="Clear"

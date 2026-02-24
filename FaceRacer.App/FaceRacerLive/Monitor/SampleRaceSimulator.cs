@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace FaceRacerLive.Monitor;
 
-internal class SampleRaceSimulator
+public class SampleRaceSimulator
 {
     private int _index = 0;
     private IReadOnlyList<SessionData>? _simulationArray;
@@ -31,5 +31,6 @@ internal class SampleRaceSimulator
     public void ResetSimulation()
     {
         _index = 0;
+        _simulationArray = null;
     }
 }
