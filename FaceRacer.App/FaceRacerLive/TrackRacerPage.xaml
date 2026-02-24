@@ -302,6 +302,7 @@
                     </Border>
 
                     <VerticalStackLayout Grid.Column="1" Spacing="8">
+                        <!-- Average -->
                         <Border 
                             Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
                             BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
@@ -325,21 +326,20 @@
                                        HorizontalTextAlignment="Center"
                                        TextColor="LightGray" />
                             </VerticalStackLayout>
-
-
                         </Border>
 
+                        <!-- Graph -->
                         <Border Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
                                 BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
                                 StrokeThickness="1"
                                 StrokeShape="RoundRectangle 8"
-                                MaximumHeightRequest="80"
-                                HeightRequest="80"
+                                MaximumHeightRequest="100"
+                                HeightRequest="100"
                                 VerticalOptions="Start"
-                                Padding="10">
+                                Padding="5,0,0,0">
                             <GraphicsView
                                 x:Name="LapTimesGraph"
-                                HeightRequest="80"
+                                HeightRequest="100"
                                 Margin="0,0,0,0"
                                 Drawable="{Binding LapTimesGraphDrawable}" />
                         </Border>
