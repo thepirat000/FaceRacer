@@ -9,9 +9,10 @@
 
     <ShellContent
         Title="Live"
-        FlyoutIcon="live.png"
         ContentTemplate="{DataTemplate faceRacerLive:MainPage}"
-        Route="MainPage"/>
+        IsEnabled="False"
+        Route="MainPage"
+        FlyoutItemIsVisible="False"/>
 
     <MenuItem Text="Tracked racer"
               Clicked="OnTrackedRacerClicked"
@@ -23,7 +24,16 @@
 
     <MenuItem Text="Settings"
               IconImageSource="settings.png"
-			  Clicked="OnSettingsClicked" />
+              Clicked="OnSettingsClicked" />
 
-
+    <Shell.FlyoutFooter>
+        <VerticalStackLayout>
+            <Button
+                Text="Exit"
+                HeightRequest="20"
+                HorizontalOptions="Start"
+                Clicked="OnExitMenuItemClicked"
+                ImageSource="exit_icon.png" />
+        </VerticalStackLayout>
+    </Shell.FlyoutFooter>
 </Shell>

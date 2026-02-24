@@ -15,7 +15,7 @@ public class SessionData
     /// <summary>
     /// List of racers/rows to render in the current monitor table.
     /// </summary>
-    public List<SessionRacerData> body_data { get; set; }
+    public List<SessionRacerData>? body_data { get; set; }
 
     /// <summary>
     /// When true, the client should display a checkered-flag indicator for the session (session finished).

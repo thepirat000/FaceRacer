@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using FaceRacer.Shared.Dto;
 using System.Windows.Input;
+#pragma warning disable S3358
 
 namespace FaceRacerLive.ViewModels;
 
@@ -46,11 +47,25 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
     public void ClearLaps()
     {
         Laps.Clear();
-        _lastRecordedRacer = null;
-        _lastRecordedPassed = null;
 
-        _bestLapSeconds = null;
+        _lastRecordedRacer = null;
+
+        AverageLapTime = "-";
+        BestLapNumber = null;
+        LastLapNumber = null;
+        LastTime = "-";
+        BestTime = "-";
+        LapText = "-";
+        BestDeltaNextText = "-";
+        BestDeltaPrevText = "-";
+
         OnChanged(nameof(Laps));
+        OnChanged(nameof(AverageLapTime));
+        OnChanged(nameof(BestLapNumber));
+        OnChanged(nameof(LastLapNumber));
+        OnChanged(nameof(BestTime));
+        OnChanged(nameof(LastTime));
+        OnChanged(nameof(LapText));
     }
 
     public string? SessionNumber
@@ -83,9 +98,9 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         private set;
     } = "—";
 
-    private string _kart_color = string.Empty;
+    private string _kartColor = string.Empty;
 
-    public Color KartColor => Color.TryParse("#" + _kart_color, out var c) ? c : Colors.Gray;
+    public Color KartColor => Color.TryParse("#" + _kartColor, out var c) ? c : Colors.Gray;
 
     public string LapText
     {
@@ -147,6 +162,12 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         private set;
     }
 
+    public string? AverageLapTime
+    {
+        get;
+        private set;
+    }
+
     public bool IsLastTimeHot
     {
         get;
@@ -164,9 +185,6 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
 
     private string? _lastRecordedSession;
     private string? _lastRecordedRacer;
-    private int? _lastRecordedPassed;
-
-    private double? _bestLapSeconds;
 
     public void UpdateFromSession(SessionData sessionData, string? trackedFullName)
     {
@@ -197,7 +215,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         // Compute best time deltas for next and previous racer
         BestDeltaNextText = "-";
         BestDeltaPrevText = "-";
-        if (sessionData.body_data != null && racer != null)
+        if (sessionData.body_data != null)
         {
             // Order by position (numeric)
             var ordered = sessionData.body_data
@@ -206,36 +224,43 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
                 .ToList();
 
             var trackedIndex = ordered.FindIndex(r => string.Equals(r.full_name, trackedFullName, StringComparison.Ordinal));
-            double trackedBest = 0;
-            bool trackedValid = TryParseLapTimeSeconds(racer.best_time, out trackedBest);
+            bool trackedValid = TryParseLapTimeSeconds(racer.best_time ?? "", out var trackedBest);
 
             // Next racer (position+1)
             if (trackedIndex >= 0 && trackedIndex + 1 < ordered.Count)
             {
                 var next = ordered[trackedIndex + 1];
-                double nextBestSeconds = 0;
-                bool nextValid = TryParseLapTimeSeconds(next.best_time, out nextBestSeconds);
-                string diff = (trackedValid && nextValid)
-                    ? (nextBestSeconds - trackedBest).ToString("+0.000;-0.000", System.Globalization.CultureInfo.InvariantCulture)
-                    : "-";
-                BestDeltaNextText = $"{diff} (#{next.position} {next.full_name})";
+                bool nextValid = TryParseLapTimeSeconds(next.best_time ?? "", out var nextBestSeconds);
+                if (nextValid)
+                {
+                    string diff = (trackedValid && nextValid) ? (nextBestSeconds - trackedBest).ToString("+0.000;-0.000", System.Globalization.CultureInfo.InvariantCulture) : "-";
+                    BestDeltaNextText = $"{diff} | #{next.position} | {next.full_name}";
+                }
+                else
+                {
+                    BestDeltaNextText = "-";
+                }
             }
 
             // Previous racer (position-1)
             if (trackedIndex > 0)
             {
                 var prev = ordered[trackedIndex - 1];
-                double prevBestSeconds = 0;
-                bool prevValid = TryParseLapTimeSeconds(prev.best_time, out prevBestSeconds);
-                string diff = (trackedValid && prevValid)
-                    ? (prevBestSeconds - trackedBest).ToString("+0.000;-0.000", System.Globalization.CultureInfo.InvariantCulture)
-                    : "-";
-                BestDeltaPrevText = $"{diff} (#{prev.position} {prev.full_name})";
+                bool prevValid = TryParseLapTimeSeconds(prev.best_time ?? "", out var prevBestSeconds);
+                if (prevValid)
+                {
+                    string diff = (trackedValid && prevValid) ? (prevBestSeconds - trackedBest).ToString("+0.000;-0.000", System.Globalization.CultureInfo.InvariantCulture) : "-";
+                    BestDeltaPrevText = $"{diff} | #{prev.position} | {prev.full_name}";
+                }
+                else
+                {
+                    BestDeltaNextText = "-";
+                }
             }
         }
         HasRacer = true;
         PositionText = $"#{racer.position}";
-        FullName = racer.full_name ?? "—";
+        FullName = racer.full_name ?? "-";
         Kart = racer.kart ?? "—";
         LapText = $"{racer.passed}/{racer.total}";
         LapProgress = ComputeLapProgress(racer.percentage);
@@ -247,13 +272,10 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
 
         BestTime = nextBest;
         LastTime = nextLast;
-        _kart_color = racer.kart_color;
+        _kartColor = racer.kart_color;
 
         ArrowIcon = racer.arrow == "green" ? "▲" : racer.arrow == "red" ? "▼" : "·";
-
-        ArrowColor = string.Equals(racer.arrow, "green", StringComparison.OrdinalIgnoreCase) ? Colors.LimeGreen :
-            string.Equals(racer.arrow, "red", StringComparison.OrdinalIgnoreCase) ? Colors.OrangeRed :
-            Colors.Gray;
+        ArrowColor = racer.arrow == "green" ? Colors.LimeGreen : racer.arrow == "red" ? Colors.OrangeRed : Colors.Gray;
 
         OnChanged(nameof(HasRacer));
         OnChanged(nameof(PositionText));
@@ -326,8 +348,6 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         Laps.Clear();
         _lastRecordedSession = sessionNumber;
         _lastRecordedRacer = null;
-        _lastRecordedPassed = null;
-        _bestLapSeconds = null;
         OnChanged(nameof(Laps));
     }
 
@@ -350,7 +370,6 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         {
             // Tracked racer changed within same session: keep info panel, reset laps list.
             Laps.Clear();
-            _bestLapSeconds = null;
         }
 
         var lastTime = racer.last_time;
@@ -366,7 +385,6 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         {
             _lastRecordedSession = sessionNumber;
             _lastRecordedRacer = racer.full_name;
-            _lastRecordedPassed = passed;
             return;
         }
 
@@ -376,7 +394,6 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
 
         _lastRecordedSession = sessionNumber;
         _lastRecordedRacer = racer.full_name;
-        _lastRecordedPassed = passed;
     }
 
     private void ClearLapsFromLapNumber(int fromLapNumber)
@@ -433,8 +450,6 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
             }
         }
 
-        _bestLapSeconds = best;
-
         foreach (var lap in Laps)
         {
             lap.IsFastest = best is not null && TryParseLapTimeSeconds(lap.Time, out var s) && Math.Abs(s - best.Value) < 0.0005;
@@ -442,6 +457,26 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
 
         BestLapNumber = Laps.FirstOrDefault(l => l.IsFastest)?.LapNumber;
         LastLapNumber = Laps.LastOrDefault()?.LapNumber;
+
+        if (Laps.Count > 1)
+        {
+            var avg = Laps.Average(l =>
+            {
+                if (TryParseLapTimeSeconds(l.Time, out var s))
+                {
+                    return s;
+                }
+                else
+                {
+                    return 0;
+                }
+            });
+
+            AverageLapTime = Math.Abs(avg) < 0.0005 ? "-" : avg.ToString("F3");
+
+            OnChanged(nameof(AverageLapTime));
+        }
+
         OnChanged(nameof(BestLapNumber));
         OnChanged(nameof(LastLapNumber));
     }

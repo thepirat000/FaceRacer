@@ -646,7 +646,7 @@ namespace FaceRacerLive
                 var message = $"Racer {racer.full_name} completed lap {racer.passed} in {racer.last_time} (best: {racer.best_time}).";
                 AppendConsole($"Auto: {message}", Colors.LightBlue);
                 var isBestLap = racer.best_time != "-" && racer.last_time == racer.best_time;
-                var command = $"{racer.last_time.Replace(".", ":")}; {(racer.passed == racer.total ? "última" : "")} {(isBestLap ? "mejor" : "")} vuelta {racer.passed}";
+                var command = $"{racer.last_time.Replace(".", ":")}; {(racer.passed == racer.total ? "última" : "")} {(isBestLap ? "mejor vuelta." : "")} vuelta {racer.passed}";
                 InputTextEditor.Text = command;
                 await SpeakTextAndClearAsync(command);
             }
@@ -654,15 +654,17 @@ namespace FaceRacerLive
             if ((racer.position != "-" && previousRacerData == null) || (sessionData.SessionNumber == _previousSession?.SessionNumber && previousRacerData?.position != racer.position))
             {
                 // Position change for this racer since last check
-                var currentPosition = int.TryParse(racer.position, out var curPosInt) ? curPosInt : 99;
-                var previousPosition = int.TryParse(previousRacerData?.position, out var positionInt) ? positionInt : 0;
-                var positionChange = currentPosition - previousPosition;
-                var direction = positionChange < 0 || previousPosition == 0 ? "up" : "down";
-                var message = $"Racer {racer.full_name} moved {direction} to position #{currentPosition}.";
-                AppendConsole($"Auto: {message}", Colors.LightBlue);
-                var command = $"Posición {currentPosition}";
-                InputTextEditor.Text = command;
-                await SpeakTextAndClearAsync(command);
+                if (int.TryParse(racer.position, out var currentPosition))
+                {
+                    var previousPosition = int.TryParse(previousRacerData?.position, out var positionInt) ? positionInt : 0;
+                    var positionChange = currentPosition - previousPosition;
+                    var direction = positionChange < 0 || previousPosition == 0 ? "up" : "down";
+                    var message = $"Racer {racer.full_name} moved {direction} to position #{currentPosition}.";
+                    AppendConsole($"Auto: {message}", Colors.LightBlue);
+                    var command = $"Posición {currentPosition}";
+                    InputTextEditor.Text = command;
+                    await SpeakTextAndClearAsync(command);
+                }
             }
         }
 

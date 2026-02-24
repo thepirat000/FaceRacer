@@ -29,5 +29,14 @@
 			FlyoutIsPresented = false;
 			await GoToAsync(nameof(TrackRacerPage));
 		}
+
+        private void OnExitMenuItemClicked(object sender, EventArgs e)
+        {
+#if ANDROID
+            Android.OS.Process.KillProcess(Android.OS.Process.MyPid());
+#elif WINDOWS
+            Application.Current.Quit();
+#endif
+        }
     }
 }

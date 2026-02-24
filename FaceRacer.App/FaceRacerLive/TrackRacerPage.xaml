@@ -49,13 +49,17 @@
     <VerticalStackLayout Padding="12" Spacing="12">
 
         <Grid ColumnDefinitions="*" RowDefinitions="Auto,Auto" RowSpacing="6">
+
             <Label Grid.Row="0"
-                   Text="{Binding SessionNumber, StringFormat='Session #{0}'}"
+                   Text="{Binding SessionNumber, StringFormat='#{0}'}"
                    FontSize="16"
                    FontAttributes="Bold"
-                   VerticalTextAlignment="Center" />
+                   VerticalTextAlignment="End"
+                   HorizontalTextAlignment="Center"
+                   />
 
             <ProgressBar Grid.Row="1"
+                         Grid.ColumnSpan="2"
                          HeightRequest="2"
                          Progress="{Binding SessionProgress}"
                          ProgressColor="{Binding SessionProgressColor}"
@@ -65,219 +69,267 @@
         <ScrollView>
             <VerticalStackLayout Spacing="12">
 
-            <!-- Tracked racer panel -->
-            <Border Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="14,5,14,5">
+                <!-- Tracked racer panel -->
+                <Border Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 8"
+                        Padding="14,5,14,5">
 
-                <VerticalStackLayout Spacing="2">
+                    <VerticalStackLayout Spacing="2">
 
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0"
-                               Text="{Binding PositionText}"
-                               FontSize="27"
-                               FontAttributes="Bold"
-                               VerticalTextAlignment="Center" />
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                            <Label Grid.Column="1"
+                                   Text="{Binding FullName}"
+                                   FontSize="20"
+                                   FontAttributes="Bold"
+                                   LineBreakMode="TailTruncation"
+                                   HorizontalTextAlignment="Center"
+                                   VerticalTextAlignment="Center" />
 
-                        <Label Grid.Column="1"
-                               Text="{Binding FullName}"
-                               FontSize="20"
-                               FontAttributes="Bold"
-                               LineBreakMode="TailTruncation"
-                               VerticalTextAlignment="Center" />
+                            <Label Grid.Column="0"
+                                   Text="{Binding Kart}"
+                                   TextColor="{Binding KartColor}"
+                                   FontSize="24"
+                                   FontAttributes="Bold"
+                                   Padding="0,0,0,0"
+                                   HorizontalTextAlignment="Start"
+                                   VerticalTextAlignment="Center" />
 
-                        <Label Grid.Column="2"
-                               Text="{Binding Kart}"
-                               TextColor="{Binding KartColor}"
-                               FontSize="20"
-                               FontAttributes="Bold"
-                               HorizontalTextAlignment="End"
-                               VerticalTextAlignment="Center" />
-                    </Grid>
+                            <Label Grid.Column="2"
+                                   Text="{Binding PositionText}"
+                                   FontSize="24"
+                                   FontAttributes="Bold"
+                                   VerticalTextAlignment="Center" />
 
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
-                        <Label Grid.Column="0"
-                               Grid.ColumnSpan="2"
-                               Text="{Binding LapText}"
-                               FontSize="28"
-                               FontAttributes="Bold"
-                               HorizontalTextAlignment="Center"
-                               TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
-                               VerticalTextAlignment="Center" />
-                    </Grid>
+                        </Grid>
 
-                    <ProgressBar HeightRequest="2"
-                                 Progress="{Binding LapProgress}"
-                                 Margin="0,0,0,10"
-                                 ProgressColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
-                                 BackgroundColor="{AppThemeBinding Light=#E0E0E0, Dark=#303030}" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+                            <Label Grid.Column="0"
+                                   Grid.ColumnSpan="2"
+                                   Text="Lap"
+                                   FontSize="14"
+                                   HorizontalTextAlignment="Center"
+                                   Padding="0,0,130,0"
+                                   TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
+                                   VerticalTextAlignment="Center" />
 
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
-                        <Border Grid.Column="0"
-                                StrokeThickness="0"
-                                StrokeShape="RoundRectangle 10"
-                                BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
-                                Padding="5,10,5,10">
-                            <VerticalStackLayout Spacing="2">
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                    <Label Grid.Column="0" 
-                                           HorizontalTextAlignment="Center" 
-                                           FontSize="11">
-                                        <Label.FormattedText>
-                                            <FormattedString>
-                                                <Span Text="Last (" />
-                                                <Span Text="{Binding LastLapNumber}" />
-                                                <Span Text=")" />
-                                                </FormattedString>
-                                        </Label.FormattedText>
-                                    </Label>
-                                    <Label Grid.Column="0"
-                                           FontSize="11"
-                                           TextColor="{AppThemeBinding Light=DarkGray, Dark=LightGray}"
-                                           HorizontalTextAlignment="Center" />
-                                    <Label Grid.Column="0"
-                                       Text="{Binding LastTime}"
-                                       Padding="4,25,0,0"
-                                       FontSize="27"
-                                       FontFamily="Atkinson"
-                                       TextColor="White" 
-                                       HorizontalTextAlignment="Center"
-                                       />
-                                    <Label Grid.Column="1"
-                                           Text="{Binding ArrowIcon}"
-                                           FontSize="20"
-                                           Padding="0,25,0,0"
-                                           FontAttributes="Bold"
-                                           TextColor="{Binding ArrowColor}"
-                                           HorizontalTextAlignment="Center"
-                                           VerticalTextAlignment="Center"
-                                           WidthRequest="18" />
-                                </Grid>
-                                <Label Text="{Binding BestDeltaPrevText}"
-                                       FontSize="10"
-                                       TextColor="#d42237"
-                                       LineBreakMode="TailTruncation"
-                                       HorizontalTextAlignment="Center"
-                                       Margin="0,0,0,0" />
+                                <Label Grid.Column="0"
+                                   Grid.ColumnSpan="2"
+                                   Text="{Binding LapText}"
+                                   FontSize="28"
+                                   FontAttributes="Bold"
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
+                                   VerticalTextAlignment="Center" />
+                        </Grid>
 
-							</VerticalStackLayout>
-                            <Border.Triggers>
-                                <DataTrigger TargetType="Border" Binding="{Binding IsLastTimeHot}" Value="True">
-                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FFF5CC, Dark=#011566}" />
-                                </DataTrigger>
-                            </Border.Triggers>
-                        </Border>
+                        <ProgressBar HeightRequest="2"
+                                     Progress="{Binding LapProgress}"
+                                     Margin="0,0,0,10"
+                                     ProgressColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
+                                     BackgroundColor="{AppThemeBinding Light=#E0E0E0, Dark=#303030}" />
 
-                        <Border Grid.Column="1"
-                                StrokeThickness="0"
-                                StrokeShape="RoundRectangle 10"
-                                BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
-                                Padding="5,10,5,10">
-                            <VerticalStackLayout Spacing="2">
-                                <Label FontSize="11"
-                                       TextColor="{AppThemeBinding Light=DarkGray, Dark=LightGray}"
-                                       HorizontalTextAlignment="Center">
-                                    <Label.FormattedText>
-                                        <FormattedString>
-                                            <Span Text="Best (" />
-                                            <Span Text="{Binding BestLapNumber}" />
-                                            <Span Text=")" />
-                                        </FormattedString>
-                                    </Label.FormattedText>
-                                </Label>
-                                <Label Text="{Binding BestTime}"
-                                       FontFamily="Atkinson"
-                                       FontSize="32"
-                                       FontAttributes="Bold"
-                                       HorizontalTextAlignment="Center"
-                                       TextColor="Lime" />
-                                <Label Text="{Binding BestDeltaNextText}"
-                                       FontSize="10"
-                                       TextColor="Lime"
-                                       LineBreakMode="TailTruncation"
-                                       HorizontalTextAlignment="Center"
-                                       Margin="0,-4,0,0" />
-                            </VerticalStackLayout>
-                            <Border.Triggers>
-                                <DataTrigger TargetType="Border" Binding="{Binding IsBestTimeHot}" Value="True">
-                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FFF5CC, Dark=#011566}" />
-                                </DataTrigger>
-                            </Border.Triggers>
-                        </Border>
-                    </Grid>
-
-                </VerticalStackLayout>
-            </Border>
-
-            <!-- Laps list -->
-            <Border Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="10">
-
-                <VerticalStackLayout Spacing="8">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                        <Label Grid.Column="0"
-                               Text="Laps"
-                               FontSize="14"
-                               TextColor="LightGray"
-                               />
-
-                        <Button Grid.Column="1"
-                                Text="Clear"
-                                Padding="0,0"
-                                HeightRequest="24"
-                                MinimumHeightRequest="24"
-                                WidthRequest="60"
-                                FontSize="12"
-                                Command="{Binding ClearLapsCommand}" />
-                    </Grid>
-
-                    <CollectionView ItemsSource="{Binding Laps}" SelectionMode="None">
-                        <CollectionView.ItemsLayout>
-                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
-                        </CollectionView.ItemsLayout>
-
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="viewmodels:LapTimeRowViewModel">
-                                <Border StrokeThickness="0"
-                                        StrokeShape="RoundRectangle 6"
-                                        Padding="5,0,0,0"
-                                        BackgroundColor="Transparent">
-                                    <Border.Triggers>
-                                        <DataTrigger TargetType="Border" Binding="{Binding IsFastest}" Value="True">
-                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FFF5CC, Dark=#011566}" />
-                                        </DataTrigger>
-                                    </Border.Triggers>
-
-                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                        <!-- Last and Best times -->
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+                            <Border Grid.Column="0"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 10"
+                                    BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
+                                    Padding="5,10,5,10">
+                                <VerticalStackLayout Spacing="2">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <Label Grid.Column="0" 
+                                               HorizontalTextAlignment="Center" 
+                                               FontSize="11">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="Last (" />
+                                                    <Span Text="{Binding LastLapNumber}" />
+                                                    <Span Text=")" />
+                                                    </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
                                         <Label Grid.Column="0"
-                                               Text="{Binding LapNumber}"
-                                               FontSize="14"
-                                               VerticalTextAlignment="Center"
-                                               TextColor="{AppThemeBinding Light=DarkGray, Dark=LightGray}" />
+                                           Text="{Binding LastTime}"
+                                           Padding="4,25,0,0"
+                                           FontSize="27"
+                                           FontFamily="Atkinson"
+                                           TextColor="White" 
+                                           HorizontalTextAlignment="Center"
+                                           />
                                         <Label Grid.Column="1"
-                                               Text="{Binding Time}"
-                                               FontFamily="Atkinson"
-                                               FontSize="14"
-                                               VerticalTextAlignment="Center"
-                                               FontAttributes="Bold" />
-                                        <Label Grid.Column="2"
                                                Text="{Binding ArrowIcon}"
-                                               FontSize="16"
+                                               FontSize="20"
+                                               Padding="0,25,0,0"
                                                FontAttributes="Bold"
                                                TextColor="{Binding ArrowColor}"
                                                HorizontalTextAlignment="Center"
                                                VerticalTextAlignment="Center"
                                                WidthRequest="18" />
                                     </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </VerticalStackLayout>
-            </Border>
+                                    <Label Text="{Binding BestDeltaPrevText}"
+                                           FontSize="10"
+                                           TextColor="#d42237"
+                                           LineBreakMode="TailTruncation"
+                                           HorizontalTextAlignment="Center"
+                                           Margin="0,0,0,0" />
+
+							    </VerticalStackLayout>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsLastTimeHot}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FFF5CC, Dark=#011566}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                            </Border>
+
+                            <Border Grid.Column="1"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 10"
+                                    BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
+                                    Padding="5,10,5,10">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label FontSize="11"
+                                           TextColor="{AppThemeBinding Light=DarkGray, Dark=LightGray}"
+                                           HorizontalTextAlignment="Center">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="Best (" />
+                                                <Span Text="{Binding BestLapNumber}" />
+                                                <Span Text=")" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    <Label Text="{Binding BestTime}"
+                                           FontFamily="Atkinson"
+                                           FontSize="32"
+                                           FontAttributes="Bold"
+                                           HorizontalTextAlignment="Center"
+                                           TextColor="Lime" />
+                                    <Label Text="{Binding BestDeltaNextText}"
+                                           FontSize="10"
+                                           TextColor="Lime"
+                                           LineBreakMode="TailTruncation"
+                                           HorizontalTextAlignment="Center"
+                                           Margin="0,-4,0,0" />
+                                </VerticalStackLayout>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsBestTimeHot}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FFF5CC, Dark=#011566}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                            </Border>
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Lap times list -->
+                <Grid ColumnDefinitions="50*,50*" ColumnSpacing="10">
+                    <Border 
+                        Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
+                        BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
+                        Grid.Column="0"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 8"
+                        Padding="10">
+
+                        <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <Label Grid.Column="0"
+                                   Text="Laps"
+                                   FontSize="14"
+                                   TextColor="LightGray"/>
+
+                                <Button Grid.Column="1"
+                                    Text="Clear"
+                                    Padding="0,0"
+                                    HeightRequest="24"
+                                    MinimumHeightRequest="24"
+                                    WidthRequest="60"
+                                    FontSize="12"
+                                    Command="{Binding ClearLapsCommand}" />
+                            </Grid>
+
+                            <CollectionView 
+                                ItemsSource="{Binding Laps}" 
+                                SelectionMode="None">
+
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
+                                </CollectionView.ItemsLayout>
+
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="viewmodels:LapTimeRowViewModel">
+                                        <Border StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 6"
+                                            Padding="5,0,0,0"
+                                            BackgroundColor="Transparent">
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsFastest}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FFF5CC, Dark=#011566}" />
+                                                </DataTrigger>
+                                            </Border.Triggers>
+
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                                <Label Grid.Column="0"
+                                                   Text="{Binding LapNumber}"
+                                                   FontSize="14"
+                                                   VerticalTextAlignment="Center"
+                                                   TextColor="{AppThemeBinding Light=DarkGray, Dark=LightGray}" />
+                                                <Label Grid.Column="1"
+                                                   Text="{Binding Time}"
+                                                   FontFamily="Atkinson"
+                                                   FontSize="14"
+                                                   VerticalTextAlignment="Center"
+                                                   FontAttributes="Bold" />
+                                                <Label Grid.Column="2"
+                                                   Text="{Binding ArrowIcon}"
+                                                   FontSize="16"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{Binding ArrowColor}"
+                                                   HorizontalTextAlignment="Center"
+                                                   VerticalTextAlignment="Center"
+                                                   WidthRequest="18" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <VerticalStackLayout Grid.Column="1">
+                        <Border 
+                            Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
+                            BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 8"
+                            MaximumHeightRequest="80"
+                            HeightRequest="80"
+                            VerticalOptions="Start"
+                            Padding="10">
+
+                            <VerticalStackLayout Spacing="2">
+                                <Label FontSize="11"
+                                       TextColor="{AppThemeBinding Light=DarkGray, Dark=LightGray}"
+                                       Text="Average"
+                                       HorizontalTextAlignment="Center">
+                                    
+                                </Label>
+                                <Label Text="{Binding AverageLapTime}"
+                                       FontFamily="Atkinson"
+                                       FontSize="24"
+                                       HorizontalTextAlignment="Center"
+                                       TextColor="LightGray" />
+                            </VerticalStackLayout>
+
+
+                        </Border>
+
+                    </VerticalStackLayout>
+
+                </Grid>
+
 
             </VerticalStackLayout>
         </ScrollView>

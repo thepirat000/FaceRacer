@@ -1,7 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
+
+#pragma warning disable CS8618
 
 namespace FaceRacer.Shared.Dto;
 
+[SuppressMessage("ReSharper", "InconsistentNaming")]
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
 public class SessionRacerData
 {
     /// <summary>
@@ -18,7 +23,7 @@ public class SessionRacerData
     /// <summary>
     /// Kart identifier/number as displayed in the monitor UI.
     /// </summary>
-    public string kart { get; set; }
+    public string? kart { get; set; }
 
     /// <summary>
     /// Kart color in hex without the leading '#', used for UI coloring (e.g. "99242c").
@@ -38,7 +43,7 @@ public class SessionRacerData
     /// <summary>
     /// Last lap time formatted as seconds.milliseconds (e.g. "34.804") or "-" when not available.
     /// </summary>
-    public string last_time { get; set; }
+    public string? last_time { get; set; }
 
     /// <summary>
     /// UI hint for a performance trend arrow. Typically "red" when <see cref="last_time"/> is slower than <see cref="best_time"/>,
@@ -49,7 +54,7 @@ public class SessionRacerData
     /// <summary>
     /// Best lap time formatted as seconds.milliseconds (e.g. "33.822") or "-" when not available.
     /// </summary>
-    public string best_time { get; set; }
+    public string? best_time { get; set; }
 
     /// <summary>
     /// Elapsed time (milliseconds) since the racer last crossed the start/finish line (time into the current lap).
@@ -108,7 +113,7 @@ public class SessionRacerData
     /// <summary>
     /// Full racer name (when the server indicates <c>should_use_full_name</c>).
     /// </summary>
-    public string full_name { get; set; }
+    public string? full_name { get; set; }
 
     /// <summary>
     /// Difference between <see cref="last_time"/> and <see cref="best_time"/> for the racer, in seconds (string, typically with 3 decimals).

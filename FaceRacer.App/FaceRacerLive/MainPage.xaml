@@ -223,6 +223,7 @@
 
             <!-- Session header -->
             <Border Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
+                    BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
                     StrokeThickness="1"
                     StrokeShape="RoundRectangle 8"
                     Padding="10,6"
@@ -267,13 +268,14 @@
 
             <!-- Racers list -->
             <Border Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
+                    BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
                     StrokeThickness="1"
                     StrokeShape="RoundRectangle 8"
                     Padding="8,6"
                     Margin="0,0,0,0"
                     HorizontalOptions="Fill">
 
-                <Grid HeightRequest="340">
+                <Grid HeightRequest="350">
                     <CollectionView ItemsSource="{Binding Racers}" SelectionMode="None">
                         <CollectionView.ItemsLayout>
                             <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
@@ -394,6 +396,7 @@
 
             <!--Console output--> 
             <Border Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
+                    BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
                     StrokeThickness="1"
                     StrokeShape="RoundRectangle 8"
                     Padding="5,0,5,0"
