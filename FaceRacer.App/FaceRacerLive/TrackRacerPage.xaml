@@ -52,17 +52,18 @@
         </Grid>
     </Shell.TitleView>
 
-    <VerticalStackLayout Padding="12" Spacing="12">
+    <VerticalStackLayout Padding="12" Spacing="8">
 
-        <Grid ColumnDefinitions="*" RowDefinitions="Auto,Auto" RowSpacing="6">
+        <Grid ColumnDefinitions="*" RowDefinitions="Auto,Auto" RowSpacing="6" BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}">
 
             <Label Grid.Row="0"
                    Text="{Binding SessionNumber, StringFormat='Session #{0}'}"
+                   LineBreakMode="TailTruncation"
+                   Margin="0,2,0,0"
                    FontSize="18"
                    FontAttributes="Bold"
-                   VerticalTextAlignment="End"
-                   HorizontalTextAlignment="Center"
-                   />
+                   VerticalTextAlignment="Center"
+                   HorizontalTextAlignment="Center" />
 
             <ProgressBar Grid.Row="1"
                          Grid.ColumnSpan="2"
@@ -109,22 +110,30 @@
 
                         </Grid>
 
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="14">
                             <Label Grid.Column="0"
-                                   Grid.ColumnSpan="2"
                                    Text="Lap"
                                    FontSize="14"
-                                   HorizontalTextAlignment="Center"
-                                   Padding="0,0,130,0"
+                                   HorizontalTextAlignment="Start"
+                                   Padding="0,0,0,0"
                                    TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
                                    VerticalTextAlignment="Center" />
 
                                 <Label Grid.Column="0"
-                                   Grid.ColumnSpan="2"
+                                   Grid.ColumnSpan="3"
                                    Text="{Binding LapText}"
                                    FontSize="28"
                                    FontAttributes="Bold"
                                    HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
+                                   VerticalTextAlignment="Center" />
+
+                            <Label Grid.Column="0"
+                                   Grid.ColumnSpan="3"
+                                   Text="{Binding PassedTimeText}"
+                                   FontSize="12"
+                                   HorizontalTextAlignment="End"
+                                   Padding="0,0,0,0"
                                    TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
                                    VerticalTextAlignment="Center" />
                         </Grid>
@@ -158,15 +167,15 @@
                                         </Label>
                                         <Label Grid.Column="0"
                                            Text="{Binding LastTime}"
-                                           Padding="4,25,0,0"
-                                           FontSize="27"
+                                           Padding="5,20,0,0"
+                                           FontSize="28"
                                            TextColor="White" 
                                            HorizontalTextAlignment="Center"
                                            />
                                         <Label Grid.Column="1"
                                                Text="{Binding ArrowIcon}"
                                                FontSize="20"
-                                               Padding="0,25,0,0"
+                                               Padding="0,18,0,0"
                                                FontAttributes="Bold"
                                                TextColor="{Binding ArrowColor}"
                                                HorizontalTextAlignment="Center"

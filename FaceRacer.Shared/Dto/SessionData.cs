@@ -28,6 +28,11 @@ public class SessionData
     public string footer_line { get; set; }
 
     /// <summary>
+    /// Elapsed time (milliseconds) since the racer last crossed the start/finish line (time into the current lap).
+    /// </summary>
+    public int? passed_time { get; set; }
+
+    /// <summary>
     /// Ranking mode used by the server for ordering and gaps (e.g., "time").
     /// </summary>
     public string session_ranking { get; set; }

@@ -511,7 +511,7 @@ namespace FaceRacerLive
 
         private void StartSnifferRun()
         {
-            var runName = $"fr_rec_{DateTime.Now:yyyyMMdd_HHmmss}";
+            var runName = $"rec_{DateTime.Now:yyyyMMdd_HHmmss}";
             _snifferRunFolder = Path.Combine(FileSystem.AppDataDirectory, "Record", runName);
 
             Directory.CreateDirectory(_snifferRunFolder);
@@ -570,7 +570,8 @@ namespace FaceRacerLive
 
             try
             {
-                var zipPath = folder.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + ".zip";
+                var zipFileName = $"rec_{_vm.LastSessionData?.SessionNumber}_{DateTime.Now:yyyyMMdd_HHmm}_{AppSettings.IntervalMillisecondsLiveMonitor}ms";
+                var zipPath = Path.Combine(Path.GetDirectoryName(folder)!, zipFileName) + ".zip";
 
                 if (File.Exists(zipPath))
                 {
@@ -579,7 +580,7 @@ namespace FaceRacerLive
 
                 await ZipFile.CreateFromDirectoryAsync(folder, zipPath, CompressionLevel.Fastest, includeBaseDirectory: false);
 
-                AppendConsole($"Rec: exported {Path.GetFileName(zipPath)}", Colors.LightGreen);
+                AppendConsole($"Rec: exported to {zipPath}", Colors.LightGreen);
 
                 await Share.Default.RequestAsync(new ShareFileRequest
                 {

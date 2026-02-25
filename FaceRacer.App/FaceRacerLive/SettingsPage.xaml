@@ -38,11 +38,10 @@
     <ScrollView>
         <VerticalStackLayout Padding="8" Spacing="0">
 
-            <Frame Padding="12,0,12,0"
-                   CornerRadius="12"
-                   HasShadow="False"
-                   BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
-                   BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
+            <Border Padding="12,0,12,0"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
+                    Background="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
 
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" RowDefinitions="Auto">
                     <Label Text="Simulation"
@@ -55,14 +54,13 @@
                             HorizontalOptions="End"
                             VerticalOptions="Center" />
                 </Grid>
-            </Frame>
+            </Border>
 
-            <Frame Padding="12,5,12,5"
-                   CornerRadius="12"
-                   HasShadow="False"
-                   BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
-                   BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#111827}"
-                   IsVisible="{Binding IsSimulation}">
+            <Border Padding="12,5,12,5"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
+                    Background="{AppThemeBinding Light=#FFFFFF, Dark=#111827}"
+                    IsVisible="{Binding IsSimulation}">
 
                 <VerticalStackLayout Style="{StaticResource FormSectionStyle}">
                     <Button Text="Select a zip file" Clicked="OnSelectSimulationZipClicked" />
@@ -71,13 +69,12 @@
                            FontSize="12"
                            TextColor="{AppThemeBinding Light=#374151, Dark=#D1D5DB}" />
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
-            <Frame Padding="12,5,12,5"
-                   CornerRadius="12"
-                   HasShadow="False"
-                   BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
-                   BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
+            <Border Padding="12,5,12,5"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
+                    Background="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
 
                 <VerticalStackLayout Style="{StaticResource FormSectionStyle}">
                     <Label Text="Monitor URL" Style="{StaticResource FormLabelStyle}" />
@@ -96,13 +93,12 @@
                         </Editor.Triggers>
                     </Editor>
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
-            <Frame Padding="12,5,12,5"
-                   CornerRadius="12"
-                   HasShadow="False"
-                   BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
-                   BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
+            <Border Padding="12,5,12,5"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
+                    Background="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
 
                 <VerticalStackLayout Style="{StaticResource FormSectionStyle}">
                     <Label Text="Ranking URL" Style="{StaticResource FormLabelStyle}" />
@@ -111,13 +107,12 @@
                             Keyboard="Url"
                             Style="{StaticResource FormEditorStyle}" />
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
-            <Frame Padding="12,0,12,0"
-                   CornerRadius="12"
-                   HasShadow="False"
-                   BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
-                   BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
+            <Border Padding="12,0,12,0"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
+                    Background="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
 
                 <VerticalStackLayout Style="{StaticResource FormSectionStyle}">
                     <Label Text="Auto track full name" Style="{StaticResource FormLabelStyle}" />
@@ -126,13 +121,12 @@
                            MaxLength="50"
                            Style="{StaticResource FormEntryStyle}" />
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
-            <Frame Padding="12,0,12,0"
-                   CornerRadius="12"
-                   HasShadow="False"
-                   BorderColor="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
-                   BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
+            <Border Padding="12,0,12,0"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
+                    Background="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
 
                 <VerticalStackLayout Style="{StaticResource FormSectionStyle}">
                     <Label Text="Live interval (ms)" Style="{StaticResource FormLabelStyle}" />
@@ -141,7 +135,7 @@
                            Placeholder="100 - 10000"
                            Style="{StaticResource FormEntryStyle}" />
                 </VerticalStackLayout>
-            </Frame>
+            </Border>
 
             <Label Text="{Binding ValidationError}"
                    TextColor="OrangeRed"

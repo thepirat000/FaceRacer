@@ -117,7 +117,7 @@ namespace FaceRacerLive.ViewModels
             }
 
             SessionTitle = "Session #" + (sessionData!.SessionNumber ?? "—");
-
+            
             // Baseline ordering (defines what "first match" means)
             var byPosition = (sessionData.body_data ?? new List<SessionRacerData>())
                 .OrderBy(r =>

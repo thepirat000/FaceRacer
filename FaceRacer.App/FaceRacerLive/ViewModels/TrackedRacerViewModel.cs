@@ -109,6 +109,12 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         private set;
     } = "—";
 
+    public string PassedTimeText
+    {
+        get;
+        private set;
+    } = "";
+
     public double LapProgress
     {
         get;
@@ -280,6 +286,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         Kart = racer.kart ?? "—";
         LapText = $"{racer.passed}/{racer.total}";
         LapProgress = ComputeLapProgress(racer.percentage);
+        PassedTimeText = racer.passed_time.HasValue ? TimeSpan.FromMilliseconds(racer.passed_time.Value).ToString("m\\:ss") : "";
         var best = racer.best_time ?? "-";
         var last = racer.last_time ?? "-";
 
@@ -309,6 +316,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         OnChanged(nameof(LastLapNumber));
         OnChanged(nameof(ArrowIcon));
         OnChanged(nameof(ArrowColor));
+        OnChanged(nameof(PassedTimeText));
 
         if (lastChanged)
         {
