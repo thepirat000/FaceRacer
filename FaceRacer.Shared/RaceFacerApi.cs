@@ -6,10 +6,6 @@ namespace FaceRacer.Shared;
 
 public class RaceFacerApi
 {
-    // Individual cart = 282 - Double = 283
-    private int _kartId;
-    private int _trackId;
-
     private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
     {
         PropertyNameCaseInsensitive = true
@@ -17,16 +13,14 @@ public class RaceFacerApi
 
     private readonly HttpClient _httpClient;
 
-    public RaceFacerApi(HttpClient httpClient, int kartId, int trackId)
+    public RaceFacerApi(HttpClient httpClient)
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        _kartId = kartId;
-        _trackId = trackId;
     }
 
-    public async Task<List<Ranking>> GetRankingByTimeAsync(Period period, CancellationToken cancellationToken)
+    public async Task<List<Ranking>> GetRankingByTimeAsync(int kartId, int trackId, Period period, CancellationToken cancellationToken)
     {
-        var url = $"https://www.racefacer.com/ajax/user-ranking-by-time-box?track_configuration_id={_trackId}&kart_id={_kartId}&period={period.ToString().ToLowerInvariant()}";
+        var url = $"https://www.racefacer.com/ajax/user-ranking-by-time-box?track_configuration_id={trackId}&kart_id={kartId}&period={period.ToString().ToLowerInvariant()}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
 
         request.Headers.Add("X-Requested-With", "XMLHttpRequest");
@@ -62,9 +56,9 @@ public class RaceFacerApi
         return result.data.ranking.Values.OrderBy(r => r.pos).ToList();
     }
 
-    public async Task<UserBestRankingByTimeResult> GetUserBestRankingByTime(int userId)
+    public async Task<UserBestRankingByTimeResult> GetUserBestRankingByTime(int kartId, int trackId, int userId)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"https://www.racefacer.com/ajax/user-best-ranking-by-time?user_id={userId}&track_configuration_id={_trackId}&kart_id={_kartId}");
+        var request = new HttpRequestMessage(HttpMethod.Get, $"https://www.racefacer.com/ajax/user-best-ranking-by-time?user_id={userId}&track_configuration_id={trackId}&kart_id={kartId}");
 
         request.Headers.Add("X-Requested-With", "XMLHttpRequest");
 
@@ -96,9 +90,9 @@ public class RaceFacerApi
         return result?.data;
     }
 
-    public async Task<SessionBoxResponse> GetUserSessionsAsync(int userId, int startFrom = 0)
+    public async Task<SessionBoxResponse> GetUserSessionsAsync(int kartId, int trackId, int userId, int startFrom = 0)
     {
-        var url = $"https://www.racefacer.com/ajax/sessions-boxes?user_id={userId}&track_configuration_id={_trackId}&period=all&start_from={startFrom}&only_victories=0&only_best_time_sessions=0&kart_id={_kartId}";
+        var url = $"https://www.racefacer.com/ajax/sessions-boxes?user_id={userId}&track_configuration_id={trackId}&period=all&start_from={startFrom}&only_victories=0&only_best_time_sessions=0&kart_id={kartId}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add("X-Requested-With", "XMLHttpRequest");
         var response = await _httpClient.SendAsync(request);

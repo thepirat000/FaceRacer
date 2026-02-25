@@ -171,7 +171,7 @@ public class TelegramBot
             period = Period.All;
         }
 
-        var rankings = (await _raceFacerApi.GetRankingByTimeAsync(period, cancellationToken)).Take(top).ToList();
+        var rankings = (await _raceFacerApi.GetRankingByTimeAsync(_appSettings.KartId, _appSettings.TrackId, period, cancellationToken)).Take(top).ToList();
 
         if (rankings.Count == 0)
         {
@@ -212,7 +212,7 @@ public class TelegramBot
             period = Period.All;
         }
 
-        var ranking = (await _raceFacerApi.GetRankingByTimeAsync(period, cancellationToken)).FirstOrDefault(r => r.pos == pos);
+        var ranking = (await _raceFacerApi.GetRankingByTimeAsync(_appSettings.KartId, _appSettings.TrackId, period, cancellationToken)).FirstOrDefault(r => r.pos == pos);
 
         if (ranking == null)
         {
@@ -256,7 +256,7 @@ public class TelegramBot
     // Handle message: /racer Id
     private async Task HandleMessageRacerInfo(ITelegramBotClient bot, Message message, int userId, CancellationToken cancellationToken)
     {
-        var best = await _raceFacerApi.GetUserBestRankingByTime(userId);
+        var best = await _raceFacerApi.GetUserBestRankingByTime(_appSettings.KartId, _appSettings.TrackId, userId);
 
         if (best == null)
         {
@@ -347,7 +347,7 @@ public class TelegramBot
     // Handle message: /sessions <userId> (responds with the user's sessions)
     private async Task HandleMessageSessions(ITelegramBotClient bot, Message message, int userId, int maxSessions, CancellationToken cancellationToken)
     {
-        var firstPage = await _raceFacerApi.GetUserSessionsAsync(userId, 0);
+        var firstPage = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, 0);
 
         if (firstPage.error || !firstPage.success)
         {
@@ -382,7 +382,7 @@ public class TelegramBot
 
                 var tasks = offsets.Select(async startFrom =>
                 {
-                    var page = await _raceFacerApi.GetUserSessionsAsync(userId, startFrom);
+                    var page = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, startFrom);
                     if (page.error || !page.success)
                     {
                         return (StartFrom: startFrom, Sessions: (IReadOnlyList<SessionInfo>)Array.Empty<SessionInfo>());
@@ -524,7 +524,7 @@ public class TelegramBot
     private async Task HandleCommandRacer(string args, ITelegramBotClient bot, Message message, CancellationToken cancellationToken)
     {
         var userId = int.Parse(args);
-        var best = await _raceFacerApi.GetUserBestRankingByTime(userId);
+        var best = await _raceFacerApi.GetUserBestRankingByTime(_appSettings.KartId, _appSettings.TrackId, userId);
         var profileNameMatch = ProfileNameMatchRegex.Match(best.data.profile_url);
         var profileName = profileNameMatch.Success ? profileNameMatch.Groups[1].Value : null;
 

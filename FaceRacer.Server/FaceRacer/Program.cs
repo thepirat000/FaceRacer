@@ -47,7 +47,7 @@ internal static class Program
 
         // Setup Business Logic
         var httpClient = new HttpClient();
-        var api = new RaceFacerApi(httpClient, appSettings.KartId, appSettings.TrackId);
+        var api = new RaceFacerApi(httpClient);
         var chart = new ChartLaps(httpClient);
         var bl = new Services.FaceRacer(appSettings, api);
 

@@ -14,12 +14,12 @@ public class FaceRacer
 {
     public readonly RaceFacerApi _raceFacerApi;
 
-    private int _trackId;
+    private AppSettings _appSettings;
 
     public FaceRacer(AppSettings appSettings, RaceFacerApi raceFacerApi)
     {
         _raceFacerApi = raceFacerApi;
-        _trackId = appSettings.TrackId;
+        _appSettings = appSettings;
     }
 
     public async Task<DateTime?> RunUpdateAsync(CancellationToken cancellationToken = default)
@@ -46,11 +46,11 @@ public class FaceRacer
                 continue;
             }
 
-            var existing = await dbContext.Rankings.FirstOrDefaultAsync(r => r.TrackId == _trackId && r.Period == period.ToString() && r.PeriodDate == periodDate, cancellationToken);
+            var existing = await dbContext.Rankings.FirstOrDefaultAsync(r => r.TrackId == _appSettings.TrackId && r.Period == period.ToString() && r.PeriodDate == periodDate, cancellationToken);
 
             if (existing == null)
             {
-                var rankingData = CreateRankingDataEntity(_trackId, period, periodDate, rankingFromApi);
+                var rankingData = CreateRankingDataEntity(_appSettings.TrackId, period, periodDate, rankingFromApi);
 
                 await dbContext.Rankings.AddAsync(rankingData, cancellationToken);
                     
@@ -77,7 +77,7 @@ public class FaceRacer
                     Id = Guid.CreateVersion7(),
                     Period = period.ToString(),
                     PeriodDate = periodDate,
-                    TrackId = _trackId,
+                    TrackId = _appSettings.TrackId,
                     NotificationDate = now,
                     RankingChanges = CreateRankingDataDetails(diffs)
                 };
@@ -157,11 +157,11 @@ public class FaceRacer
     {
         var tasks = new[]
         {
-            _raceFacerApi.GetRankingByTimeAsync(Period.Day, cancellationToken),
-            _raceFacerApi.GetRankingByTimeAsync(Period.Week, cancellationToken),
-            _raceFacerApi.GetRankingByTimeAsync(Period.Month, cancellationToken),
-            _raceFacerApi.GetRankingByTimeAsync(Period.Year, cancellationToken),
-            _raceFacerApi.GetRankingByTimeAsync(Period.All, cancellationToken)
+            _raceFacerApi.GetRankingByTimeAsync(_appSettings.KartId, _appSettings.TrackId, Period.Day, cancellationToken),
+            _raceFacerApi.GetRankingByTimeAsync(_appSettings.KartId, _appSettings.TrackId, Period.Week, cancellationToken),
+            _raceFacerApi.GetRankingByTimeAsync(_appSettings.KartId, _appSettings.TrackId, Period.Month, cancellationToken),
+            _raceFacerApi.GetRankingByTimeAsync(_appSettings.KartId, _appSettings.TrackId, Period.Year, cancellationToken),
+            _raceFacerApi.GetRankingByTimeAsync(_appSettings.KartId, _appSettings.TrackId, Period.All, cancellationToken)
         };
             
         var results = await Task.WhenAll(tasks);
