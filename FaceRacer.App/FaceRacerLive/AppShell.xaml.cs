@@ -8,7 +8,6 @@
 
             Routing.RegisterRoute(nameof(BigLandscapeTextPage), typeof(BigLandscapeTextPage));
             Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
-            Routing.RegisterRoute(nameof(MonitorRankingPage), typeof(MonitorRankingPage));
             Routing.RegisterRoute(nameof(TrackRacerPage), typeof(TrackRacerPage));
         }
 
@@ -21,10 +20,22 @@
 		private async void OnRankingClicked(object? sender, EventArgs e)
 		{
 			FlyoutIsPresented = false;
-			await GoToAsync(nameof(MonitorRankingPage));
-		}
 
-		private async void OnTrackedRacerClicked(object? sender, EventArgs e)
+            var url = AppSettings.MonitorRankingUrl;
+
+            await Launcher.Default.OpenAsync(url);
+        }
+
+        private async void OnCurrentClicked(object? sender, EventArgs e)
+        {
+            FlyoutIsPresented = false;
+
+            var url = AppSettings.MonitorCurrentSessionsDefault;
+
+            await Launcher.Default.OpenAsync(url);
+        }
+
+        private async void OnTrackedRacerClicked(object? sender, EventArgs e)
 		{
 			FlyoutIsPresented = false;
 			await GoToAsync(nameof(TrackRacerPage));

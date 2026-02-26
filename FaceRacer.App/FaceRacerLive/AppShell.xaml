@@ -18,6 +18,11 @@
               Clicked="OnTrackedRacerClicked"
               IconImageSource="running_track.png"/>
 
+    <MenuItem Text="Live"
+              IconImageSource="live.png"
+              Clicked="OnCurrentClicked" >
+    </MenuItem>
+
     <MenuItem Text="Ranking"
               IconImageSource="ranking.png"
               Clicked="OnRankingClicked" />

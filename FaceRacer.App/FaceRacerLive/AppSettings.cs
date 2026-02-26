@@ -15,6 +15,7 @@
 
         public const string CurrentSessionMonitorUrlDefault = "http://192.168.10.174/ajax/monitors/current-session-monitor";
         public const string MonitorRankingUrlDefault = "http://192.168.10.174/es/monitors/monitor-ranking";
+        public const string MonitorCurrentSessionsDefault = "http://192.168.10.174/es/monitors/monitor-current-sessions";
 
         public static bool IsSimulation
         {

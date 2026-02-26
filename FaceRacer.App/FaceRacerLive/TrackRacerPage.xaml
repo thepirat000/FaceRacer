@@ -119,10 +119,11 @@
 
                         <Grid ColumnDefinitions="*,*,*" ColumnSpacing="14">
                             <Label Grid.Column="0"
+                                   Grid.ColumnSpan="1"
                                    Text="Lap"
                                    FontSize="14"
-                                   HorizontalTextAlignment="Start"
-                                   Padding="0,0,0,0"
+                                   HorizontalTextAlignment="Center"
+                                   Padding="40,0,0,0"
                                    TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
                                    VerticalTextAlignment="Center" />
 
@@ -135,12 +136,12 @@
                                    TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
                                    VerticalTextAlignment="Center" />
 
-                            <Label Grid.Column="0"
-                                   Grid.ColumnSpan="3"
+                            <Label Grid.Column="2"
+                                   Grid.ColumnSpan="1"
                                    Text="{Binding PassedTimeText}"
                                    FontSize="12"
-                                   HorizontalTextAlignment="End"
-                                   Padding="0,0,0,0"
+                                   HorizontalTextAlignment="Center"
+                                   Padding="-40,0,0,0"
                                    TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
                                    VerticalTextAlignment="Center" />
                         </Grid>
