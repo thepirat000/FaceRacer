@@ -1,12 +1,22 @@
+
+using Microsoft.Maui.Controls;
 using FaceRacerLive.Services;
 
 namespace FaceRacerLive;
 
+[QueryProperty(nameof(CustomTrackByName), "trackByName")]
 public partial class TrackRacerPage : ContentPage
 {
     private readonly RaceMonitorState _state;
     private bool _syncingLive;
     private bool _syncingAuto;
+    private string? _customTrackByName;
+
+    public string? CustomTrackByName
+    {
+        get { return _customTrackByName; }
+        set { _customTrackByName = value; }
+    }
 
     public TrackRacerPage()
     {
@@ -32,7 +42,9 @@ public partial class TrackRacerPage : ContentPage
 
         _state.AutoTrackChanged += OnAutoTrackChangedFromState;
 
-        _state.Tracked.UpdateFromSession(_state.Panel.LastSessionData ?? new FaceRacer.Shared.Dto.SessionData(), _state.Panel.TrackedRacerFullName);
+        // Use custom track name if provided, else use global tracked racer
+        var trackedName = _customTrackByName ?? _state.Panel.TrackedRacerFullName;
+        _state.Tracked.UpdateFromSession(_state.Panel.LastSessionData ?? new FaceRacer.Shared.Dto.SessionData(), trackedName);
     }
 
     protected override void OnDisappearing()

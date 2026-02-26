@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using FaceRacerLive.Services;
 
 namespace FaceRacerLive.ViewModels;
 
@@ -88,6 +89,10 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         AppSettings.CurrentSessionMonitorUrl = (CurrentSessionMonitorUrl ?? string.Empty).Trim();
         AppSettings.AutoTrackFullName = (AutoTrackFullName ?? string.Empty).Trim();
         AppSettings.MonitorRankingUrl = (MonitorRankingUrl ?? string.Empty).Trim();
+
+        // Update the shared RaceMonitorPanelViewModel
+        var state = Application.Current!.Handler!.MauiContext!.Services.GetService<RaceMonitorState>();
+        state!.Panel.AutoTrackByName = AppSettings.AutoTrackFullName;
 
         return true;
     }

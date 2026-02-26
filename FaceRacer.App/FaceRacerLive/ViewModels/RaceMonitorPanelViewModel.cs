@@ -1,13 +1,26 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 using FaceRacer.Shared.Dto;
 
 namespace FaceRacerLive.ViewModels
 {
     internal sealed class RaceMonitorPanelViewModel : INotifyPropertyChanged
     {
+
+        public ICommand OnRacerDoubleTappedCommand { get; }
         public ObservableCollection<RacerRowViewModel> Racers { get; } = new();
+
+        public RaceMonitorPanelViewModel()
+        {
+            OnRacerDoubleTappedCommand = new Command<string>(OnRacerDoubleTapped);
+        }
+
+        private void OnRacerDoubleTapped(string fullName)
+        {
+            AutoTrackByName = fullName;
+        }
 
         private readonly Dictionary<string, RacerRowViewModel> _racerByFullName = new(StringComparer.Ordinal);
 

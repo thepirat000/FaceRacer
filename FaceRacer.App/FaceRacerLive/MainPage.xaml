@@ -284,7 +284,10 @@
                     HorizontalOptions="Fill">
 
                 <Grid HeightRequest="350">
-                    <CollectionView ItemsSource="{Binding Racers}" SelectionMode="None">
+                    <CollectionView ItemsSource="{Binding Racers}" 
+                                    SelectionMode="None" 
+                                    VerticalOptions="FillAndExpand"
+                                    ItemSizingStrategy="MeasureFirstItem">
                         <CollectionView.ItemsLayout>
                             <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
                         </CollectionView.ItemsLayout>
@@ -300,17 +303,14 @@
                                             <Setter Property="BackgroundColor"
                                                     Value="{AppThemeBinding Light=#FFF5CC, Dark=#011566}" />
                                         </DataTrigger>
-
                                         <DataTrigger TargetType="Border" Binding="{Binding IsHighlighted}" Value="False">
                                             <Setter Property="BackgroundColor" Value="Transparent" />
                                         </DataTrigger>
                                     </Border.Triggers>
-
                                     <Grid RowDefinitions="Auto,Auto"
                                           ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto"
                                           ColumnSpacing="5"
                                           RowSpacing="1">
-
                                         <Label Grid.Row="0"
                                                Grid.Column="0"
                                                Text="{Binding PositionText}"
@@ -319,7 +319,6 @@
                                                WidthRequest="28"
                                                HorizontalTextAlignment="Start"
                                                VerticalTextAlignment="Center" />
-
                                         <Label Grid.Row="0"
                                                Grid.Column="1"
                                                Text="{Binding FullName}"
@@ -332,7 +331,6 @@
                                                 </DataTrigger>
                                             </Label.Triggers>
                                         </Label>
-
                                         <Label Grid.Row="0"
                                                Grid.Column="2"
                                                Text="{Binding Kart}"
@@ -340,7 +338,6 @@
                                                TextColor="{Binding KartColor}"
                                                HorizontalTextAlignment="End"
                                                VerticalTextAlignment="Center" />
-
                                         <Label Grid.Row="0"
                                                Grid.Column="3"
                                                Text="{Binding LapText}"
@@ -349,7 +346,6 @@
                                                TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
                                                HorizontalTextAlignment="End"
                                                VerticalTextAlignment="Center" />
-
                                         <Label Grid.Row="0"
                                                Grid.Column="4"
                                                Text="{Binding LastTime}"
@@ -363,7 +359,6 @@
                                                 </DataTrigger>
                                             </Label.Triggers>
                                         </Label>
-
                                         <Label Grid.Row="0"
                                                Grid.Column="5"
                                                Text="{Binding BestTime}"
@@ -377,7 +372,6 @@
                                                 </DataTrigger>
                                             </Label.Triggers>
                                         </Label>
-
                                         <Label Grid.Row="0"
                                                Grid.Column="6"
                                                Text="{Binding ArrowIcon}"
@@ -387,7 +381,6 @@
                                                HorizontalTextAlignment="Center"
                                                VerticalTextAlignment="Center"
                                                WidthRequest="14" />
-
                                         <ProgressBar Grid.Row="1"
                                                      Grid.ColumnSpan="7"
                                                      HeightRequest="2"
@@ -395,6 +388,9 @@
                                                      ProgressColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
                                                      BackgroundColor="{AppThemeBinding Light=#E0E0E0, Dark=#303030}" />
                                     </Grid>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer NumberOfTapsRequired="2" Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.OnRacerDoubleTappedCommand}" CommandParameter="{Binding FullName}" />
+                                    </Border.GestureRecognizers>
                                 </Border>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>

@@ -93,10 +93,6 @@ namespace FaceRacerLive
         {
             base.OnAppearing();
 
-            // Settings can change while this page is not visible.
-            // Refresh tracked racer target (used by RaceMonitorPanelViewModel) when coming back.
-            _vm.AutoTrackByName = AppSettings.AutoTrackFullName;
-
             InitializeRaceMonitorApi();
         }
 
