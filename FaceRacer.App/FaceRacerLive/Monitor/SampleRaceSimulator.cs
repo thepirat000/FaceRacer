@@ -1,7 +1,5 @@
 using FaceRacer.Shared.Dto;
 
-using System.Threading;
-
 namespace FaceRacerLive.Monitor;
 
 public class SampleRaceSimulator
@@ -13,9 +11,14 @@ public class SampleRaceSimulator
     {
         EnsureSimulationArray();
 
-        var sessionData = _simulationArray![_index];
+        if (_index + 1 > _simulationArray!.Count)
+        {
+            return null;
+        }
 
-        _index = (_index + 1) % _simulationArray.Count;
+        var sessionData = _simulationArray[_index];
+
+        _index++;
 
         return sessionData;
     }

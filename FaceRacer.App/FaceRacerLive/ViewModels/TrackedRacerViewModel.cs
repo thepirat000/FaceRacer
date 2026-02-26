@@ -8,7 +8,10 @@ namespace FaceRacerLive.ViewModels;
 
 internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
 {
+
     public ObservableCollection<LapTimeRowViewModel> Laps { get; } = new();
+
+    private readonly Services.RaceMonitorState _raceMonitorState;
 
     public ICommand ClearLapsCommand { get; }
 
@@ -39,17 +42,30 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         }
     }
 
-    public TrackedRacerViewModel()
+    private bool isLiveEnabled;
+    public bool IsLiveEnabled
     {
+        get => isLiveEnabled;
+        set
+        {
+            if (isLiveEnabled != value)
+            {
+                isLiveEnabled = value;
+                OnChanged(nameof(IsLiveEnabled));
+            }
+        }
+    }
+
+    public TrackedRacerViewModel(Services.RaceMonitorState raceMonitorState)
+    {
+        _raceMonitorState = raceMonitorState;
         ClearLapsCommand = new Command(ClearLaps);
     }
 
     public void ClearLaps()
     {
         Laps.Clear();
-
         _lastRecordedRacer = null;
-
         AverageLapTime = "-";
         BestLapNumber = null;
         LastLapNumber = null;
@@ -58,7 +74,6 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         LapText = "-";
         BestDeltaNextText = "-";
         BestDeltaPrevText = "-";
-
         OnChanged(nameof(Laps));
         OnChanged(nameof(AverageLapTime));
         OnChanged(nameof(BestLapNumber));
@@ -67,6 +82,16 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         OnChanged(nameof(LastTime));
         OnChanged(nameof(LapText));
         OnChanged(nameof(LapTimesGraphDrawable));
+    }
+
+    public void LoadLapsForRacer(string fullName)
+    {
+        Laps.Clear();
+        foreach (var lap in _raceMonitorState.GetLapsForRacer(fullName))
+        {
+            Laps.Add(lap);
+        }
+        RefreshLap();
     }
 
     public string? SessionNumber
@@ -227,12 +252,16 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
             return;
         }
 
+
         var racer = sessionData.body_data.FirstOrDefault(r => string.Equals(r.full_name, trackedFullName, StringComparison.Ordinal));
         if (racer is null)
         {
             SetNoRacer();
             return;
         }
+
+        // Load laps for this racer from the shared state
+        LoadLapsForRacer(racer.full_name ?? "-");
 
         // Compute best time deltas for next and previous racer
         BestDeltaNextText = "-";
@@ -328,8 +357,6 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
             StartHotFlag(ref _bestTimeHotCts, nameof(IsBestTimeHot), v => IsBestTimeHot = v, 3);
         }
 
-        TryAppendLap(racer, sessionData.SessionNumber);
-
         // Derive lap numbers for labels from collected laps.
         LastLapNumber = Laps.LastOrDefault()?.LapNumber;
         BestLapNumber = Laps.FirstOrDefault(l => l.IsFastest)?.LapNumber;
@@ -374,89 +401,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         _lastRecordedRacer = null;
         OnChanged(nameof(Laps));
     }
-
-    private void TryAppendLap(SessionRacerData racer, string? sessionNumber)
-    {
-        var passed = racer.passed;
-        if (passed <= 0)
-        {
-            return;
-        }
-        
-        var completedLapNumber = Math.Max(1, passed - 1);
-
-        if (_lastRecordedSession is not null && sessionNumber is not null && !string.Equals(_lastRecordedSession, sessionNumber, StringComparison.Ordinal))
-        {
-            ClearForNewSession(sessionNumber);
-        }
-        
-        if (_lastRecordedRacer is not null && !string.Equals(_lastRecordedRacer, racer.full_name, StringComparison.Ordinal))
-        {
-            // Tracked racer changed within same session: keep info panel, reset laps list.
-            Laps.Clear();
-        }
-
-        var lastTime = racer.last_time;
-        if (string.IsNullOrWhiteSpace(lastTime) || lastTime == "-")
-        {
-            return;
-        }
-
-        ClearLapsFromLapNumber(completedLapNumber);
-
-        // If we already recorded a lap equal to this number, do not duplicate.
-        if (Laps.Any(l => l.LapNumber == completedLapNumber))
-        {
-            _lastRecordedSession = sessionNumber;
-            _lastRecordedRacer = racer.full_name;
-            return;
-        }
-
-        // Calculate the difference between this lap time but the previous lap, if available, to show it as a delta in the UI.
-        string diffPreviousText = "";
-        if (Laps.Count > 0 && TryParseLapTimeSeconds(Laps[^1].Time, out var secondsPreviousLap) && TryParseLapTimeSeconds(lastTime, out var secondsCurrentLap))
-        {
-            var diffPrevious = secondsCurrentLap - secondsPreviousLap;
-            diffPreviousText = diffPrevious.ToString("+0.000;-0.000", System.Globalization.CultureInfo.InvariantCulture);
-        }
-        
-
-        Laps.Add(new LapTimeRowViewModel(completedLapNumber, lastTime, diffPreviousText, ArrowIcon, ArrowColor));
-
-        RefreshLap();
-
-        _lastRecordedSession = sessionNumber;
-        _lastRecordedRacer = racer.full_name;
-    }
-
-    private void ClearLapsFromLapNumber(int fromLapNumber)
-    {
-        if (Laps.Count == 0)
-        {
-            return;
-        }
-
-        var maxLap = Laps[^1].LapNumber;
-        if (maxLap < fromLapNumber)
-        {
-            return;
-        }
-
-        var removedAny = false;
-        for (var i = Laps.Count - 1; i >= 0; i--)
-        {
-            if (Laps[i].LapNumber > fromLapNumber)
-            {
-                Laps.RemoveAt(i);
-                removedAny = true;
-            }
-        }
-
-        if (removedAny)
-        {
-            RefreshLap();
-        }
-    }
+    
 
     private static double TryGetLapTimeSeconds(string time, double defaultValue = 0)
     {
@@ -468,7 +413,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         return defaultValue;
     }
 
-    private static bool TryParseLapTimeSeconds(string time, out double seconds)
+    public static bool TryParseLapTimeSeconds(string time, out double seconds)
     {
         seconds = 0;
 

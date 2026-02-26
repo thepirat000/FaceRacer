@@ -380,6 +380,8 @@ namespace FaceRacerLive
             await Task.Yield();
 
             _state.IsLive = e.Value;
+            _state.LiveChanged?.Invoke(e.Value);
+            _state.Tracked.IsLiveEnabled = e.Value;
 
             if (e.Value)
             {
@@ -439,9 +441,19 @@ namespace FaceRacerLive
             {
                 try
                 {
-                    var sessions = SimulationSessionStore.TryGetSessions();
-                    var hasSimulation = sessions is { Count: > 0 };
+                    var hasSimulation = SimulationSessionStore.HasSimulation();
                     var session = hasSimulation ? _raceMonitorSimulator!.GetCurrentSession() : await _raceMonitorApi!.GetCurrentSession(ct);
+
+                    if (hasSimulation && session == null)
+                    {
+                        AppendConsole("Live race simulation ended.", Colors.LightYellow);
+                        _state.Tracked.IsLiveEnabled = false;
+                        LiveRaceCheckBox.IsChecked = false;
+                        return;
+                    }
+
+                    // Update centralized lap history for all racers
+                    _state.UpdateSessionLaps(session!);
 
                     await MainThread.InvokeOnMainThreadAsync(() =>
                     {
@@ -465,7 +477,7 @@ namespace FaceRacerLive
                 {
                     await MainThread.InvokeOnMainThreadAsync(() =>
                     {
-                        AppendConsole($"Race monitor error: {ex.Message}", Colors.OrangeRed);
+                        AppendConsole($"Race monitor {ex.GetType().Name}: {ex.Message}", Colors.OrangeRed);
                     });
 
                     await Task.Delay(TimeSpan.FromSeconds(10), ct);

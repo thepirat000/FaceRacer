@@ -43,6 +43,11 @@ internal static class SimulationSessionStore
         }
     }
 
+    public static bool HasSimulation()
+    {
+        return _sessions?.Count > 0;
+    }
+
     public static string? TryGetZipFileName()
     {
         lock (Gate)

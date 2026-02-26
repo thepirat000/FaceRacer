@@ -18,7 +18,10 @@
                    FontAttributes="Bold" />
 
             <HorizontalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
-                <CheckBox x:Name="AutoTrackCheckBox" VerticalOptions="Center" CheckedChanged="OnAutoTrackCheckedChanged" Margin="-6,0,0,0" />
+                <CheckBox x:Name="AutoTrackCheckBox" 
+                          VerticalOptions="Center" 
+                          CheckedChanged="OnAutoTrackCheckedChanged" 
+                          Margin="-6,0,0,0" />
                 <Label Text="Auto" FontSize="12" Margin="-10,0,0,0" VerticalOptions="Center" >
                     <Label.Triggers>
                         <DataTrigger TargetType="Label"
@@ -34,7 +37,11 @@
             </HorizontalStackLayout>
 
             <HorizontalStackLayout Grid.Column="2" Spacing="6" VerticalOptions="Center">
-                <CheckBox x:Name="LiveCheckBox" VerticalOptions="Center" CheckedChanged="OnLiveCheckedChanged" Margin="-6,0,0,0" />
+                <CheckBox x:Name="LiveCheckBox" 
+                          VerticalOptions="Center" 
+                          CheckedChanged="OnLiveCheckedChanged" 
+                          Margin="-6,0,0,0"
+                          IsChecked="{Binding IsLiveEnabled, Mode=TwoWay}"/>
                 <Label Text="Live" FontSize="12" Margin="-10,0,0,0" VerticalOptions="Center" >
                     <Label.Triggers>
                         <DataTrigger TargetType="Label"
