@@ -74,7 +74,7 @@ namespace FaceRacerLive
 
             if (_micToSpeaker is null)
             {
-                MicStatusLabel.Text = "Mic → Speaker not available on this platform.";
+                AppendConsole("Mic → Speaker not available on this platform.");
                 MicToggleBtn.IsEnabled = false;
                 PttBtn.IsEnabled = false;
             }
@@ -191,24 +191,19 @@ namespace FaceRacerLive
             {
                 if (_micToSpeaker.IsRunning)
                 {
-                    MicStatusLabel.Text = "Stop";
                     MicToggleBtn.BackgroundColor = Color.FromArgb("#ac99ea");
                     await _micToSpeaker.StopAsync();
-                    MicStatusLabel.Text = "Idle";
                 }
                 else
                 {
-                    MicStatusLabel.Text = "Start";
                     MicToggleBtn.BackgroundColor = Colors.LightCoral;
                     await _micToSpeaker.StartAsync(CancellationToken.None);
-                    MicStatusLabel.Text = "Running";
                 }
 
                 UpdateMicButtons();
             }
             catch (Exception ex)
             {
-                MicStatusLabel.Text = ex.Message;
                 UpdateMicButtons();
             }
             finally
@@ -233,7 +228,6 @@ namespace FaceRacerLive
             }
 
             MicToggleBtn.IsEnabled = false;
-            MicStatusLabel.Text = "PTT: Running...";
 
             try
             {
@@ -242,7 +236,6 @@ namespace FaceRacerLive
             }
             catch (Exception ex)
             {
-                MicStatusLabel.Text = ex.Message;
                 UpdateMicButtons();
                 MicToggleBtn.IsEnabled = true;
             }
@@ -261,12 +254,9 @@ namespace FaceRacerLive
                 return;
             }
 
-            MicStatusLabel.Text = "PTT: Stopping...";
-
             try
             {
                 await _micToSpeaker.StopAsync();
-                MicStatusLabel.Text = "Idle";
                 UpdateMicButtons();
             }
             finally
@@ -284,16 +274,6 @@ namespace FaceRacerLive
 
             MicToggleBtn.Text = _micToSpeaker.IsRunning ? "Mic Off" : "Mic On";
             PttBtn.BackgroundColor = _micToSpeaker.IsRunning ? Colors.LightCoral : Color.FromArgb("#ac99ea");
-        }
-
-        private async void OnPresetClicked(object? sender, EventArgs e)
-        {
-            if (sender is not Button { CommandParameter: string preset } || string.IsNullOrWhiteSpace(preset))
-            {
-                return;
-            }
-
-            await SpeakTextAndClearAsync(preset);
         }
 
         private async Task SpeakTextAndClearAsync(string? text)

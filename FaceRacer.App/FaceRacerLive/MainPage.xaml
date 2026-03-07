@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:FaceRacerLive" 
+             xmlns:local="clr-namespace:FaceRacerLive"
              xmlns:viewmodels="clr-namespace:FaceRacerLive.ViewModels"
              x:Class="FaceRacerLive.MainPage"
              x:DataType="viewmodels:RaceMonitorPanelViewModel">
@@ -65,7 +65,7 @@
                        Margin="-10,0,0,0"
                        Text="Rec."
                        FontSize="12"
-                       VerticalOptions="Center" >
+                       VerticalOptions="Center">
                     <Label.Triggers>
                         <DataTrigger TargetType="Label"
                                      Binding="{Binding Source={x:Reference SnifferCheckBox}, Path=IsChecked}"
@@ -114,322 +114,274 @@
         </Grid>
     </Shell.TitleView>
 
-    <ScrollView>
-        <VerticalStackLayout Padding="10,16,10,0"
-                             Spacing="12">
+    <Grid Padding="10,16,10,0"
+          RowDefinitions="Auto,Auto,Auto,*,Auto"
+          RowSpacing="12">
 
-            <Border Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="10,0"
-                    Margin="0,-10,0,0"
-                    HorizontalOptions="Fill">
+        <Border Grid.Row="0"
+                Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 8"
+                Padding="10,0"
+                Margin="0,-10,0,0"
+                HorizontalOptions="Fill">
 
-                <Editor x:Name="InputTextEditor"
-                        Placeholder=""
-                        AutoSize="TextChanges"
-                        MaxLength="96"
-                        FontSize="16"
-                        HeightRequest="60"
-                        Margin="0"
-                        BackgroundColor="Transparent"
-                        HorizontalOptions="Fill" 
-                        Unfocused="OnInputTextEditorUnfocused" />
-            </Border>
+            <Editor x:Name="InputTextEditor"
+                    Placeholder=""
+                    AutoSize="TextChanges"
+                    MaxLength="96"
+                    FontSize="16"
+                    HeightRequest="60"
+                    Margin="0"
+                    BackgroundColor="Transparent"
+                    HorizontalOptions="Fill"
+                    Unfocused="OnInputTextEditorUnfocused" />
+        </Border>
 
-            <!-- MIC controls -->
-            <Grid ColumnDefinitions="*,auto,auto,auto,auto"
-                  ColumnSpacing="12">
+        <!-- MIC controls -->
+        <Grid Grid.Row="1"
+              ColumnDefinitions="*,auto,auto,auto,auto"
+              ColumnSpacing="12">
 
-                <Button x:Name="SendTextBtn"
-                        Text="Send"
-                        Grid.Column="0"
-                        SemanticProperties.Hint="Send text"
-                        Clicked="OnSendTextClicked"
-                        HorizontalOptions="Fill" />
+            <Button x:Name="SendTextBtn"
+                    Text="Send"
+                    Grid.Column="0"
+                    SemanticProperties.Hint="Send text"
+                    Clicked="OnSendTextClicked"
+                    HorizontalOptions="Fill" />
 
-                <Button x:Name="TrackRacerBtn"
-                        Text="Track"
-                        Grid.Column="1"
-                        Clicked="OnTrackClicked"
-                        HorizontalOptions="Fill" />
+            <Button x:Name="TrackRacerBtn"
+                    Text="Track"
+                    Grid.Column="1"
+                    Clicked="OnTrackClicked"
+                    HorizontalOptions="Fill" />
 
-                <Button x:Name="ShowTextBtn"
-                        Text="Show"
-                        Grid.Column="2"
-                        Clicked="OnShowTextClicked"
-                        HorizontalOptions="Fill" />
+            <Button x:Name="ShowTextBtn"
+                    Text="Show"
+                    Grid.Column="2"
+                    Clicked="OnShowTextClicked"
+                    HorizontalOptions="Fill" />
 
-                <Button x:Name="MicToggleBtn"
-                        Grid.Column="3"
-                        Text="Mic On"
-                        FontSize="11"
-                        Clicked="OnMicToggleClicked" />
+            <Button x:Name="MicToggleBtn"
+                    Grid.Column="3"
+                    Text="Mic On"
+                    FontSize="11"
+                    Clicked="OnMicToggleClicked" />
 
-                <Button x:Name="PttBtn"
-                        Grid.Column="4"
-                        Text="PTT"
-                        Pressed="OnPttPressed"
-                        Released="OnPttReleased"
-                        IsVisible="False" />
+            <Button x:Name="PttBtn"
+                    Grid.Column="4"
+                    Text="PTT"
+                    Pressed="OnPttPressed"
+                    Released="OnPttReleased"
+                    IsVisible="False" />
+        </Grid>
+
+        <!-- Session header -->
+        <Border Grid.Row="2"
+                Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
+                BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 8"
+                Padding="10,6"
+                Margin="0,0,0,-12"
+                HorizontalOptions="Fill">
+
+            <Grid ColumnDefinitions="Auto,*,Auto"
+                  RowDefinitions="Auto,Auto"
+                  ColumnSpacing="10"
+                  VerticalOptions="Center">
+
+                <Label Grid.Column="0"
+                       Text="{Binding SessionTitle}"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                       LineBreakMode="TailTruncation" />
+
+                <Label Grid.Column="1"
+                       Text="{Binding KartsText}"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light=DarkGray, Dark=LightGray}"
+                       HorizontalTextAlignment="Center"
+                       LineBreakMode="NoWrap" />
+
+                <Label Grid.Column="2"
+                       Text="{Binding SessionStatusText}"
+                       FontSize="14"
+                       FontAttributes="Bold"
+                       TextColor="{Binding SessionStatusColor}"
+                       HorizontalTextAlignment="End"
+                       LineBreakMode="NoWrap" />
+
+                <ProgressBar Grid.Row="1"
+                             Grid.ColumnSpan="3"
+                             HeightRequest="1"
+                             Margin="0,5,0,0"
+                             Progress="{Binding SessionProgress}"
+                             ProgressColor="{Binding SessionProgressColor}"
+                             BackgroundColor="{AppThemeBinding Light=#E0E0E0, Dark=#303030}" />
             </Grid>
+        </Border>
 
-            <Label x:Name="MicStatusLabel" Text="Idle" IsVisible="False" />
+        <!-- Racers list (fills remaining space) -->
+        <Border Grid.Row="3"
+                Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
+                BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 8"
+                Padding="8,6"
+                Margin="0,0,0,0"
+                HorizontalOptions="Fill"
+                VerticalOptions="Fill">
 
-            <!-- Presets Buttons (hidden) -->
-            <HorizontalStackLayout Spacing="8" HorizontalOptions="Center" IsVisible="False">
-                <Button Text="🔵"
-                        Clicked="OnPresetClicked"
-                        CommandParameter="Próxima limpia"
-                        Padding="0"
-                        WidthRequest="45"
-                        HeightRequest="36"
-                        MinimumHeightRequest="36"
-                        FontSize="13"
-                        CornerRadius="6" />
+            <Grid VerticalOptions="Fill">
+                <CollectionView ItemsSource="{Binding Racers}"
+                                SelectionMode="None"
+                                VerticalOptions="Fill"
+                                ItemSizingStrategy="MeasureFirstItem">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                    </CollectionView.ItemsLayout>
 
-                <Button Text="🟡🔴"
-                        Clicked="OnPresetClicked"
-                        CommandParameter="Amarilla precaución"
-                        Padding="0"
-                        WidthRequest="45"
-                        HeightRequest="36"
-                        MinimumHeightRequest="36"
-                        FontSize="11"
-                        CornerRadius="6" />
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:RacerRowViewModel">
+                            <Border StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 6"
+                                    Padding="0,0,3,0"
+                                    BackgroundColor="Transparent">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsHighlighted}" Value="True">
+                                        <Setter Property="BackgroundColor"
+                                                Value="{AppThemeBinding Light=#FFF5CC, Dark=#011566}" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsHighlighted}" Value="False">
+                                        <Setter Property="BackgroundColor" Value="Transparent" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Grid RowDefinitions="Auto,Auto"
+                                      ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto"
+                                      ColumnSpacing="5"
+                                      RowSpacing="1">
+                                    <Label Grid.Row="0"
+                                           Grid.Column="0"
+                                           Text="{Binding PositionText}"
+                                           FontSize="11"
+                                           FontAttributes="Bold"
+                                           WidthRequest="28"
+                                           HorizontalTextAlignment="Start"
+                                           VerticalTextAlignment="Center" />
+                                    <Label Grid.Row="0"
+                                           Grid.Column="1"
+                                           Text="{Binding FullName}"
+                                           FontSize="11"
+                                           LineBreakMode="TailTruncation"
+                                           VerticalTextAlignment="Center">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsHighlighted}" Value="True">
+                                                <Setter Property="FontAttributes" Value="Bold" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                    <Label Grid.Row="0"
+                                           Grid.Column="2"
+                                           Text="{Binding Kart}"
+                                           FontSize="11"
+                                           TextColor="{Binding KartColor}"
+                                           HorizontalTextAlignment="End"
+                                           VerticalTextAlignment="Center" />
+                                    <Label Grid.Row="0"
+                                           Grid.Column="3"
+                                           Text="{Binding LapText}"
+                                           FontSize="13"
+                                           FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
+                                           HorizontalTextAlignment="End"
+                                           VerticalTextAlignment="Center" />
+                                    <Label Grid.Row="0"
+                                           Grid.Column="4"
+                                           Text="{Binding LastTime}"
+                                           TextColor="{AppThemeBinding Light=DarkGray, Dark=#adadad}"
+                                           FontSize="12"
+                                           HorizontalTextAlignment="End"
+                                           VerticalTextAlignment="Center">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsHighlighted}" Value="True">
+                                                <Setter Property="FontSize" Value="14" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                    <Label Grid.Row="0"
+                                           Grid.Column="5"
+                                           Text="{Binding BestTime}"
+                                           FontSize="14"
+                                           FontAttributes="Bold"
+                                           HorizontalTextAlignment="End"
+                                           VerticalTextAlignment="Center">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsHighlighted}" Value="True">
+                                                <Setter Property="FontSize" Value="15" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                    <Label Grid.Row="0"
+                                           Grid.Column="6"
+                                           Text="{Binding ArrowIcon}"
+                                           FontSize="14"
+                                           FontAttributes="Bold"
+                                           TextColor="{Binding ArrowColor}"
+                                           HorizontalTextAlignment="Center"
+                                           VerticalTextAlignment="Center"
+                                           WidthRequest="14" />
+                                    <ProgressBar Grid.Row="1"
+                                                 Grid.ColumnSpan="7"
+                                                 HeightRequest="2"
+                                                 Progress="{Binding LapProgress}"
+                                                 ProgressColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
+                                                 BackgroundColor="{AppThemeBinding Light=#E0E0E0, Dark=#303030}" />
+                                </Grid>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer NumberOfTapsRequired="2"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.OnRacerDoubleTappedCommand}"
+                                                          CommandParameter="{Binding FullName}" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+        </Border>
 
-                <Button Text="🟡🔵"
-                        Clicked="OnPresetClicked"
-                        CommandParameter="Amarilla limpia"
-                        Padding="0"
-                        WidthRequest="45"
-                        HeightRequest="36"
-                        MinimumHeightRequest="36"
-                        FontSize="11"
-                        CornerRadius="6" />
+        <!--Console output-->
+        <Border Grid.Row="4"
+                Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
+                BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 8"
+                Padding="5,0,5,0"
+                Margin="0,0,0,0"
+                HorizontalOptions="Fill">
 
-                <Button Text="🟢"
-                        Clicked="OnPresetClicked"
-                        CommandParameter="Verde"
-                        Padding="0"
-                        WidthRequest="45"
-                        HeightRequest="36"
-                        MinimumHeightRequest="36"
-                        FontSize="13"
-                        CornerRadius="6" />
+            <Grid>
+                <ScrollView x:Name="ConsoleScrollView"
+                            HeightRequest="105"
+                            Orientation="Vertical"
+                            Scrolled="OnConsoleScrolled">
+                    <VerticalStackLayout x:Name="ConsoleStack" Spacing="1" />
+                </ScrollView>
 
-                <Button Text="⚫"
-                        Clicked="OnPresetClicked"
-                        CommandParameter="Negra"
-                        Padding="0"
-                        WidthRequest="45"
-                        HeightRequest="36"
-                        MinimumHeightRequest="36"
-                        FontSize="14"
-                        CornerRadius="6" />
-            </HorizontalStackLayout>
+                <Button Text="Clear"
+                        Padding="0,0"
+                        FontSize="12"
+                        HeightRequest="24"
+                        MinimumHeightRequest="24"
+                        WidthRequest="60"
+                        Clicked="OnConsoleClearClicked"
+                        HorizontalOptions="End"
+                        VerticalOptions="Start"
+                        Margin="0,4,0,0"
+                        ZIndex="10" />
+            </Grid>
+        </Border>
 
-            <!-- Session header -->
-            <Border Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
-                    BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="10,6"
-                    Margin="0,0,0,-12"
-                    HorizontalOptions="Fill">
-
-                <Grid ColumnDefinitions="Auto,*,Auto"
-                      RowDefinitions="Auto,Auto"
-                      ColumnSpacing="10"
-                      VerticalOptions="Center">
-
-                    <Label Grid.Column="0"
-                           Text="{Binding SessionTitle}"
-                           FontSize="14"
-                           TextColor="{AppThemeBinding Light=Black, Dark=White}"
-                           LineBreakMode="TailTruncation" />
-
-                    <Label Grid.Column="1"
-                           Text="{Binding KartsText}"
-                           FontSize="14"
-                           TextColor="{AppThemeBinding Light=DarkGray, Dark=LightGray}"
-                           HorizontalTextAlignment="Center"
-                           LineBreakMode="NoWrap" />
-
-                    <Label Grid.Column="2"
-                           Text="{Binding SessionStatusText}"
-                           FontSize="14"
-                           FontAttributes="Bold"
-                           TextColor="{Binding SessionStatusColor}"
-                           HorizontalTextAlignment="End"
-                           LineBreakMode="NoWrap" />
-
-                    <ProgressBar Grid.Row="1"
-                                 Grid.ColumnSpan="3"
-                                 HeightRequest="1"
-                                 Margin="0,5,0,0"
-                                 Progress="{Binding SessionProgress}"
-                                 ProgressColor="{Binding SessionProgressColor}"
-                                 BackgroundColor="{AppThemeBinding Light=#E0E0E0, Dark=#303030}" />
-                </Grid>
-            </Border>
-
-            <!-- Racers list -->
-            <Border Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
-                    BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="8,6"
-                    Margin="0,0,0,0"
-                    HorizontalOptions="Fill">
-
-                <Grid HeightRequest="360">
-                    <CollectionView ItemsSource="{Binding Racers}" 
-                                    SelectionMode="None" 
-                                    VerticalOptions="FillAndExpand"
-                                    ItemSizingStrategy="MeasureFirstItem">
-                        <CollectionView.ItemsLayout>
-                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
-                        </CollectionView.ItemsLayout>
-
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="viewmodels:RacerRowViewModel">
-                                <Border StrokeThickness="0"
-                                        StrokeShape="RoundRectangle 6"
-                                        Padding="0,0,3,0"
-                                        BackgroundColor="Transparent">
-                                    <Border.Triggers>
-                                        <DataTrigger TargetType="Border" Binding="{Binding IsHighlighted}" Value="True">
-                                            <Setter Property="BackgroundColor"
-                                                    Value="{AppThemeBinding Light=#FFF5CC, Dark=#011566}" />
-                                        </DataTrigger>
-                                        <DataTrigger TargetType="Border" Binding="{Binding IsHighlighted}" Value="False">
-                                            <Setter Property="BackgroundColor" Value="Transparent" />
-                                        </DataTrigger>
-                                    </Border.Triggers>
-                                    <Grid RowDefinitions="Auto,Auto"
-                                          ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto"
-                                          ColumnSpacing="5"
-                                          RowSpacing="1">
-                                        <Label Grid.Row="0"
-                                               Grid.Column="0"
-                                               Text="{Binding PositionText}"
-                                               FontSize="11"
-                                               FontAttributes="Bold"
-                                               WidthRequest="28"
-                                               HorizontalTextAlignment="Start"
-                                               VerticalTextAlignment="Center" />
-                                        <Label Grid.Row="0"
-                                               Grid.Column="1"
-                                               Text="{Binding FullName}"
-                                               FontSize="11"
-                                               LineBreakMode="TailTruncation"
-                                               VerticalTextAlignment="Center">
-                                            <Label.Triggers>
-                                                <DataTrigger TargetType="Label" Binding="{Binding IsHighlighted}" Value="True">
-                                                    <Setter Property="FontAttributes" Value="Bold" />
-                                                </DataTrigger>
-                                            </Label.Triggers>
-                                        </Label>
-                                        <Label Grid.Row="0"
-                                               Grid.Column="2"
-                                               Text="{Binding Kart}"
-                                               FontSize="11"
-                                               TextColor="{Binding KartColor}"
-                                               HorizontalTextAlignment="End"
-                                               VerticalTextAlignment="Center" />
-                                        <Label Grid.Row="0"
-                                               Grid.Column="3"
-                                               Text="{Binding LapText}"
-                                               FontSize="13"
-                                               FontAttributes="Bold"
-                                               TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
-                                               HorizontalTextAlignment="End"
-                                               VerticalTextAlignment="Center" />
-                                        <Label Grid.Row="0"
-                                               Grid.Column="4"
-                                               Text="{Binding LastTime}"
-                                               TextColor="{AppThemeBinding Light=DarkGray, Dark=#adadad}"
-                                               FontSize="12"
-                                               HorizontalTextAlignment="End"
-                                               VerticalTextAlignment="Center">
-                                            <Label.Triggers>
-                                                <DataTrigger TargetType="Label" Binding="{Binding IsHighlighted}" Value="True">
-                                                    <Setter Property="FontSize" Value="14" />
-                                                </DataTrigger>
-                                            </Label.Triggers>
-                                        </Label>
-                                        <Label Grid.Row="0"
-                                               Grid.Column="5"
-                                               Text="{Binding BestTime}"
-                                               FontSize="14"
-                                               FontAttributes="Bold"
-                                               HorizontalTextAlignment="End"
-                                               VerticalTextAlignment="Center">
-                                            <Label.Triggers>
-                                                <DataTrigger TargetType="Label" Binding="{Binding IsHighlighted}" Value="True">
-                                                    <Setter Property="FontSize" Value="15" />
-                                                </DataTrigger>
-                                            </Label.Triggers>
-                                        </Label>
-                                        <Label Grid.Row="0"
-                                               Grid.Column="6"
-                                               Text="{Binding ArrowIcon}"
-                                               FontSize="14"
-                                               FontAttributes="Bold"
-                                               TextColor="{Binding ArrowColor}"
-                                               HorizontalTextAlignment="Center"
-                                               VerticalTextAlignment="Center"
-                                               WidthRequest="14" />
-                                        <ProgressBar Grid.Row="1"
-                                                     Grid.ColumnSpan="7"
-                                                     HeightRequest="2"
-                                                     Progress="{Binding LapProgress}"
-                                                     ProgressColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
-                                                     BackgroundColor="{AppThemeBinding Light=#E0E0E0, Dark=#303030}" />
-                                    </Grid>
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer NumberOfTapsRequired="2" Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainPage}}, Path=BindingContext.OnRacerDoubleTappedCommand}" CommandParameter="{Binding FullName}" />
-                                    </Border.GestureRecognizers>
-                                </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </Grid>
-            </Border>
-
-            <!--Console output--> 
-            <Border Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
-                    BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
-                    StrokeThickness="1"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="5,0,5,0"
-                    Margin="0,0,0,0"
-                    HorizontalOptions="Fill">
-
-                <Grid>
-                    <ScrollView x:Name="ConsoleScrollView"
-                                HeightRequest="105"
-                                Orientation="Vertical"
-                                Scrolled="OnConsoleScrolled">
-                        <VerticalStackLayout x:Name="ConsoleStack" Spacing="1" />
-                    </ScrollView>
-
-                    <Button Text="Clear"
-                            Padding="0,0"
-                            FontSize="12"
-                            HeightRequest="24"
-                            MinimumHeightRequest="24"
-                            WidthRequest="60"
-                            Clicked="OnConsoleClearClicked"
-                            HorizontalOptions="End"
-                            VerticalOptions="Start"
-                            Margin="0,4,0,0"
-                            ZIndex="10" />
-                </Grid>
-            </Border>
-
-        </VerticalStackLayout>
-    </ScrollView>
+    </Grid>
 
 </ContentPage>
