@@ -112,6 +112,12 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         private set;
     } = "—";
 
+    public Color? PositionColor
+    {
+        get;
+        private set;
+    } = Colors.Gray;
+
     public string FullName
     {
         get;
@@ -311,6 +317,16 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         }
         HasRacer = true;
         PositionText = $"#{racer.position}";
+        if (!string.IsNullOrWhiteSpace(racer.position) && int.TryParse(racer.position, out var pos))
+        {
+            PositionColor = pos switch
+            {
+                1 => Colors.LimeGreen,
+                2 => Colors.Gold,
+                3 => Colors.Gold,
+                _ => Colors.OrangeRed
+            };
+        }
         FullName = racer.full_name ?? "-";
         Kart = racer.kart ?? "—";
         LapText = $"{racer.passed}/{racer.total}";
@@ -331,6 +347,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
 
         OnChanged(nameof(HasRacer));
         OnChanged(nameof(PositionText));
+        OnChanged(nameof(PositionColor));
         OnChanged(nameof(FullName));
         OnChanged(nameof(Kart));
         OnChanged(nameof(KartColor));

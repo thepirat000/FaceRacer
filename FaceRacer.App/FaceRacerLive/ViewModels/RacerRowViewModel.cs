@@ -26,7 +26,8 @@ internal sealed class RacerRowViewModel : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FullName)));
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Kart)));
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(KartColor)));
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LapText)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Lap)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TotalLaps)));
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastTime)));
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BestTime)));
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ArrowIcon)));
@@ -48,7 +49,8 @@ internal sealed class RacerRowViewModel : INotifyPropertyChanged
     public string FullName => _model.full_name;
     public string Kart => _model.kart;
     public Color KartColor => Color.TryParse("#" + _model.kart_color, out var c) ? c : Colors.Gray;
-    public string LapText => $"{_model.passed}/{_model.total}";
+    public int Lap => _model.passed;
+    public int TotalLaps => _model.total;
     public string LastTime => _model.last_time ?? "-";
     public string BestTime => _model.best_time ?? "-";
 

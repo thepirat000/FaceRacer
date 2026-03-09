@@ -264,7 +264,7 @@
                                     <Label Grid.Row="0"
                                            Grid.Column="0"
                                            Text="{Binding PositionText}"
-                                           FontSize="11"
+                                           FontSize="13"
                                            FontAttributes="Bold"
                                            WidthRequest="28"
                                            HorizontalTextAlignment="Start"
@@ -284,35 +284,41 @@
                                     <Label Grid.Row="0"
                                            Grid.Column="2"
                                            Text="{Binding Kart}"
-                                           FontSize="11"
+                                           FontSize="13"
                                            TextColor="{Binding KartColor}"
                                            HorizontalTextAlignment="End"
                                            VerticalTextAlignment="Center" />
                                     <Label Grid.Row="0"
                                            Grid.Column="3"
-                                           Text="{Binding LapText}"
-                                           FontSize="13"
                                            FontAttributes="Bold"
                                            TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
                                            HorizontalTextAlignment="End"
-                                           VerticalTextAlignment="Center" />
+                                           VerticalTextAlignment="Center">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{Binding Lap}" FontSize="13" />
+                                                <Span Text="/" FontSize="9" />
+                                                <Span Text="{Binding TotalLaps}" FontSize="9" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
                                     <Label Grid.Row="0"
                                            Grid.Column="4"
                                            Text="{Binding LastTime}"
                                            TextColor="{AppThemeBinding Light=DarkGray, Dark=#adadad}"
-                                           FontSize="12"
+                                           FontSize="11"
                                            HorizontalTextAlignment="End"
                                            VerticalTextAlignment="Center">
                                         <Label.Triggers>
                                             <DataTrigger TargetType="Label" Binding="{Binding IsHighlighted}" Value="True">
-                                                <Setter Property="FontSize" Value="14" />
+                                                <Setter Property="FontSize" Value="11" />
                                             </DataTrigger>
                                         </Label.Triggers>
                                     </Label>
                                     <Label Grid.Row="0"
                                            Grid.Column="5"
                                            Text="{Binding BestTime}"
-                                           FontSize="14"
+                                           FontSize="15"
                                            FontAttributes="Bold"
                                            HorizontalTextAlignment="End"
                                            VerticalTextAlignment="Center">

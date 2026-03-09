@@ -111,10 +111,10 @@
 
                             <Label Grid.Column="2"
                                    Text="{Binding PositionText}"
+                                   TextColor="{Binding PositionColor}"
                                    FontSize="24"
                                    FontAttributes="Bold"
                                    VerticalTextAlignment="Center" />
-
                         </Grid>
 
                         <Grid ColumnDefinitions="*,*,*" ColumnSpacing="14">
@@ -191,7 +191,7 @@
                                                WidthRequest="18" />
                                     </Grid>
                                     <Label Text="{Binding BestDeltaPrevText}"
-                                           FontSize="10"
+                                           FontSize="13"
                                            TextColor="#d42237"
                                            LineBreakMode="TailTruncation"
                                            HorizontalTextAlignment="Center"
@@ -227,10 +227,10 @@
                                            FontSize="32"
                                            FontAttributes="Bold"
                                            HorizontalTextAlignment="Center"
-                                           TextColor="Lime" />
+                                           TextColor="LimeGreen" />
                                     <Label Text="{Binding BestDeltaNextText}"
-                                           FontSize="10"
-                                           TextColor="Lime"
+                                           FontSize="13"
+                                           TextColor="LimeGreen"
                                            LineBreakMode="TailTruncation"
                                            HorizontalTextAlignment="Center"
                                            Margin="0,-4,0,0" />
