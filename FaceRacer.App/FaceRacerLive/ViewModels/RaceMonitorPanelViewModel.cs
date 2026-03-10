@@ -8,7 +8,6 @@ namespace FaceRacerLive.ViewModels
 {
     internal sealed class RaceMonitorPanelViewModel : INotifyPropertyChanged
     {
-
         public ICommand OnRacerDoubleTappedCommand { get; }
         public ObservableCollection<RacerRowViewModel> Racers { get; } = new();
 
@@ -121,7 +120,7 @@ namespace FaceRacerLive.ViewModels
             var sessionProgress = Math.Clamp(sessionData.current_high_lap.GetValueOrDefault() / (double)sessionData.total_laps_for_all.GetValueOrDefault(sessionData.current_high_lap.GetValueOrDefault(1)), 0, 100);
 
             SessionProgress = sessionProgress;
-            SessionProgressColor = sessionProgress < 0.5 ? Colors.LimeGreen : sessionProgress < 0.85 ? Colors.Gold : Colors.Red;
+            SessionProgressColor = sessionProgress < 0.5 ? Colors.LimeGreen : sessionProgress < 0.85 ? Color.FromArgb("#FBBF24") : Color.FromArgb("#FB7185");
 
             if (racerCount == 0)
             {

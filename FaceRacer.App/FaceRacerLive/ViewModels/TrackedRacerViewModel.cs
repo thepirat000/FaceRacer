@@ -29,6 +29,21 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
             }
         }
     }
+
+    private string? _nextFullName;
+    public string? NextFullName
+    {
+        get => _nextFullName;
+        private set
+        {
+            if (_nextFullName != value)
+            {
+                _nextFullName = value;
+                OnChanged(nameof(NextFullName));
+            }
+        }
+    }
+
     public string BestDeltaPrevText
     {
         get => _bestDeltaPrevText;
@@ -38,6 +53,20 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
             {
                 _bestDeltaPrevText = value;
                 OnChanged(nameof(BestDeltaPrevText));
+            }
+        }
+    }
+
+    private string? _prevFullName;
+    public string? PrevFullName
+    {
+        get => _prevFullName;
+        private set
+        {
+            if (_prevFullName != value)
+            {
+                _prevFullName = value;
+                OnChanged(nameof(PrevFullName));
             }
         }
     }
@@ -66,23 +95,46 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
     {
         Laps.Clear();
         _lastRecordedRacer = null;
-        AverageLapTime = "-";
+        AverageLapTime = "";
         BestLapNumber = null;
         LastLapNumber = null;
-        LastTime = "-";
-        BestTime = "-";
-        Lap = "-";
-        BestDeltaNextText = "-";
-        BestDeltaPrevText = "-";
-        OnChanged(nameof(Laps));
+        LastTime = "";
+        BestTime = "";
+        Lap = "";
+        BestDeltaNextText = "";
+        BestDeltaPrevText = "";
+        PrevFullName = "";
+        NextFullName = "";
+        SessionNumber = "";
+        AverageLapTime = "";
+        TotalKarts = null;
+        PositionText = "-";
+        TotalLaps = "";
         OnChanged(nameof(AverageLapTime));
-        OnChanged(nameof(BestLapNumber));
-        OnChanged(nameof(LastLapNumber));
-        OnChanged(nameof(BestTime));
-        OnChanged(nameof(LastTime));
+        OnChanged(nameof(HasRacer));
+        OnChanged(nameof(PositionText));
+        OnChanged(nameof(PositionColor));
+        OnChanged(nameof(FullName));
+        OnChanged(nameof(Kart));
+        OnChanged(nameof(KartColor));
         OnChanged(nameof(Lap));
         OnChanged(nameof(TotalLaps));
-        OnChanged(nameof(LapTimesGraphDrawable));
+        OnChanged(nameof(LapProgress));
+        OnChanged(nameof(SessionNumber));
+        OnChanged(nameof(TotalKarts));
+        OnChanged(nameof(SessionProgress));
+        OnChanged(nameof(SessionProgressColor));
+        OnChanged(nameof(BestTime));
+        OnChanged(nameof(LastTime));
+        OnChanged(nameof(BestLapNumber));
+        OnChanged(nameof(LastLapNumber));
+        OnChanged(nameof(ArrowIcon));
+        OnChanged(nameof(ArrowColor));
+        OnChanged(nameof(PassedTimeText));
+        OnChanged(nameof(BestDeltaPrevText));
+        OnChanged(nameof(PrevFullName));
+        OnChanged(nameof(BestDeltaNextText));
+        OnChanged(nameof(NextFullName));
     }
 
     public void LoadLapsForRacer(string fullName)
@@ -96,6 +148,12 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
     }
 
     public string? SessionNumber
+    {
+        get;
+        private set;
+    }
+
+    public int? TotalKarts
     {
         get;
         private set;
@@ -265,6 +323,8 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
             return;
         }
 
+        var karts = sessionData.body_data.Count;
+        TotalKarts = karts;
 
         var racer = sessionData.body_data.FirstOrDefault(r => string.Equals(r.full_name, trackedFullName, StringComparison.Ordinal));
         if (racer is null)
@@ -298,12 +358,19 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
                 if (nextValid)
                 {
                     string diff = (trackedValid && nextValid) ? (nextBestSeconds - trackedBest).ToString("+0.000;-0.000", System.Globalization.CultureInfo.InvariantCulture) : "-";
-                    BestDeltaNextText = $"{diff} | #{next.position} | {next.full_name}";
+                    BestDeltaNextText = $"{diff} | #{next.position}";
+                    NextFullName = next.full_name;
                 }
                 else
                 {
                     BestDeltaNextText = "-";
+                    NextFullName = "-";
                 }
+            }
+            else
+            {
+                BestDeltaNextText = "-";
+                NextFullName = "-";
             }
 
             // Previous racer (position-1)
@@ -314,12 +381,19 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
                 if (prevValid)
                 {
                     string diff = (trackedValid && prevValid) ? (prevBestSeconds - trackedBest).ToString("+0.000;-0.000", System.Globalization.CultureInfo.InvariantCulture) : "-";
-                    BestDeltaPrevText = $"{diff} | #{prev.position} | {prev.full_name}";
+                    BestDeltaPrevText = $"{diff} | #{prev.position}";
+                    PrevFullName = prev.full_name;
                 }
                 else
                 {
-                    BestDeltaNextText = "-";
+                    BestDeltaPrevText = "-";
+                    PrevFullName = "-";
                 }
+            }
+            else
+            {
+                BestDeltaPrevText = "-";
+                PrevFullName = "-";
             }
         }
         HasRacer = true;
@@ -353,6 +427,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         ArrowIcon = racer.arrow == "green" ? "▲" : racer.arrow == "red" ? "▼" : "·";
         ArrowColor = racer.arrow == "green" ? Colors.LimeGreen : racer.arrow == "red" ? Colors.OrangeRed : Colors.Gray;
 
+        OnChanged(nameof(AverageLapTime));
         OnChanged(nameof(HasRacer));
         OnChanged(nameof(PositionText));
         OnChanged(nameof(PositionColor));
@@ -363,6 +438,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         OnChanged(nameof(TotalLaps));
         OnChanged(nameof(LapProgress));
         OnChanged(nameof(SessionNumber));
+        OnChanged(nameof(TotalKarts));
         OnChanged(nameof(SessionProgress));
         OnChanged(nameof(SessionProgressColor));
         OnChanged(nameof(BestTime));
@@ -372,6 +448,10 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         OnChanged(nameof(ArrowIcon));
         OnChanged(nameof(ArrowColor));
         OnChanged(nameof(PassedTimeText));
+        OnChanged(nameof(BestDeltaPrevText));
+        OnChanged(nameof(PrevFullName));
+        OnChanged(nameof(BestDeltaNextText));
+        OnChanged(nameof(NextFullName));
 
         if (lastChanged)
         {
@@ -399,7 +479,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
             100);
 
         SessionProgress = sessionProgress;
-        SessionProgressColor = sessionProgress < 0.5 ? Colors.LimeGreen : sessionProgress < 0.85 ? Colors.Gold : Colors.Red;
+        SessionProgressColor = sessionProgress < 0.5 ? Colors.LimeGreen : sessionProgress < 0.85 ? Color.FromArgb("#FBBF24") : Color.FromArgb("#FB7185");
     }
 
     private static double ComputeLapProgress(string? percentage)
@@ -427,7 +507,6 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         _lastRecordedRacer = null;
         OnChanged(nameof(Laps));
     }
-    
 
     private static double TryGetLapTimeSeconds(string time, double defaultValue = 0)
     {
