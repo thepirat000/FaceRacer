@@ -28,6 +28,7 @@ public partial class SettingsPage : ContentPage
     private void OnResetClicked(object? sender, EventArgs e)
     {
         AppSettings.IsSimulation = false;
+        AppSettings.MoveTrackedRacerToTheTop = false;
         AppSettings.IntervalMillisecondsLiveMonitor = AppSettings.IntervalMillisecondsLiveMonitorDefault;
         AppSettings.CurrentSessionMonitorUrl = AppSettings.CurrentSessionMonitorUrlDefault;
         AppSettings.AutoTrackFullName = AppSettings.DefaultAutoTrackFullName;
@@ -73,6 +74,13 @@ public partial class SettingsPage : ContentPage
         await PickAndLoadSimulationZipAsync(turnOffSimulationOnCancelOrFailure: true);
     }
 
+    private async void OnMoveTrackedRacerToTheTopToggled(object? sender, ToggledEventArgs e)
+    {
+        AppSettings.MoveTrackedRacerToTheTop = e.Value;
+
+        _vm.TrySaveToAppSettings();
+    }
+    
     private async void OnSelectSimulationZipClicked(object? sender, EventArgs e)
     {
         if (!_vm.IsSimulation)

@@ -71,7 +71,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         LastLapNumber = null;
         LastTime = "-";
         BestTime = "-";
-        LapText = "-";
+        Lap = "-";
         BestDeltaNextText = "-";
         BestDeltaPrevText = "-";
         OnChanged(nameof(Laps));
@@ -80,7 +80,8 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         OnChanged(nameof(LastLapNumber));
         OnChanged(nameof(BestTime));
         OnChanged(nameof(LastTime));
-        OnChanged(nameof(LapText));
+        OnChanged(nameof(Lap));
+        OnChanged(nameof(TotalLaps));
         OnChanged(nameof(LapTimesGraphDrawable));
     }
 
@@ -134,11 +135,17 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
 
     public Color KartColor => Color.TryParse("#" + _kartColor, out var c) ? c : Colors.Gray;
 
-    public string LapText
+    public string Lap
     {
         get;
         private set;
     } = "—";
+
+    public string TotalLaps
+    {
+        get;
+        private set;
+    }
 
     public string PassedTimeText
     {
@@ -329,7 +336,8 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         }
         FullName = racer.full_name ?? "-";
         Kart = racer.kart ?? "—";
-        LapText = $"{racer.passed}/{racer.total}";
+        Lap = $"{racer.passed}";
+        TotalLaps = $"{racer.total}";
         LapProgress = ComputeLapProgress(racer.percentage);
         PassedTimeText = racer.passed_time.HasValue ? TimeSpan.FromMilliseconds(racer.passed_time.Value).ToString("m\\:ss") : "";
         var best = racer.best_time ?? "-";
@@ -351,7 +359,8 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         OnChanged(nameof(FullName));
         OnChanged(nameof(Kart));
         OnChanged(nameof(KartColor));
-        OnChanged(nameof(LapText));
+        OnChanged(nameof(Lap));
+        OnChanged(nameof(TotalLaps));
         OnChanged(nameof(LapProgress));
         OnChanged(nameof(SessionNumber));
         OnChanged(nameof(SessionProgress));

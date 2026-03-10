@@ -122,26 +122,32 @@
                                    Grid.ColumnSpan="1"
                                    Text="Lap"
                                    FontSize="14"
-                                   HorizontalTextAlignment="Center"
-                                   Padding="40,0,0,0"
+                                   HorizontalTextAlignment="Start"
+                                   Padding="0,13,0,0"
                                    TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
                                    VerticalTextAlignment="Center" />
 
-                                <Label Grid.Column="0"
+                            <Label Grid.Column="0"
                                    Grid.ColumnSpan="3"
-                                   Text="{Binding LapText}"
-                                   FontSize="28"
                                    FontAttributes="Bold"
                                    HorizontalTextAlignment="Center"
                                    TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
-                                   VerticalTextAlignment="Center" />
+                                   VerticalTextAlignment="Center">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding Lap}" FontSize="28" />
+                                        <Span Text="/" FontSize="15" />
+                                        <Span Text="{Binding TotalLaps}" FontSize="15" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
 
                             <Label Grid.Column="2"
                                    Grid.ColumnSpan="1"
                                    Text="{Binding PassedTimeText}"
                                    FontSize="12"
-                                   HorizontalTextAlignment="Center"
-                                   Padding="-40,0,0,0"
+                                   HorizontalTextAlignment="End"
+                                   Padding="0,13,0,0"
                                    TextColor="{AppThemeBinding Light=#665f4d, Dark=#e6d6ac}"
                                    VerticalTextAlignment="Center" />
                         </Grid>

@@ -148,20 +148,23 @@ namespace FaceRacerLive.ViewModels
             RefreshTrackedRacerAndUi();
 
             // Move tracked racer to the top (only that one), keep the rest by position
-            if (!string.IsNullOrWhiteSpace(TrackedRacerFullName))
+            if (AppSettings.MoveTrackedRacerToTheTop)
             {
-                var sorted = Racers
-                    .OrderByDescending(r => string.Equals(r.FullName, TrackedRacerFullName, StringComparison.Ordinal))
-                    .ThenBy(r => int.TryParse(r.PositionText.TrimStart('#'), out var pos) ? pos : int.MaxValue)
-                    .ToList();
-
-                for (var i = 0; i < sorted.Count; i++)
+                if (!string.IsNullOrWhiteSpace(TrackedRacerFullName))
                 {
-                    var item = sorted[i];
-                    var currentIndex = Racers.IndexOf(item);
-                    if (currentIndex != i && currentIndex >= 0)
+                    var sorted = Racers
+                        .OrderByDescending(r => string.Equals(r.FullName, TrackedRacerFullName, StringComparison.Ordinal))
+                        .ThenBy(r => int.TryParse(r.PositionText.TrimStart('#'), out var pos) ? pos : int.MaxValue)
+                        .ToList();
+
+                    for (var i = 0; i < sorted.Count; i++)
                     {
-                        Racers.Move(currentIndex, i);
+                        var item = sorted[i];
+                        var currentIndex = Racers.IndexOf(item);
+                        if (currentIndex != i && currentIndex >= 0)
+                        {
+                            Racers.Move(currentIndex, i);
+                        }
                     }
                 }
             }

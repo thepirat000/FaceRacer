@@ -322,7 +322,7 @@ namespace FaceRacerLive
             {
                 Text = noDateTime ? message : $"[{DateTime.Now:HH\\:mm\\:ss}]: {message}",
                 TextColor = color,
-                FontSize = 10,
+                FontSize = 9,
                 LineBreakMode = LineBreakMode.CharacterWrap
             };
 

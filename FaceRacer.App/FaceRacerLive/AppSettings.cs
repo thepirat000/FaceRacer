@@ -4,6 +4,8 @@
     {
         private static bool _isSimulationRuntime;
 
+        
+
         private const string IntervalMillisecondsLiveMonitorKey = "AppSettings.IntervalMillisecondsLiveMonitor";
         private const string CurrentSessionMonitorUrlKey = "AppSettings.CurrentSessionMonitorUrl";
         private const string AutoTrackFullNameKey = "AppSettings.AutoTrackFullName";
@@ -17,10 +19,18 @@
         public const string MonitorRankingUrlDefault = "http://192.168.10.174/es/monitors/monitor-ranking";
         public const string MonitorCurrentSessionsDefault = "http://192.168.10.174/es/monitors/monitor-current-sessions";
 
+        private static bool _moveTrackedRacerToTheTop = false;
+
         public static bool IsSimulation
         {
             get => _isSimulationRuntime;
             set => _isSimulationRuntime = value;
+        }
+
+        public static bool MoveTrackedRacerToTheTop
+        {
+            get => _moveTrackedRacerToTheTop;
+            set => _moveTrackedRacerToTheTop = value;
         }
 
         public static int IntervalMillisecondsLiveMonitor

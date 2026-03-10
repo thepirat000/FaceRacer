@@ -13,6 +13,13 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         set => Set(ref _isSimulation, value);
     }
 
+    private bool _moveTrackedRacerToTheTop;
+    public bool MoveTrackedRacerToTheTop
+    {
+        get => _moveTrackedRacerToTheTop;
+        set => Set(ref _moveTrackedRacerToTheTop, value);
+    }
+
     private string _intervalMillisecondsLiveMonitorText = string.Empty;
     public string IntervalMillisecondsLiveMonitorText
     {
@@ -58,6 +65,7 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
     public void LoadFromAppSettings()
     {
         IsSimulation = AppSettings.IsSimulation;
+        MoveTrackedRacerToTheTop = AppSettings.MoveTrackedRacerToTheTop;
         IntervalMillisecondsLiveMonitorText = AppSettings.IntervalMillisecondsLiveMonitor.ToString();
         CurrentSessionMonitorUrl = AppSettings.CurrentSessionMonitorUrl;
         AutoTrackFullName = AppSettings.AutoTrackFullName;
@@ -85,6 +93,7 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         }
 
         AppSettings.IsSimulation = IsSimulation;
+        AppSettings.MoveTrackedRacerToTheTop = MoveTrackedRacerToTheTop;
         AppSettings.IntervalMillisecondsLiveMonitor = ms;
         AppSettings.CurrentSessionMonitorUrl = (CurrentSessionMonitorUrl ?? string.Empty).Trim();
         AppSettings.AutoTrackFullName = (AutoTrackFullName ?? string.Empty).Trim();
