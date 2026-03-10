@@ -45,7 +45,7 @@ internal sealed class RacerRowViewModel : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsHighlighted)));
     }
 
-    public string PositionText => $"#{_model.position}";
+    public string PositionText => _model.position;
     public string FullName => _model.full_name;
     public string Kart => _model.kart;
     public Color KartColor => Color.TryParse("#" + _model.kart_color, out var c) ? c : Colors.Gray;

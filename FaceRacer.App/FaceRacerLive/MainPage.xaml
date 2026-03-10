@@ -266,7 +266,7 @@
                                            Text="{Binding PositionText}"
                                            FontSize="13"
                                            FontAttributes="Bold"
-                                           WidthRequest="28"
+                                           WidthRequest="22"
                                            HorizontalTextAlignment="Start"
                                            VerticalTextAlignment="Center" />
                                     <Label Grid.Row="0"
