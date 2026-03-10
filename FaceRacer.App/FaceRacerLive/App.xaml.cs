@@ -7,6 +7,9 @@ namespace FaceRacerLive
         public App()
         {
             InitializeComponent();
+
+            // Force dark theme for the app
+            Application.Current!.UserAppTheme = AppTheme.Dark;
         }
 
         protected override Window CreateWindow(IActivationState? activationState)
