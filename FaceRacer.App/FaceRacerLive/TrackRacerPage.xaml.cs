@@ -45,6 +45,8 @@ public partial class TrackRacerPage : ContentPage
         // Use custom track name if provided, else use global tracked racer
         var trackedName = _customTrackByName ?? _state.Panel.TrackedRacerFullName;
         _state.Tracked.UpdateFromSession(_state.Panel.LastSessionData ?? new FaceRacer.Shared.Dto.SessionData(), trackedName);
+
+        LapTimesGraph?.Invalidate();
     }
 
     protected override void OnDisappearing()

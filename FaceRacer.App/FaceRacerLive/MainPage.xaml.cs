@@ -87,6 +87,15 @@ namespace FaceRacerLive
             {
                 AppendConsole("Face Racer By ThePirat © 2026", Colors.LightGray, true);
             });
+
+            UpdateToggleLabelColors();
+        }
+
+        private void UpdateToggleLabelColors()
+        {
+            AutoTrackLabel.TextColor = AutoTrackCheckBox.IsChecked ? Color.FromArgb("#ba0d0d") : Colors.MediumPurple;
+            SnifferLabel.TextColor = SnifferCheckBox.IsChecked ? Color.FromArgb("#ba0d0d") : Colors.MediumPurple;
+            LiveLabel.TextColor = LiveRaceCheckBox.IsChecked ? Color.FromArgb("#27ba0d") : Colors.MediumPurple;
         }
 
         protected override void OnAppearing()
@@ -346,6 +355,7 @@ namespace FaceRacerLive
         private void OnAutoTrackLabelTapped(object? sender, TappedEventArgs e)
         {
             AutoTrackCheckBox.IsChecked = !AutoTrackCheckBox.IsChecked;
+            UpdateToggleLabelColors();
         }
 
         #region LiveRace
@@ -353,11 +363,14 @@ namespace FaceRacerLive
         private void OnLiveLabelTapped(object? sender, TappedEventArgs e)
         {
             LiveRaceCheckBox.IsChecked = !LiveRaceCheckBox.IsChecked;
+            UpdateToggleLabelColors();
         }
 
         private async void OnLiveRaceCheckedChanged(object? sender, CheckedChangedEventArgs e)
         {
             await Task.Yield();
+
+            UpdateToggleLabelColors();
 
             _state.IsLive = e.Value;
             _state.LiveChanged?.Invoke(e.Value);
@@ -487,6 +500,8 @@ namespace FaceRacerLive
         {
             await Task.Yield();
 
+            UpdateToggleLabelColors();
+
             if (e.Value)
             {
                 StartSnifferRun();
@@ -510,6 +525,7 @@ namespace FaceRacerLive
         private void OnSnifferLabelTapped(object? sender, TappedEventArgs e)
         {
             SnifferCheckBox.IsChecked = !SnifferCheckBox.IsChecked;
+            UpdateToggleLabelColors();
         }
 
         private async Task SaveResponse(SessionData sessionData)

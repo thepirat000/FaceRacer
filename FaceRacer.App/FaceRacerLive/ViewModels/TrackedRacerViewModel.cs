@@ -360,13 +360,11 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
     private string? _lastRecordedSession;
     private string? _lastRecordedRacer;
 
+    private readonly LapTimesGraphDrawable _lapTimesGraphDrawable = new(new List<double>(64));
+
     public LapTimesGraphDrawable LapTimesGraphDrawable
     {
-        get
-        {
-            var lapTimes = Laps?.Select(l => TryGetLapTimeSeconds(l.Time, 0)).ToList() ?? [];
-            return new LapTimesGraphDrawable(lapTimes);
-        }
+        get => _lapTimesGraphDrawable;
     }
 
     public void UpdateFromSession(SessionData sessionData, string? trackedFullName)
@@ -404,8 +402,17 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
             return;
         }
 
-        // Load laps for this racer from the shared state
-        LoadLapsForRacer(racer.full_name ?? "-");
+        // Load laps for this racer from the shared state only when needed.
+        // Rebuilding the entire list every tick is expensive and dominates rendering time.
+        var currentFullName = racer.full_name ?? "-";
+        if (!string.Equals(_lastRecordedRacer, currentFullName, StringComparison.Ordinal))
+        {
+            LoadLapsForRacer(currentFullName);
+        }
+        else
+        {
+            AppendLatestLapIfChanged(currentFullName);
+        }
 
         // Compute best time deltas for next and previous racer
         BestDeltaNextText = "-";
@@ -541,6 +548,24 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         OnChanged(nameof(LastLapNumber));
     }
 
+    private void AppendLatestLapIfChanged(string fullName)
+    {
+        var latest = _raceMonitorState.GetLapsForRacer(fullName).LastOrDefault();
+        if (latest is null)
+        {
+            return;
+        }
+
+        var lastExistingLapNumber = Laps.LastOrDefault()?.LapNumber;
+        if (lastExistingLapNumber.HasValue && latest.LapNumber == lastExistingLapNumber.Value)
+        {
+            return;
+        }
+
+        Laps.Add(latest);
+        RefreshLap();
+    }
+
     private void UpdateSessionProgress(SessionData sessionData)
     {
         var sessionProgress = Math.Clamp(
@@ -662,6 +687,14 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
 
         OnChanged(nameof(BestLapNumber));
         OnChanged(nameof(LastLapNumber));
+
+        var lapTimes = new List<double>(Laps.Count);
+        foreach (var l in Laps)
+        {
+            lapTimes.Add(TryGetLapTimeSeconds(l.Time, 0));
+        }
+
+        _lapTimesGraphDrawable.SetLapTimes(lapTimes);
         OnChanged(nameof(LapTimesGraphDrawable));
     }
 

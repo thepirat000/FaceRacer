@@ -35,14 +35,8 @@
                        Margin="-10,0,0,0"
                        Text="Auto"
                        FontSize="12"
-                       VerticalOptions="Center">
-                    <Label.Triggers>
-                        <DataTrigger TargetType="Label"
-                                     Binding="{Binding Source={x:Reference AutoTrackCheckBox}, Path=IsChecked}"
-                                     Value="True">
-                            <Setter Property="TextColor" Value="#ba0d0d" />
-                        </DataTrigger>
-                    </Label.Triggers>
+                       VerticalOptions="Center"
+                       TextColor="MediumPurple">
 
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnAutoTrackLabelTapped" />
@@ -65,14 +59,8 @@
                        Margin="-10,0,0,0"
                        Text="Rec."
                        FontSize="12"
-                       VerticalOptions="Center">
-                    <Label.Triggers>
-                        <DataTrigger TargetType="Label"
-                                     Binding="{Binding Source={x:Reference SnifferCheckBox}, Path=IsChecked}"
-                                     Value="True">
-                            <Setter Property="TextColor" Value="#ba0d0d" />
-                        </DataTrigger>
-                    </Label.Triggers>
+                       VerticalOptions="Center"
+                       TextColor="MediumPurple">
 
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnSnifferLabelTapped" />
@@ -95,14 +83,8 @@
                        Text="Live"
                        FontSize="12"
                        Margin="-10,0,0,0"
-                       VerticalOptions="Center">
-                    <Label.Triggers>
-                        <DataTrigger TargetType="Label"
-                                     Binding="{Binding Source={x:Reference LiveRaceCheckBox}, Path=IsChecked}"
-                                     Value="True">
-                            <Setter Property="TextColor" Value="#27ba0d" />
-                        </DataTrigger>
-                    </Label.Triggers>
+                       VerticalOptions="Center"
+                       TextColor="MediumPurple">
 
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnLiveLabelTapped" />

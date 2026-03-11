@@ -2,13 +2,18 @@
 
 public class LapTimesGraphDrawable : IDrawable
 {
-    private readonly List<double> _lapTimes;
+    private List<double> _lapTimes;
 
     private const int DefaultMin = 30;
     private const int DefaultMax = 35;
     private const int DefaultMarkValue = 32;
 
     public LapTimesGraphDrawable(List<double> lapTimes)
+    {
+        _lapTimes = lapTimes;
+    }
+
+    public void SetLapTimes(List<double> lapTimes)
     {
         _lapTimes = lapTimes;
     }

@@ -56,14 +56,7 @@
                           VerticalOptions="Center" 
                           CheckedChanged="OnAutoTrackCheckedChanged" 
                           Margin="-6,0,0,0" />
-                <Label Text="Auto" FontSize="12" Margin="-10,0,0,0" VerticalOptions="Center" >
-                    <Label.Triggers>
-                        <DataTrigger TargetType="Label"
-                                     Binding="{Binding Source={x:Reference AutoTrackCheckBox}, Path=IsChecked}"
-                                     Value="True">
-                            <Setter Property="TextColor" Value="#ba0d0d" />
-                        </DataTrigger>
-                    </Label.Triggers>
+                <Label x:Name="AutoTrackLabel" Text="Auto" FontSize="12" Margin="-10,0,0,0" VerticalOptions="Center" TextColor="#9CA3AF" >
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnAutoTrackLabelTapped" />
                     </Label.GestureRecognizers>
@@ -76,14 +69,7 @@
                           CheckedChanged="OnLiveCheckedChanged" 
                           Margin="-6,0,0,0"
                           IsChecked="{Binding IsLiveEnabled, Mode=TwoWay}"/>
-                <Label Text="Live" FontSize="12" Margin="-10,0,0,0" VerticalOptions="Center" >
-                    <Label.Triggers>
-                        <DataTrigger TargetType="Label"
-                                     Binding="{Binding Source={x:Reference LiveCheckBox}, Path=IsChecked}"
-                                     Value="True">
-                            <Setter Property="TextColor" Value="#27ba0d" />
-                        </DataTrigger>
-                    </Label.Triggers>
+                <Label x:Name="LiveLabel" Text="Live" FontSize="12" Margin="-10,0,0,0" VerticalOptions="Center" TextColor="#9CA3AF" >
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnLiveLabelTapped" />
                     </Label.GestureRecognizers>
@@ -155,11 +141,10 @@
             </Grid>
         </Border>
 
-        <ScrollView>
-            <VerticalStackLayout Spacing="4">
+        <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
 
                 <!-- Tracked racer panel -->
-                <Border Style="{StaticResource CardBorderStyle}" Padding="10,5,10,5">
+                <Border Grid.Row="0" Style="{StaticResource CardBorderStyle}" Padding="10,5,10,5">
 
                     <VerticalStackLayout Spacing="0">
 
@@ -345,7 +330,7 @@
                 </Border>
 
                 <!-- Lap times list & Average -->
-                <Grid ColumnDefinitions="50*,50*" ColumnSpacing="2">
+                <Grid Grid.Row="1" ColumnDefinitions="50*,50*" ColumnSpacing="2">
                     <Border Grid.Column="0" Style="{StaticResource CardBorderStyle}" Padding="6,0,6,0">
 
                         <VerticalStackLayout Spacing="0">
@@ -356,9 +341,10 @@
                                        Style="{StaticResource SectionTitleStyle}" />
                             </Grid>
 
-                            <CollectionView 
+                            <CollectionView
                                 ItemsSource="{Binding Laps}"
-                                SelectionMode="None">
+                                SelectionMode="None"
+                                ItemSizingStrategy="MeasureFirstItem">
 
                                 <CollectionView.ItemsLayout>
                                     <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
@@ -366,15 +352,12 @@
 
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate x:DataType="viewmodels:LapTimeRowViewModel">
-                                        <Border StrokeThickness="0"
-                                            StrokeShape="RoundRectangle 6"
-                                            Padding="5,0,5,0"
-                                            BackgroundColor="Transparent">
-                                            <Border.Triggers>
-                                                <DataTrigger TargetType="Border" Binding="{Binding IsFastest}" Value="True">
+                                        <Grid Padding="5,0,5,0">
+                                            <Grid.Triggers>
+                                                <DataTrigger TargetType="Grid" Binding="{Binding IsFastest}" Value="True">
                                                     <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FFF5CC, Dark=#011566}" />
                                                 </DataTrigger>
-                                            </Border.Triggers>
+                                            </Grid.Triggers>
 
                                             <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="2">
                                                 <Label Grid.Column="0"
@@ -400,7 +383,7 @@
                                                    VerticalTextAlignment="Center"
                                                    WidthRequest="18" />
                                             </Grid>
-                                        </Border>
+                                        </Grid>
                                     </DataTemplate>
                                 </CollectionView.ItemTemplate>
                             </CollectionView>
@@ -453,26 +436,23 @@
                 </Grid>
 
                 <!-- Mini Racer List (Top 3) -->
-                <Border Style="{StaticResource CardBorderStyle}" Padding="2,2,2,2">
+                <Border Grid.Row="2" Style="{StaticResource CardBorderStyle}" Padding="2,2,2,2">
                     <VerticalStackLayout Spacing="0">
                         <Label Text="Top 3" Margin="0,0,0,0" Style="{StaticResource SectionTitleStyle}" />
 
-                        <CollectionView ItemsSource="{Binding MiniRacers}" SelectionMode="None">
+                        <CollectionView ItemsSource="{Binding MiniRacers}" SelectionMode="None" ItemSizingStrategy="MeasureFirstItem">
                             <CollectionView.ItemsLayout>
                                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
                             </CollectionView.ItemsLayout>
 
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="viewmodels:MiniRacerRowViewModel">
-                                    <Border StrokeThickness="0"
-                                        StrokeShape="RoundRectangle 6"
-                                        Padding="6,0,6,0"
-                                        BackgroundColor="Transparent">
-                                        <Border.Triggers>
-                                            <DataTrigger TargetType="Border" Binding="{Binding Racer.IsHighlighted}" Value="True">
+                                    <Grid Padding="6,0,6,0">
+                                        <Grid.Triggers>
+                                            <DataTrigger TargetType="Grid" Binding="{Binding Racer.IsHighlighted}" Value="True">
                                                 <Setter Property="BackgroundColor" Value="#111B3D" />
                                             </DataTrigger>
-                                        </Border.Triggers>
+                                        </Grid.Triggers>
 
                                         <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
                                             <Label Grid.Column="0"
@@ -516,14 +496,13 @@
                                                VerticalTextAlignment="Center"
                                                WidthRequest="16" />
                                         </Grid>
-                                    </Border>
+                                    </Grid>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
                         </CollectionView>
                     </VerticalStackLayout>
                 </Border>
-            </VerticalStackLayout>
-        </ScrollView>
+        </Grid>
 
     </VerticalStackLayout>
 
