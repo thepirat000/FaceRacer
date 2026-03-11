@@ -14,8 +14,8 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
 
     private readonly Services.RaceMonitorState _raceMonitorState;
 
-    private readonly ObservableCollection<RacerRowViewModel> _miniRacers = new();
-    public ObservableCollection<RacerRowViewModel> MiniRacers => _miniRacers;
+    private readonly ObservableCollection<MiniRacerRowViewModel> _miniRacers = new();
+    public ObservableCollection<MiniRacerRowViewModel> MiniRacers => _miniRacers;
 
     public ICommand ClearLapsCommand { get; }
 
@@ -95,26 +95,68 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         ClearLapsCommand = new Command(ClearLaps);
 
         _raceMonitorState.Panel.Racers.CollectionChanged += OnPanelRacersChanged;
+        foreach (var racer in _raceMonitorState.Panel.Racers)
+        {
+            racer.PropertyChanged += OnPanelRacerPropertyChanged;
+        }
         RefreshMiniRacers();
     }
 
     private void OnPanelRacersChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
+        if (e.OldItems is not null)
+        {
+            foreach (var item in e.OldItems)
+            {
+                if (item is RacerRowViewModel racer)
+                {
+                    racer.PropertyChanged -= OnPanelRacerPropertyChanged;
+                }
+            }
+        }
+
+        if (e.NewItems is not null)
+        {
+            foreach (var item in e.NewItems)
+            {
+                if (item is RacerRowViewModel racer)
+                {
+                    racer.PropertyChanged += OnPanelRacerPropertyChanged;
+                }
+            }
+        }
+
         RefreshMiniRacers();
+    }
+
+    private void OnPanelRacerPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (string.Equals(e.PropertyName, nameof(RacerRowViewModel.BestTime), StringComparison.Ordinal) ||
+            string.Equals(e.PropertyName, nameof(RacerRowViewModel.PositionText), StringComparison.Ordinal))
+        {
+            RefreshMiniRacers();
+        }
     }
 
     private void RefreshMiniRacers()
     {
         var top = _raceMonitorState.Panel.Racers
+            .Where(r => !string.IsNullOrEmpty(r.PositionText.TrimStart('#').TrimStart('-')))
             .OrderBy(r => int.TryParse(r.PositionText.TrimStart('#'), out var pos) ? pos : int.MaxValue)
             .ThenBy(r => r.FullName)
             .Take(3)
             .ToList();
 
         _miniRacers.Clear();
-        foreach (var racer in top)
+        for (var i = 0; i < top.Count; i++)
         {
-            _miniRacers.Add(racer);
+            var delta = "-";
+            if (i > 0 && TryParseLapTimeSeconds(top[i - 1].ModelBestTime, out var prev) && TryParseLapTimeSeconds(top[i].ModelBestTime, out var curr))
+            {
+                delta = (curr - prev).ToString("0.000", System.Globalization.CultureInfo.InvariantCulture);
+            }
+
+            _miniRacers.Add(new MiniRacerRowViewModel(top[i], delta));
         }
 
         OnChanged(nameof(MiniRacers));

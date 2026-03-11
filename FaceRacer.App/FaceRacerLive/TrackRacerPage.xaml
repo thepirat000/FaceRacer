@@ -196,7 +196,7 @@
                             <Label Grid.Column="0"
                                    Grid.ColumnSpan="1"
                                    Text="Lap"
-                                   FontSize="14"
+                                   FontSize="16"
                                    HorizontalTextAlignment="Start"
                                    Padding="0,5,0,0"
                                    TextColor="#C7CEDB"
@@ -220,7 +220,7 @@
                             <Label Grid.Column="2"
                                    Grid.ColumnSpan="1"
                                    Text="{Binding PassedTimeText}"
-                                   FontSize="12"
+                                   FontSize="16"
                                    HorizontalTextAlignment="End"
                                    Padding="0,5,0,0"
                                    TextColor="#C7CEDB"
@@ -251,10 +251,9 @@
                                                TextColor="{StaticResource MutedText}">
                                             <Label.FormattedText>
                                                 <FormattedString>
-                                                    <Span Text="Last (" />
+                                                    <Span Text="Last lap " />
                                                     <Span Text="{Binding LastLapNumber}" />
-                                                    <Span Text=")" />
-                                                    </FormattedString>
+                                                </FormattedString>
                                             </Label.FormattedText>
                                         </Label>
                                         <Label x:Name="LastTimeValue"
@@ -281,7 +280,7 @@
                                            HorizontalTextAlignment="Center"
                                            Margin="0,0,0,0" />
                                     <Label Text="{Binding PrevFullName}"
-                                           FontSize="13"
+                                           FontSize="10"
                                            TextColor="{StaticResource AccentRed}"
                                            LineBreakMode="TailTruncation"
                                            HorizontalTextAlignment="Center"
@@ -309,9 +308,8 @@
                                            HorizontalTextAlignment="Center">
                                         <Label.FormattedText>
                                             <FormattedString>
-                                                <Span Text="Best (" />
+                                                <Span Text="Best lap " />
                                                 <Span Text="{Binding BestLapNumber}" />
-                                                <Span Text=")" />
                                             </FormattedString>
                                         </Label.FormattedText>
                                     </Label>
@@ -328,7 +326,7 @@
                                            HorizontalTextAlignment="Center"
                                            Margin="0,-4,0,0" />
                                     <Label Text="{Binding NextFullName}"
-                                           FontSize="13"
+                                           FontSize="10"
                                            TextColor="{StaticResource AccentGreen}"
                                            LineBreakMode="TailTruncation"
                                            HorizontalTextAlignment="Center"
@@ -465,48 +463,55 @@
                             </CollectionView.ItemsLayout>
 
                             <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="viewmodels:RacerRowViewModel">
+                                <DataTemplate x:DataType="viewmodels:MiniRacerRowViewModel">
                                     <Border StrokeThickness="0"
                                         StrokeShape="RoundRectangle 6"
                                         Padding="6,0,6,0"
                                         BackgroundColor="Transparent">
                                         <Border.Triggers>
-                                            <DataTrigger TargetType="Border" Binding="{Binding IsHighlighted}" Value="True">
+                                            <DataTrigger TargetType="Border" Binding="{Binding Racer.IsHighlighted}" Value="True">
                                                 <Setter Property="BackgroundColor" Value="#111B3D" />
                                             </DataTrigger>
                                         </Border.Triggers>
 
-                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8">
+                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
                                             <Label Grid.Column="0"
-                                               Text="{Binding PositionText, StringFormat='#{0}'}"
+                                               Text="{Binding Racer.PositionText, StringFormat='#{0}'}"
                                                FontSize="12"
                                                FontAttributes="Bold"
                                                VerticalTextAlignment="Center"
                                                TextColor="#E5E7EB" />
                                             <Label Grid.Column="1"
-                                               Text="{Binding FullName}"
+                                               Text="{Binding Racer.FullName}"
                                                FontSize="12"
                                                LineBreakMode="TailTruncation"
                                                VerticalTextAlignment="Center"
                                                TextColor="#E5E7EB" />
                                             <Label Grid.Column="2"
-                                               Text="{Binding Kart}"
+                                               Text="{Binding Racer.Kart}"
                                                FontSize="12"
-                                               TextColor="{Binding KartColor}"
+                                               TextColor="{Binding Racer.KartColor}"
                                                HorizontalTextAlignment="End"
                                                VerticalTextAlignment="Center" />
                                             <Label Grid.Column="3"
-                                               Text="{Binding BestTime}"
+                                               Text="{Binding Racer.BestTime}"
                                                FontSize="12"
                                                FontAttributes="Bold"
                                                HorizontalTextAlignment="End"
                                                VerticalTextAlignment="Center"
                                                TextColor="#E5E7EB" />
                                             <Label Grid.Column="4"
-                                               Text="{Binding ArrowIcon}"
+                                               Text="{Binding BestDeltaPrev}"
+                                               FontSize="11"
+                                               TextColor="Gray"
+                                               HorizontalTextAlignment="End"
+                                               VerticalTextAlignment="Center"
+                                               WidthRequest="56" />
+                                            <Label Grid.Column="5"
+                                               Text="{Binding Racer.ArrowIcon}"
                                                FontSize="14"
                                                FontAttributes="Bold"
-                                               TextColor="{Binding ArrowColor}"
+                                               TextColor="{Binding Racer.ArrowColor}"
                                                HorizontalTextAlignment="Center"
                                                VerticalTextAlignment="Center"
                                                WidthRequest="16" />

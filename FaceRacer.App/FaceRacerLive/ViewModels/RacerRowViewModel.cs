@@ -54,6 +54,8 @@ internal sealed class RacerRowViewModel : INotifyPropertyChanged
     public string LastTime => _model.last_time ?? "-";
     public string BestTime => _model.best_time ?? "-";
 
+    public string ModelBestTime => _model.best_time ?? "-";
+
     public string ArrowIcon => string.Equals(_model.arrow, "green", StringComparison.OrdinalIgnoreCase) ? "▲" :
         string.Equals(_model.arrow, "red", StringComparison.OrdinalIgnoreCase) ? "▼" : "·";
 
