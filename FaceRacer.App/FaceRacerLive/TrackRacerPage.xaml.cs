@@ -26,6 +26,19 @@ public partial class TrackRacerPage : ContentPage
                  ?? new RaceMonitorState();
 
         BindingContext = _state.Tracked;
+
+        if (BindingContext is System.ComponentModel.INotifyPropertyChanged inpc)
+        {
+            inpc.PropertyChanged += OnTrackedPropertyChanged;
+        }
+    }
+
+    private void OnTrackedPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (string.Equals(e.PropertyName, nameof(ViewModels.TrackedRacerViewModel.LapTimesGraphDrawable), StringComparison.Ordinal))
+        {
+            MainThread.BeginInvokeOnMainThread(() => LapTimesGraph?.Invalidate());
+        }
     }
 
     protected override void OnAppearing()
