@@ -96,7 +96,7 @@
     <VerticalStackLayout Padding="10,0,10,0" Spacing="4">
 
         <!-- Session header -->
-        <Border StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="10,5,10,0">
+        <Border StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="10,3,10,0">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                     <GradientStop Color="#121826" Offset="0" />
@@ -112,7 +112,7 @@
                 <Label Grid.Row="0"
                        Grid.Column="0"
                        Text="Session"
-                       FontSize="11"
+                       FontSize="9"
                        FontAttributes="Bold"
                        HorizontalTextAlignment="Center"
                        TextColor="#E5E7EB" />
@@ -121,7 +121,7 @@
                        Grid.Column="0"
                        Text="{Binding SessionNumber, StringFormat='#{0}'}"
                        LineBreakMode="TailTruncation"
-                       FontSize="18"
+                       FontSize="16"
                        FontAttributes="Bold"
                        HorizontalTextAlignment="Center"
                        TextColor="#E5E7EB" />
@@ -129,7 +129,7 @@
                 <Label Grid.Row="0"
                        Grid.Column="1"
                        Text="Karts"
-                       FontSize="11"
+                       FontSize="9"
                        FontAttributes="Bold"
                        VerticalTextAlignment="Center"
                        HorizontalTextAlignment="Center"
@@ -139,7 +139,7 @@
                        Grid.Column="1"
                        Text="{Binding TotalKarts}"
                        LineBreakMode="TailTruncation"
-                       FontSize="18"
+                       FontSize="16"
                        FontAttributes="Bold"
                        HorizontalTextAlignment="Center"
                        TextColor="#E5E7EB" />
@@ -159,9 +159,9 @@
             <VerticalStackLayout Spacing="4">
 
                 <!-- Tracked racer panel -->
-                <Border Style="{StaticResource CardBorderStyle}" Padding="14,10">
+                <Border Style="{StaticResource CardBorderStyle}" Padding="10,5,10,5">
 
-                    <VerticalStackLayout Spacing="2">
+                    <VerticalStackLayout Spacing="0">
 
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
                             <Label Grid.Column="1"
@@ -190,7 +190,7 @@
                                    VerticalTextAlignment="Center" />
                         </Grid>
 
-                        <BoxView HeightRequest="1" Margin="0,8,0,6" BackgroundColor="#243047" />
+                        <BoxView HeightRequest="1" Margin="0,0,0,0" BackgroundColor="#243047" />
 
                         <Grid ColumnDefinitions="*,*,*" ColumnSpacing="14">
                             <Label Grid.Column="0"
@@ -198,7 +198,7 @@
                                    Text="Lap"
                                    FontSize="14"
                                    HorizontalTextAlignment="Start"
-                                   Padding="0,13,0,0"
+                                   Padding="0,5,0,0"
                                    TextColor="#C7CEDB"
                                    VerticalTextAlignment="Center" />
 
@@ -222,7 +222,7 @@
                                    Text="{Binding PassedTimeText}"
                                    FontSize="12"
                                    HorizontalTextAlignment="End"
-                                   Padding="0,13,0,0"
+                                   Padding="0,5,0,0"
                                    TextColor="#C7CEDB"
                                    VerticalTextAlignment="Center" />
                         </Grid>
@@ -348,18 +348,18 @@
 
                 <!-- Lap times list & Average -->
                 <Grid ColumnDefinitions="50*,50*" ColumnSpacing="2">
-                    <Border Grid.Column="0" Style="{StaticResource CardBorderStyle}" Padding="12">
+                    <Border Grid.Column="0" Style="{StaticResource CardBorderStyle}" Padding="6,0,6,0">
 
-                        <VerticalStackLayout Spacing="4">
+                        <VerticalStackLayout Spacing="0">
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                 <Label Grid.Column="0"
-                                       Margin="0,-5,0,0"
+                                       Margin="0,0,0,0"
                                        Text="Laps"
                                        Style="{StaticResource SectionTitleStyle}" />
                             </Grid>
 
                             <CollectionView 
-                                ItemsSource="{Binding Laps}" 
+                                ItemsSource="{Binding Laps}"
                                 SelectionMode="None">
 
                                 <CollectionView.ItemsLayout>
@@ -370,7 +370,7 @@
                                     <DataTemplate x:DataType="viewmodels:LapTimeRowViewModel">
                                         <Border StrokeThickness="0"
                                             StrokeShape="RoundRectangle 6"
-                                            Padding="5,0,0,0"
+                                            Padding="5,0,5,0"
                                             BackgroundColor="Transparent">
                                             <Border.Triggers>
                                                 <DataTrigger TargetType="Border" Binding="{Binding IsFastest}" Value="True">
@@ -380,15 +380,14 @@
 
                                             <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="2">
                                                 <Label Grid.Column="0"
-                                                   Text="{Binding LapNumber, StringFormat='{0}.'}"
+                                                   Text="{Binding LapNumber, StringFormat='{0}. '}"
                                                    FontSize="11"
                                                    VerticalTextAlignment="Center"
                                                    TextColor="{AppThemeBinding Light=DarkGray, Dark=LightGray}" />
                                                 <Label Grid.Column="1"
                                                    Text="{Binding Time}"
                                                    FontSize="13"
-                                                   VerticalTextAlignment="Center"
-                                                   FontAttributes="Bold" />
+                                                   VerticalTextAlignment="Center" />
                                                 <Label Grid.Column="2"
                                                        Text="{Binding DiffPrevious}"
                                                        TextColor="Gray"
@@ -455,7 +454,69 @@
 
                 </Grid>
 
+                <!-- Mini Racer List (Top 3) -->
+                <Border Style="{StaticResource CardBorderStyle}" Padding="2,2,2,2">
+                    <VerticalStackLayout Spacing="0">
+                        <Label Text="Top 3" Margin="0,0,0,0" Style="{StaticResource SectionTitleStyle}" />
 
+                        <CollectionView ItemsSource="{Binding MiniRacers}" SelectionMode="None">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="0" />
+                            </CollectionView.ItemsLayout>
+
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="viewmodels:RacerRowViewModel">
+                                    <Border StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 6"
+                                        Padding="6,0,6,0"
+                                        BackgroundColor="Transparent">
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsHighlighted}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="#111B3D" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
+
+                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8">
+                                            <Label Grid.Column="0"
+                                               Text="{Binding PositionText, StringFormat='#{0}'}"
+                                               FontSize="12"
+                                               FontAttributes="Bold"
+                                               VerticalTextAlignment="Center"
+                                               TextColor="#E5E7EB" />
+                                            <Label Grid.Column="1"
+                                               Text="{Binding FullName}"
+                                               FontSize="12"
+                                               LineBreakMode="TailTruncation"
+                                               VerticalTextAlignment="Center"
+                                               TextColor="#E5E7EB" />
+                                            <Label Grid.Column="2"
+                                               Text="{Binding Kart}"
+                                               FontSize="12"
+                                               TextColor="{Binding KartColor}"
+                                               HorizontalTextAlignment="End"
+                                               VerticalTextAlignment="Center" />
+                                            <Label Grid.Column="3"
+                                               Text="{Binding BestTime}"
+                                               FontSize="12"
+                                               FontAttributes="Bold"
+                                               HorizontalTextAlignment="End"
+                                               VerticalTextAlignment="Center"
+                                               TextColor="#E5E7EB" />
+                                            <Label Grid.Column="4"
+                                               Text="{Binding ArrowIcon}"
+                                               FontSize="14"
+                                               FontAttributes="Bold"
+                                               TextColor="{Binding ArrowColor}"
+                                               HorizontalTextAlignment="Center"
+                                               VerticalTextAlignment="Center"
+                                               WidthRequest="16" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Border>
             </VerticalStackLayout>
         </ScrollView>
 

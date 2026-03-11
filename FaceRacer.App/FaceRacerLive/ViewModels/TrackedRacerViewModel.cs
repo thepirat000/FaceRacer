@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using FaceRacer.Shared.Dto;
 using System.Windows.Input;
+using System.Collections.Specialized;
 #pragma warning disable S3358
 
 namespace FaceRacerLive.ViewModels;
@@ -12,6 +13,9 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
     public ObservableCollection<LapTimeRowViewModel> Laps { get; } = new();
 
     private readonly Services.RaceMonitorState _raceMonitorState;
+
+    private readonly ObservableCollection<RacerRowViewModel> _miniRacers = new();
+    public ObservableCollection<RacerRowViewModel> MiniRacers => _miniRacers;
 
     public ICommand ClearLapsCommand { get; }
 
@@ -89,6 +93,31 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
     {
         _raceMonitorState = raceMonitorState;
         ClearLapsCommand = new Command(ClearLaps);
+
+        _raceMonitorState.Panel.Racers.CollectionChanged += OnPanelRacersChanged;
+        RefreshMiniRacers();
+    }
+
+    private void OnPanelRacersChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        RefreshMiniRacers();
+    }
+
+    private void RefreshMiniRacers()
+    {
+        var top = _raceMonitorState.Panel.Racers
+            .OrderBy(r => int.TryParse(r.PositionText.TrimStart('#'), out var pos) ? pos : int.MaxValue)
+            .ThenBy(r => r.FullName)
+            .Take(3)
+            .ToList();
+
+        _miniRacers.Clear();
+        foreach (var racer in top)
+        {
+            _miniRacers.Add(racer);
+        }
+
+        OnChanged(nameof(MiniRacers));
     }
 
     public void ClearLaps()
