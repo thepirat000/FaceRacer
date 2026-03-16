@@ -1,6 +1,7 @@
 
 using Microsoft.Maui.Controls;
 using FaceRacerLive.Services;
+using System.Windows.Input;
 
 namespace FaceRacerLive;
 
@@ -11,6 +12,8 @@ public partial class TrackRacerPage : ContentPage
     private bool _syncingLive;
     private bool _syncingAuto;
     private string? _customTrackByName;
+
+    public ICommand BindingContextMiniRacerDoubleTappedCommand { get; }
 
     public string? CustomTrackByName
     {
@@ -27,10 +30,28 @@ public partial class TrackRacerPage : ContentPage
 
         BindingContext = _state.Tracked;
 
+        BindingContextMiniRacerDoubleTappedCommand = new Command<string>(OnMiniRacerDoubleTapped);
+
         if (BindingContext is System.ComponentModel.INotifyPropertyChanged inpc)
         {
             inpc.PropertyChanged += OnTrackedPropertyChanged;
         }
+    }
+
+    private void OnMiniRacerDoubleTapped(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+        {
+            return;
+        }
+
+        _customTrackByName = fullName;
+        _state.Panel.AutoTrackByName = fullName;
+
+        _state.Tracked.UpdateFromSession(_state.Panel.LastSessionData ?? new FaceRacer.Shared.Dto.SessionData(), fullName);
+        _state.Tracked.LoadLapsForRacer(fullName);
+
+        MainThread.BeginInvokeOnMainThread(() => LapTimesGraph?.Invalidate());
     }
 
     private void OnTrackedPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)

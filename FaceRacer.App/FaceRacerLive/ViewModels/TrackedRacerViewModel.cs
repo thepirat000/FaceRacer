@@ -9,6 +9,7 @@ namespace FaceRacerLive.ViewModels;
 
 internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
 {
+    private const int TopRacersCount = 5;
 
     public ObservableCollection<LapTimeRowViewModel> Laps { get; } = new();
 
@@ -144,16 +145,16 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
             .Where(r => !string.IsNullOrEmpty(r.PositionText.TrimStart('#').TrimStart('-')))
             .OrderBy(r => int.TryParse(r.PositionText.TrimStart('#'), out var pos) ? pos : int.MaxValue)
             .ThenBy(r => r.FullName)
-            .Take(3)
+            .Take(TopRacersCount)
             .ToList();
 
         _miniRacers.Clear();
         for (var i = 0; i < top.Count; i++)
         {
-            var delta = "-";
+            var delta = "";
             if (i > 0 && TryParseLapTimeSeconds(top[i - 1].ModelBestTime, out var prev) && TryParseLapTimeSeconds(top[i].ModelBestTime, out var curr))
             {
-                delta = (curr - prev).ToString("0.000", System.Globalization.CultureInfo.InvariantCulture);
+                delta = (curr - prev).ToString("+0.000", System.Globalization.CultureInfo.InvariantCulture);
             }
 
             _miniRacers.Add(new MiniRacerRowViewModel(top[i], delta));
@@ -475,7 +476,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
             }
         }
         HasRacer = true;
-        PositionText = $"#{racer.position}";
+        PositionText = racer.position;
         if (!string.IsNullOrWhiteSpace(racer.position) && int.TryParse(racer.position, out var pos))
         {
             PositionColor = pos switch

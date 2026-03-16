@@ -14,7 +14,7 @@
         Route="MainPage"
         FlyoutItemIsVisible="False"/>
 
-    <MenuItem Text="Tracked racer"
+    <MenuItem Text="Track"
               Clicked="OnTrackedRacerClicked"
               IconImageSource="running_track.png"/>
 
