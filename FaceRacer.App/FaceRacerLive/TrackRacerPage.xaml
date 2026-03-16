@@ -8,6 +8,8 @@
     Title="Track"
     x:DataType="viewmodels:TrackedRacerViewModel">
 
+
+
     <ContentPage.Resources>
         <ResourceDictionary>
             <Color x:Key="PageBg">#0B0D12</Color>
@@ -80,7 +82,11 @@
         </Grid>
     </Shell.TitleView>
 
-    <VerticalStackLayout Padding="5,0,5,0" Spacing="0">
+    <ScrollView x:Name="RootScroll"
+                Orientation="Vertical"
+                VerticalScrollBarVisibility="Default">
+
+        <VerticalStackLayout Padding="5,0,5,0" Spacing="0">
         <!-- Session header -->
         <Border StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="10,3,10,0">
             <Border.Background>
@@ -94,35 +100,40 @@
                 <Shadow Brush="#000000" Offset="0,10" Radius="18" Opacity="0.35" />
             </Border.Shadow>
             
-            <Grid ColumnDefinitions="*,*" RowDefinitions="*,Auto" RowSpacing="0">
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,*,Auto" RowSpacing="0">
                 <Label Grid.Row="0"
                        Grid.Column="0"
                        LineBreakMode="TailTruncation"
+                       VerticalTextAlignment="Start"
+                       Padding="0,-3,0,0"
+                       HorizontalTextAlignment="Center"
+                       Text="Session" FontSize="9" TextColor="#C7CEDB">
+                </Label>
+                <Label Grid.Row="1"
+                       Grid.Column="0"
+                       LineBreakMode="TailTruncation"
                        VerticalTextAlignment="Center"
-                       HorizontalTextAlignment="Start">
-                    <Label.FormattedText>
-                        <FormattedString>
-                            <Span Text="Session " FontSize="10" TextColor="#C7CEDB" />
-                            <Span Text="{Binding SessionNumber, StringFormat='#{0}'}" FontSize="16" TextColor="#E5E7EB" FontAttributes="Bold" />
-                        </FormattedString>
-                    </Label.FormattedText>
+                       HorizontalTextAlignment="Center"
+                       Padding="0,-5,0,0"
+                       Text="{Binding SessionNumber, StringFormat='#{0}'}" FontSize="16" TextColor="#E5E7EB" FontAttributes="Bold">
                 </Label>
 
                 <Label Grid.Row="0"
                        Grid.Column="1"
-                       HorizontalTextAlignment="End"
+                       HorizontalTextAlignment="Center"
+                       VerticalTextAlignment="Start"
+                       Padding="0,-3,0,0"
+                       Text="Karts" FontSize="9" TextColor="#C7CEDB">
+                </Label>
+                <Label Grid.Row="1"
+                       Grid.Column="1"
+                       HorizontalTextAlignment="Center"
                        VerticalTextAlignment="Center"
-                       TextColor="#E5E7EB">
-                    <Label.FormattedText>
-                        <FormattedString>
-                            <Span Text="Karts " FontSize="10" TextColor="#C7CEDB" />
-                            <Span Text="{Binding TotalKarts}" FontSize="16" TextColor="#E5E7EB" FontAttributes="Bold" />
-                        </FormattedString>
-                    </Label.FormattedText>
-
+                       Padding="0,-5,0,0"
+                       Text="{Binding TotalKarts}" FontSize="16" TextColor="#E5E7EB" FontAttributes="Bold" >
                 </Label>
 
-                <ProgressBar Grid.Row="1"
+                <ProgressBar Grid.Row="2"
                              Grid.Column="0"
                              Grid.ColumnSpan="2"
                              HeightRequest="8"
@@ -191,7 +202,7 @@
                                    VerticalTextAlignment="Center">
                                 <Label.FormattedText>
                                     <FormattedString>
-                                        <Span Text="{Binding Lap}" FontSize="28" />
+                                        <Span Text="{Binding Lap}" FontSize="24" />
                                         <Span Text="/" FontSize="15" />
                                         <Span Text="{Binding TotalLaps}" FontSize="15" />
                                     </FormattedString>
@@ -227,13 +238,13 @@
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                         <Label Grid.Column="0" 
                                                HorizontalTextAlignment="Center" 
-                                               Margin="0,-5,0,0"
+                                               Margin="8,-2,0,0"
                                                FontSize="11"
                                                TextColor="{StaticResource MutedText}">
                                             <Label.FormattedText>
                                                 <FormattedString>
-                                                    <Span Text="Last lap " />
-                                                    <Span Text="{Binding LastLapNumber}" />
+                                                    <Span Text="Last " />
+                                                    <Span Text="{Binding LastLapNumber}" FontAttributes="Bold"/>
                                                 </FormattedString>
                                             </Label.FormattedText>
                                         </Label>
@@ -285,13 +296,13 @@
                                     Padding="10,5,3,3">
                                 <VerticalStackLayout Spacing="2">
                                     <Label FontSize="11"
-                                           Margin="0,-5,0,0"
+                                           Margin="0,-2,0,0"
                                            TextColor="{StaticResource MutedText}"
                                            HorizontalTextAlignment="Center">
                                         <Label.FormattedText>
                                             <FormattedString>
-                                                <Span Text="Best lap " />
-                                                <Span Text="{Binding BestLapNumber}" />
+                                                <Span Text="Best " />
+                                                <Span Text="{Binding BestLapNumber}" FontAttributes="Bold" />
                                             </FormattedString>
                                         </Label.FormattedText>
                                     </Label>
@@ -508,6 +519,8 @@
                 </Border>
         </Grid>
 
-    </VerticalStackLayout>
+        </VerticalStackLayout>
+
+    </ScrollView>
 
 </ContentPage>

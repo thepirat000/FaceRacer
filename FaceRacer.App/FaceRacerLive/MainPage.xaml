@@ -96,9 +96,12 @@
         </Grid>
     </Shell.TitleView>
 
-    <Grid Padding="10,16,10,0"
-          RowDefinitions="Auto,Auto,Auto,*,Auto"
-          RowSpacing="12">
+    <ScrollView Orientation="Vertical"
+                VerticalScrollBarVisibility="Default">
+
+        <Grid Padding="10,16,10,0"
+              RowDefinitions="Auto,Auto,Auto,*,Auto"
+              RowSpacing="12">
 
         <Border Grid.Row="0"
                 Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
@@ -371,6 +374,9 @@
             </Grid>
         </Border>
 
-    </Grid>
+
+        </Grid>
+
+    </ScrollView>
 
 </ContentPage>
