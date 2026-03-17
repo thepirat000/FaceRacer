@@ -87,6 +87,13 @@ public class LapTimesGraphDrawable : IDrawable
         canvas.StrokeColor = Colors.MediumPurple;
         canvas.StrokeSize = 2;
 
+        if (_lapTimes.Count == 1)
+        {
+            var y = (float)(height - margin - ((_lapTimes[0] - min) / (max - min) * (height - 2 * margin)));
+            canvas.DrawLine(margin, y, width - margin, y);
+            return;
+        }
+
         for (var i = 0; i < _lapTimes.Count - 1; i++)
         {
             var x1 = margin + i * stepX;

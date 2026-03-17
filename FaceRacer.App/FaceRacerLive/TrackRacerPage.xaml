@@ -238,7 +238,7 @@
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                         <Label Grid.Column="0" 
                                                HorizontalTextAlignment="Center" 
-                                               Margin="8,-2,0,0"
+                                               Margin="15,-2,0,0"
                                                FontSize="11"
                                                TextColor="{StaticResource MutedText}">
                                             <Label.FormattedText>
