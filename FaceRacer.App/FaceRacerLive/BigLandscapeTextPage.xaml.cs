@@ -33,13 +33,59 @@ public partial class BigLandscapeTextPage : ContentPage, IQueryAttributable
 
         RestorePreferences();
 
+        DeviceDisplay.MainDisplayInfoChanged += OnMainDisplayInfoChanged;
+
         SizeChanged += (_, _) =>
         {
+            UpdateLandscapePresentation();
             if (!_manualFontEnabled)
             {
                 AutoFit();
             }
         };
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        UpdateLandscapePresentation();
+        if (!_manualFontEnabled)
+        {
+            AutoFit();
+        }
+    }
+
+    protected override void OnDisappearing()
+    {
+        DeviceDisplay.MainDisplayInfoChanged -= OnMainDisplayInfoChanged;
+
+        StopFontRepeat();
+
+        TextColorPicker?.Unfocus();
+        FontFamilyPicker?.Unfocus();
+        BigTextLabel?.Focus();
+        base.OnDisappearing();
+    }
+
+    private void OnMainDisplayInfoChanged(object? sender, DisplayInfoChangedEventArgs e)
+    {
+        UpdateLandscapePresentation();
+        if (!_manualFontEnabled)
+        {
+            AutoFit();
+        }
+    }
+
+    private void UpdateLandscapePresentation()
+    {
+        // Force the label itself to be visually "landscape".
+        // When the phone is portrait we rotate the label 90 degrees; when already landscape we do not rotate.
+        var rotation = DeviceDisplay.MainDisplayInfo.Orientation == DisplayOrientation.Portrait ? 90 : 0;
+        if (Math.Abs(BigTextLabel.Rotation - rotation) > 0.1)
+        {
+            BigTextLabel.Rotation = rotation;
+            BigTextLabel.InvalidateMeasure();
+        }
     }
 
     private void RestorePreferences()
@@ -129,16 +175,6 @@ public partial class BigLandscapeTextPage : ContentPage, IQueryAttributable
         _manualFontSize = BigTextLabel.FontSize;
 
         FontFamilyPicker.Unfocus();
-    }
-
-    protected override void OnDisappearing()
-    {
-        StopFontRepeat();
-
-        TextColorPicker?.Unfocus();
-        FontFamilyPicker?.Unfocus();
-        BigTextLabel?.Focus();
-        base.OnDisappearing();
     }
 
     private void ApplyManualFontSize(double newSize)
@@ -233,8 +269,9 @@ public partial class BigLandscapeTextPage : ContentPage, IQueryAttributable
 
         var horizontalChrome = 25;
 
-        var maxLabelWidthUnrotated = Math.Max(0, Height - horizontalChrome);
-        var maxLabelHeightUnrotated = Math.Max(0, Width);
+        var isRotated = Math.Abs(BigTextLabel.Rotation % 180) > 0.1;
+        var maxLabelWidthUnrotated = Math.Max(0, (isRotated ? Height : Width) - horizontalChrome);
+        var maxLabelHeightUnrotated = Math.Max(0, isRotated ? Width : Height);
 
         if (maxLabelWidthUnrotated <= 0 || maxLabelHeightUnrotated <= 0)
         {

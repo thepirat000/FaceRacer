@@ -15,7 +15,6 @@
             <Picker x:Name="FontFamilyPicker"
                     Title="Font"
                     WidthRequest="90"
-                    Width="90"
                     BackgroundColor="#292828"
                     TextColor="Gray"
                     SelectedIndexChanged="OnFontFamilyChanged">
@@ -30,7 +29,6 @@
             <Picker x:Name="TextColorPicker"
                     Title="Color"
                     WidthRequest="80"
-                    Width="80"
                     BackgroundColor="#292828"
                     TextColor="Gray"
                     SelectedIndexChanged="OnTextColorChanged">
@@ -65,7 +63,7 @@
 
     <Grid>
         <Label x:Name="BigTextLabel"
-               Rotation="90"
+               Rotation="0"
                AnchorX="0.5"
                AnchorY="0.5"
                Text="--:--.---"

@@ -1,7 +1,7 @@
 
-using Microsoft.Maui.Controls;
 using FaceRacerLive.Services;
 using System.Windows.Input;
+using System.Web;
 
 namespace FaceRacerLive;
 
@@ -130,5 +130,38 @@ public partial class TrackRacerPage : ContentPage
     private void OnAutoTrackLabelTapped(object? sender, TappedEventArgs e)
     {
         AutoTrackCheckBox.IsChecked = !AutoTrackCheckBox.IsChecked;
+    }
+
+    private async void OnBestTimeCardDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        var vm = BindingContext as ViewModels.TrackedRacerViewModel;
+        var raw = vm?.BestTime;
+        if (string.IsNullOrWhiteSpace(raw) || string.Equals(raw, "-", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var text = FormatTimeToOneDecimal(raw);
+
+        if (text is null)
+        {
+            return;
+        }
+
+        var encoded = HttpUtility.UrlEncode(text);
+        await Shell.Current.GoToAsync($"{nameof(BigLandscapeTextPage)}?text={encoded}");
+    }
+
+    private static string? FormatTimeToOneDecimal(string raw)
+    {
+        var trimmed = raw.Trim();
+
+        if (double.TryParse(trimmed, System.Globalization.CultureInfo.InvariantCulture, out var seconds))
+        {
+            var truncated = Math.Truncate(seconds * 10) / 10;
+            return truncated.ToString("0.0");
+        }
+
+        return null;
     }
 }

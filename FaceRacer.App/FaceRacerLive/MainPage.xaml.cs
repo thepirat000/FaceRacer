@@ -682,7 +682,7 @@ namespace FaceRacerLive
 
         private async void OnShowTextClicked(object sender, EventArgs e)
         {
-            string? text;
+            string? text = null;
             if (SendTextBtn.IsEnabled && !string.IsNullOrWhiteSpace(InputTextEditor.Text))
             {
                 text = InputTextEditor.Text;
@@ -691,7 +691,12 @@ namespace FaceRacerLive
             else
             {
                 var bestTime = GetCurrentTrackedRacerBestTimeText();
-                text = bestTime?.Length >= 4 ? bestTime[0..4] : null;
+                if (double.TryParse(bestTime, out var bestTimeValue))
+                {
+                    var truncated = Math.Truncate(bestTimeValue * 10) / 10;
+                    text = truncated.ToString("0.0");
+                }
+                
             }
 
             if (text == null)
