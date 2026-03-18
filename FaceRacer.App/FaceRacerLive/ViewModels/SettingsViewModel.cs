@@ -20,6 +20,13 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         set => Set(ref _moveTrackedRacerToTheTop, value);
     }
 
+    private string _bigTextTimeFormat = "0.0";
+    public string BigTextTimeFormat
+    {
+        get => _bigTextTimeFormat;
+        set => Set(ref _bigTextTimeFormat, value);
+    }
+
     private string _intervalMillisecondsLiveMonitorText = string.Empty;
     public string IntervalMillisecondsLiveMonitorText
     {
@@ -67,6 +74,7 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         IsSimulation = AppSettings.IsSimulation;
         MoveTrackedRacerToTheTop = AppSettings.MoveTrackedRacerToTheTop;
         IntervalMillisecondsLiveMonitorText = AppSettings.IntervalMillisecondsLiveMonitor.ToString();
+        BigTextTimeFormat = AppSettings.BigTextTimeFormat;
         CurrentSessionMonitorUrl = AppSettings.CurrentSessionMonitorUrl;
         AutoTrackFullName = AppSettings.AutoTrackFullName;
         MonitorRankingUrl = AppSettings.MonitorRankingUrl;
@@ -95,6 +103,7 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         AppSettings.IsSimulation = IsSimulation;
         AppSettings.MoveTrackedRacerToTheTop = MoveTrackedRacerToTheTop;
         AppSettings.IntervalMillisecondsLiveMonitor = ms;
+        AppSettings.BigTextTimeFormat = BigTextTimeFormat?.Trim() ?? "0.0";
         AppSettings.CurrentSessionMonitorUrl = (CurrentSessionMonitorUrl ?? string.Empty).Trim();
         AppSettings.AutoTrackFullName = (AutoTrackFullName ?? string.Empty).Trim();
         AppSettings.MonitorRankingUrl = (MonitorRankingUrl ?? string.Empty).Trim();

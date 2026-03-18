@@ -683,6 +683,7 @@ namespace FaceRacerLive
         private async void OnShowTextClicked(object sender, EventArgs e)
         {
             string? text = null;
+            var followBestTime = false;
             if (SendTextBtn.IsEnabled && !string.IsNullOrWhiteSpace(InputTextEditor.Text))
             {
                 text = InputTextEditor.Text;
@@ -693,8 +694,9 @@ namespace FaceRacerLive
                 var bestTime = GetCurrentTrackedRacerBestTimeText();
                 if (double.TryParse(bestTime, out var bestTimeValue))
                 {
-                    var truncated = Math.Truncate(bestTimeValue * 10) / 10;
-                    text = truncated.ToString("0.0");
+                    var truncated = AppSettings.TruncateForBigTextTime(bestTimeValue);
+                    text = truncated.ToString(AppSettings.BigTextTimeFormat);
+                    followBestTime = true;
                 }
                 
             }
@@ -705,7 +707,8 @@ namespace FaceRacerLive
             }
 
             var encoded = HttpUtility.UrlEncode(text);
-            await Shell.Current.GoToAsync($"{nameof(BigLandscapeTextPage)}?text={encoded}");
+            var follow = followBestTime ? "&followBestTime=1" : "";
+            await Shell.Current.GoToAsync($"{nameof(BigLandscapeTextPage)}?text={encoded}{follow}");
 
         }
 

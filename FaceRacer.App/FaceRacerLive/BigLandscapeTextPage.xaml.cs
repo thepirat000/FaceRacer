@@ -25,6 +25,9 @@ public partial class BigLandscapeTextPage : ContentPage, IQueryAttributable
     private bool _isFontRepeatActive;
     private int _fontRepeatDirection; // +1 = plus, -1 = minus
 
+    private bool _followBestTime;
+    private Services.RaceMonitorState? _raceMonitorState;
+
     public BigLandscapeTextPage()
     {
         InitializeComponent();
@@ -48,6 +51,8 @@ public partial class BigLandscapeTextPage : ContentPage, IQueryAttributable
     protected override void OnAppearing()
     {
         base.OnAppearing();
+
+        TryStartFollowingBestTime();
         UpdateLandscapePresentation();
         if (!_manualFontEnabled)
         {
@@ -57,6 +62,7 @@ public partial class BigLandscapeTextPage : ContentPage, IQueryAttributable
 
     protected override void OnDisappearing()
     {
+        StopFollowingBestTime();
         DeviceDisplay.MainDisplayInfoChanged -= OnMainDisplayInfoChanged;
 
         StopFontRepeat();
@@ -65,6 +71,75 @@ public partial class BigLandscapeTextPage : ContentPage, IQueryAttributable
         FontFamilyPicker?.Unfocus();
         BigTextLabel?.Focus();
         base.OnDisappearing();
+    }
+
+    private void TryStartFollowingBestTime()
+    {
+        if (!_followBestTime)
+        {
+            return;
+        }
+
+        _raceMonitorState ??= Application.Current?.Handler?.MauiContext?.Services.GetService<Services.RaceMonitorState>();
+        if (_raceMonitorState?.Tracked is not null)
+        {
+            _raceMonitorState.Tracked.PropertyChanged -= OnTrackedPropertyChanged;
+            _raceMonitorState.Tracked.PropertyChanged += OnTrackedPropertyChanged;
+            ApplyTrackedBestTimeToLabel();
+        }
+    }
+
+    private void StopFollowingBestTime()
+    {
+        if (_raceMonitorState?.Tracked is not null)
+        {
+            _raceMonitorState.Tracked.PropertyChanged -= OnTrackedPropertyChanged;
+        }
+    }
+
+    private void OnTrackedPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (string.Equals(e.PropertyName, nameof(ViewModels.TrackedRacerViewModel.BestTime), StringComparison.Ordinal))
+        {
+            ApplyTrackedBestTimeToLabel();
+        }
+    }
+
+    private void ApplyTrackedBestTimeToLabel()
+    {
+        var raw = _raceMonitorState?.Tracked?.BestTime;
+        if (string.IsNullOrWhiteSpace(raw) || string.Equals(raw, "-", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var formatted = FormatTimeToOneDecimal(raw);
+        if (formatted is null)
+        {
+            return;
+        }
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            BigTextLabel.Text = formatted;
+            _text = formatted;
+            if (!_manualFontEnabled)
+            {
+                AutoFit();
+            }
+        });
+    }
+
+    private static string? FormatTimeToOneDecimal(string raw)
+    {
+        var trimmed = raw.Trim();
+        if (double.TryParse(trimmed, System.Globalization.CultureInfo.InvariantCulture, out var seconds))
+        {
+            var truncated = AppSettings.TruncateForBigTextTime(seconds);
+            return truncated.ToString(AppSettings.BigTextTimeFormat, System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        return null;
     }
 
     private void OnMainDisplayInfoChanged(object? sender, DisplayInfoChangedEventArgs e)
@@ -252,12 +327,40 @@ public partial class BigLandscapeTextPage : ContentPage, IQueryAttributable
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
+        if (query.TryGetValue("followBestTime", out var followValue))
+        {
+            _followBestTime = IsTruthyQueryValue(followValue);
+        }
+
+        if (_followBestTime)
+        {
+            TryStartFollowingBestTime();
+        }
+
         if (query.TryGetValue("text", out var value) && value is string s && !string.IsNullOrWhiteSpace(s))
         {
             _text = HttpUtility.UrlDecode(s);
             BigTextLabel.Text = _text;
             AutoFit();
         }
+    }
+
+    private static bool IsTruthyQueryValue(object value)
+    {
+        if (value is bool b)
+        {
+            return b;
+        }
+
+        if (value is string s)
+        {
+            return string.Equals(s, "1", StringComparison.Ordinal) ||
+                   string.Equals(s, "true", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(s, "yes", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(s, "on", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return false;
     }
 
     private void AutoFit()

@@ -149,7 +149,7 @@ public partial class TrackRacerPage : ContentPage
         }
 
         var encoded = HttpUtility.UrlEncode(text);
-        await Shell.Current.GoToAsync($"{nameof(BigLandscapeTextPage)}?text={encoded}");
+        await Shell.Current.GoToAsync($"{nameof(BigLandscapeTextPage)}?text={encoded}&followBestTime=1");
     }
 
     private static string? FormatTimeToOneDecimal(string raw)
@@ -158,8 +158,8 @@ public partial class TrackRacerPage : ContentPage
 
         if (double.TryParse(trimmed, System.Globalization.CultureInfo.InvariantCulture, out var seconds))
         {
-            var truncated = Math.Truncate(seconds * 10) / 10;
-            return truncated.ToString("0.0");
+            var truncated = AppSettings.TruncateForBigTextTime(seconds);
+            return truncated.ToString(AppSettings.BigTextTimeFormat);
         }
 
         return null;

@@ -30,10 +30,11 @@ public partial class SettingsPage : ContentPage
         AppSettings.IsSimulation = false;
         AppSettings.MoveTrackedRacerToTheTop = false;
         AppSettings.IntervalMillisecondsLiveMonitor = AppSettings.IntervalMillisecondsLiveMonitorDefault;
+        AppSettings.BigTextTimeFormat = "0.0";
         AppSettings.CurrentSessionMonitorUrl = AppSettings.CurrentSessionMonitorUrlDefault;
         AppSettings.AutoTrackFullName = AppSettings.DefaultAutoTrackFullName;
         AppSettings.MonitorRankingUrl = AppSettings.MonitorRankingUrlDefault;
-
+        
         _vm.LoadFromAppSettings();
     }
 
