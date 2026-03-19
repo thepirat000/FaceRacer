@@ -1,19 +1,20 @@
 ﻿using FaceRacer.DB;
 using FaceRacer.Settings;
+using FaceRacer.Shared;
+using FaceRacer.Shared.Dto;
 
 using Microsoft.EntityFrameworkCore;
 
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-using FaceRacer.Shared;
+
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-using FaceRacer.Shared.Dto;
 
 namespace FaceRacer.Services;
 
@@ -54,7 +55,8 @@ public class TelegramBot
             new BotCommand { Command = "top", Description = "Returns the top X for given period Y. Format: /top {N} {Period} (e.g. top 10 day)" },
             new BotCommand { Command = "pos", Description = "Returns the racer at position X for given period Y. Format: /pos {N} {Period} (e.g. pos 5 week)" },
             new BotCommand { Command = "racer", Description = "Returns info about racer with given ID or name. Format: /racer {ID|Name} (e.g. racer 12345 or racer JohnDoe)" },
-            new BotCommand { Command = "sessions", Description = "Returns the last sessions for given user ID. Format: /sessions {UserID} [{MaxSessions}] (e.g. sessions 12345 50)" }
+            new BotCommand { Command = "sessions", Description = "Returns the last sessions for given user ID. Format: /sessions {UserID} [{MaxSessions}] (e.g. sessions 12345 50)" },
+            new BotCommand { Command = "session", Description = "Returns details about a session for given user ID and session position. Format: /session {UserID} [{SessionPosition}] (e.g. session 12345 1)" }
         ], cancellationToken: cancellationToken);
 
         _botClient.StartReceiving(updateHandler: HandleUpdateAsync, errorHandler: HandleErrorAsync, receiverOptions, cancellationToken);
@@ -111,6 +113,11 @@ public class TelegramBot
             }
             var maxSessions = data.Length > 2 && int.TryParse(data[2], out int max) ? max : 100;
             await HandleMessageSessions(bot, message, userId, maxSessions, cancellationToken);
+        }
+        else if (msg.StartsWith("/session", StringComparison.OrdinalIgnoreCase) || msg.StartsWith("session", StringComparison.OrdinalIgnoreCase))
+        {
+            // Format: /session <userId> <sessionPosition>
+            await HandleMessageSessionDetails(bot, message, cancellationToken);
         }
     }
 
@@ -351,7 +358,6 @@ public class TelegramBot
 
         if (firstPage.error || !firstPage.success)
         {
-            // TODO: Get the error
             await bot.SendMessage(chatId: message.Chat.Id, text: $"Error when getting sessions for user '{userId}'.", cancellationToken: cancellationToken);
             return;
         }
@@ -482,6 +488,74 @@ public class TelegramBot
         return responseMessage.ToString();
     }
 
+    // Handle message: /session <userId> <sessionPosition> (responds with the user session at given session position. sessionPosition=1 means the latest, sessionPosition=2 the second latest, etc.)
+    private async Task HandleMessageSessionDetails(ITelegramBotClient bot, Message message, CancellationToken cancellationToken)
+    {
+        var data = message.Text!.Split(' ', 3);
+        if (data.Length < 2 || !int.TryParse(data[1], out int userId))
+        {
+            await bot.SendMessage(chatId: message.Chat.Id, text: "Usage: /session <userId> [<sessionPosition>]", cancellationToken: cancellationToken);
+            return;
+        }
+
+        int sessionPosition = 0;
+        if (data.Length > 2 && int.TryParse(data[2], out int sp))
+        {
+            sessionPosition = Math.Max(0, sp - 1);
+        }
+
+        var sessionData = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, sessionPosition);
+
+        if (sessionData.error || !sessionData.success)
+        {
+            await bot.SendMessage(chatId: message.Chat.Id, text: $"Error when getting sessions for user '{userId}'.", cancellationToken: cancellationToken);
+            return;
+        }
+
+        if (sessionData.total <= 0)
+        {
+            await bot.SendMessage(chatId: message.Chat.Id, text: $"No sessions for user '{userId}'.", cancellationToken: cancellationToken);
+            return;
+        }
+
+        var session = SessionBoxesParser.Parse(sessionData.html, _appSettings).FirstOrDefault();
+
+        if (session != null)
+        {
+            // Similar to HandleCommandSession to show the session info
+            var chartData = await _raceFacerApi.GetSessionChartData(userId, session.SessionId);
+            var date = session.Date;
+
+            if (chartData != null)
+            {
+                var lapTimes = chartData.datasets[0].data;
+
+                var laps = string.Join('\n', lapTimes.Select((time, index) =>
+                {
+                    var isBest = Math.Abs(time - lapTimes.Min()) < 0.0001;
+                    return $"{(isBest ? "*" : "")}{index + 1} - {TimeSpan.FromSeconds(time):mm\\:ss\\.fff}{(isBest ? "* ⏱️ (best)" : "")}";
+                })) + '\n';
+
+                var title = "*" + session.UserFullName + " - Session Details*";
+
+                var responseMessage = title + "\n" +
+                                      $"*Session Data for {date:yyyy-MM-dd} {session.ClockText}*\n" +
+                                      $"Laps: {lapTimes.Count}\n" +
+                                      laps +
+                                      $"Average Time: {TimeSpan.FromSeconds(lapTimes.Average()):mm\\:ss\\.fff}\n";
+
+                var chartTitle = title[2..] + $" - {date:yyyy-MM-dd}";
+                await using var chart = _chart.Graph(lapTimes.ToArray(), true, chartTitle);
+
+                await bot.SendPhoto(chatId: message.Chat.Id, photo: InputFile.FromStream(chart, "laps_graph.png"), caption: responseMessage, ParseMode.Markdown, cancellationToken: cancellationToken);
+            }
+            else
+            {
+                await bot.SendMessage(message.Chat.Id, "Could not fetch session details.", cancellationToken: cancellationToken);
+            }
+        }
+    }
+
     // Handle command: session
     private async Task HandleCommandSession(string args, ITelegramBotClient bot, Message message, CancellationToken cancellationToken)
     {
@@ -489,11 +563,11 @@ public class TelegramBot
         var userId = int.Parse(data[0]);
         var sessionId = data[1];
         var date = DateOnly.Parse(data[2], CultureInfo.InvariantCulture);
-        var session = await _raceFacerApi.GetSessionChartData(userId, sessionId);
+        var chartData = await _raceFacerApi.GetSessionChartData(userId, sessionId);
 
-        if (session != null)
+        if (chartData != null)
         {
-            var lapTimes = session.datasets[0].data;
+            var lapTimes = chartData.datasets[0].data;
 
             var laps = string.Join('\n', lapTimes.Select((time, index) =>
             {

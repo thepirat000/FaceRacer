@@ -73,7 +73,7 @@ public class RaceFacerApi
         return result;
     }
 
-    public async Task<SessionChartData> GetSessionChartData(int userId, string sessionId)
+    public async Task<SessionChartData?> GetSessionChartData(int userId, string sessionId)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, $"https://www.racefacer.com/ajax/session/chart-data?user_id={userId}&session_id={sessionId}");
 
