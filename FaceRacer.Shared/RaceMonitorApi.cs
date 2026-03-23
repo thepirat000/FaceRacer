@@ -1,14 +1,23 @@
-﻿using System.Text.Json;
-using FaceRacer.Shared.Dto;
+﻿using FaceRacer.Shared.Dto;
+
+using System.Net.Http.Headers;
+using System.Text.Json;
 
 namespace FaceRacer.Shared;
 
+/// <summary>
+/// Race Facer internal Monitors API client.
+/// </summary>
 public sealed class RaceMonitorApi
 {
-    private readonly HttpClient _httpClient;
-    private string _currentSessionMonitorUrl;
+    private const string RequestedWithHeaderName = "X-Requested-With";
+    private const string RequestedWithHeaderValue = "XMLHttpRequest";
+    private const string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome";
 
-    public string CurrentSessionMonitorUrl => _currentSessionMonitorUrl;
+    private readonly HttpClient _httpClient;
+    private Uri _currentSessionMonitorUri;
+
+    public string CurrentSessionMonitorUrl => _currentSessionMonitorUri.ToString();
 
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
@@ -17,26 +26,39 @@ public sealed class RaceMonitorApi
 
     public void Reset(string monitorUrl)
     {
-        _currentSessionMonitorUrl = monitorUrl;
+        _currentSessionMonitorUri = new Uri(monitorUrl, UriKind.Absolute);
     }
 
     public RaceMonitorApi(HttpClient httpClient, string monitorUrl)
     {
+        ArgumentNullException.ThrowIfNull(httpClient);
+
         _httpClient = httpClient;
-        _currentSessionMonitorUrl = monitorUrl;
+        _currentSessionMonitorUri = new Uri(monitorUrl, UriKind.Absolute);
+
+        if (!_httpClient.DefaultRequestHeaders.Contains(RequestedWithHeaderName))
+        {
+            _httpClient.DefaultRequestHeaders.Add(RequestedWithHeaderName, RequestedWithHeaderValue);
+        }
+
+        if (_httpClient.DefaultRequestHeaders.UserAgent.Count == 0)
+        {
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
+        }
+
+        _httpClient.DefaultRequestHeaders.CacheControl ??= new CacheControlHeaderValue { NoCache = true };
     }
 
     public async Task<SessionData?> GetCurrentSession(CancellationToken cancellationToken)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, _currentSessionMonitorUrl);
-        request.Headers.Add("X-Requested-With", "XMLHttpRequest");
-        request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome");
+        var request = new HttpRequestMessage(HttpMethod.Get, _currentSessionMonitorUri);
 
-        var response = await _httpClient.SendAsync(request, cancellationToken);
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
-        response.EnsureSuccessStatusCode(); 
+        response.EnsureSuccessStatusCode();
 
-        var json = await response.Content.ReadAsStringAsync(cancellationToken);
-        return JsonSerializer.Deserialize<SessionData>(json, SerializerOptions);
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+
+        return await JsonSerializer.DeserializeAsync<SessionData>(stream, SerializerOptions, cancellationToken);
     }
 }

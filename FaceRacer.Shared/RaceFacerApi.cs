@@ -4,6 +4,9 @@ using System.Text.Json;
 
 namespace FaceRacer.Shared;
 
+/// <summary>
+/// Race Facer "public" API client.
+/// </summary>
 public class RaceFacerApi
 {
     private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions()
