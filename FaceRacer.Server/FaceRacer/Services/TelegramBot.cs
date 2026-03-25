@@ -21,6 +21,9 @@ namespace FaceRacer.Services;
 public class TelegramBot
 {
     private static readonly Regex ProfileNameMatchRegex = new Regex(@"/profile/([^/?#]+)");
+    private static readonly LinkPreviewOptions LinkPreviewOptions = new LinkPreviewOptions() { IsDisabled = true };
+
+    private const int MessageMaxLength = 8300;
 
     private readonly RaceFacerApi _raceFacerApi;
     private readonly AppSettings _appSettings;
@@ -55,7 +58,7 @@ public class TelegramBot
             new BotCommand { Command = "top", Description = "Returns the top X for given period Y. Format: /top {N} {Period} (e.g. top 10 day)" },
             new BotCommand { Command = "pos", Description = "Returns the racer at position X for given period Y. Format: /pos {N} {Period} (e.g. pos 5 week)" },
             new BotCommand { Command = "racer", Description = "Returns info about racer with given ID or name. Format: /racer {ID|Name} (e.g. racer 12345 or racer JohnDoe)" },
-            new BotCommand { Command = "sessions", Description = "Returns the last sessions for given user ID. Format: /sessions {UserID} [{MaxSessions}] (e.g. sessions 12345 50)" },
+            new BotCommand { Command = "sessions", Description = "Returns the last sessions for given user ID. Format: /sessions {UserID} [{MaxSessions}] [html] (e.g. sessions 12345 50 html)" },
             new BotCommand { Command = "session", Description = "Returns details about a session for given user ID and session position. Format: /session {UserID} [{SessionPosition}] (e.g. session 12345 1)" }
         ], cancellationToken: cancellationToken);
 
@@ -85,7 +88,7 @@ public class TelegramBot
 
         if (msg == "/start")
         {
-            await bot.SendMessage(chatId: message.Chat.Id, text: "*Hello!*", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+            await bot.SendMessage(chatId: message.Chat.Id, text: "*Hello!*", parseMode: ParseMode.Markdown, linkPreviewOptions: LinkPreviewOptions, cancellationToken: cancellationToken);
         }
         else if (msg.StartsWith("/top", StringComparison.OrdinalIgnoreCase) || msg.StartsWith("top", StringComparison.OrdinalIgnoreCase))
         {
@@ -105,14 +108,18 @@ public class TelegramBot
         else if (msg.StartsWith("/sessions", StringComparison.OrdinalIgnoreCase) || msg.StartsWith("sessions", StringComparison.OrdinalIgnoreCase))
         {
             // Format: /sessions <userId>
-            var data = message.Text!.Split(' ', 3);
+            var data = message.Text!.Split(' ', 4);
             if (data.Length < 2 || !int.TryParse(data[1], out int userId))
             {
                 await bot.SendMessage(chatId: message.Chat.Id, text: "Usage: /sessions <userId>", cancellationToken: cancellationToken);
                 return;
             }
-            var maxSessions = data.Length > 2 && int.TryParse(data[2], out int max) ? max : 100;
-            await HandleMessageSessions(bot, message, userId, maxSessions, cancellationToken);
+            var isHtml = (data.Length > 3 && data[3].Equals("html", StringComparison.OrdinalIgnoreCase))
+                || (data.Length > 2 && data[2].Equals("html", StringComparison.OrdinalIgnoreCase));
+            int defaultMax = isHtml ? 50 : 100;
+            var maxSessions = data.Length > 2 && int.TryParse(data[2], out int max) ? max : defaultMax;
+            var showAsTable = !isHtml;
+            await HandleMessageSessions(bot, message, userId, maxSessions, showAsTable, cancellationToken);
         }
         else if (msg.StartsWith("/session", StringComparison.OrdinalIgnoreCase) || msg.StartsWith("session", StringComparison.OrdinalIgnoreCase))
         {
@@ -193,7 +200,7 @@ public class TelegramBot
         {
             var date = DateTime.ParseExact(racer.date, "dd.MM.yyyy", CultureInfo.InvariantCulture);
             var line = $"{racer.pos}. {racer.best_time} [{racer.full_name}]({racer.profile_url}) [{date:yyyy-MM-dd}]({_appSettings.GetSessionUrl(racer.username, racer.session_uuid)})";
-            if (responseMessage.Length + line.Length > 8300)
+            if (responseMessage.Length + line.Length > MessageMaxLength)
             {
                 partial = true;
                 break;
@@ -201,7 +208,7 @@ public class TelegramBot
             responseMessage.AppendLine(line);
         }
 
-        await bot.SendMessage(chatId: message.Chat.Id, text: responseMessage + (partial ? "[...]" : ""), parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+        await bot.SendMessage(message.Chat.Id, responseMessage + (partial ? "[...]" : ""), ParseMode.Markdown, linkPreviewOptions: LinkPreviewOptions, cancellationToken: cancellationToken);
     }
 
     // Handle message: /pos <number> [period]
@@ -234,7 +241,7 @@ public class TelegramBot
         var line = $"{pos}. [{ranking.full_name}]({ranking.profile_url}) - {ranking.best_time} ([{date:yyyy-MM-dd}]({_appSettings.GetSessionUrl(ranking.username, ranking.session_uuid)}))";
         responseMessage.AppendLine(line);
 
-        await bot.SendMessage(chatId: message.Chat.Id, text: responseMessage.ToString(), parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+        await bot.SendMessage(chatId: message.Chat.Id, text: responseMessage.ToString(), parseMode: ParseMode.Markdown, linkPreviewOptions: LinkPreviewOptions, cancellationToken: cancellationToken);
     }
 
     // Handle message: /racer <Id|Name>
@@ -314,13 +321,13 @@ public class TelegramBot
                 if (e.ErrorCode == 400 && e.Message.Contains("wrong type of the web page content"))
                 {
                     // Problem with the image URL, send as text message instead
-                    await bot.SendMessage(chatId: message.Chat.Id, text: responseMessage.ToString(), replyMarkup: keyboard, parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+                    await bot.SendMessage(chatId: message.Chat.Id, text: responseMessage.ToString(), replyMarkup: keyboard, parseMode: ParseMode.Markdown, linkPreviewOptions: LinkPreviewOptions, cancellationToken: cancellationToken);
                 }
             }
         }
         else
         {
-            await bot.SendMessage(chatId: message.Chat.Id, text: responseMessage.ToString(), parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+            await bot.SendMessage(chatId: message.Chat.Id, text: responseMessage.ToString(), parseMode: ParseMode.Markdown, linkPreviewOptions: LinkPreviewOptions, cancellationToken: cancellationToken);
         }
     }
 
@@ -348,11 +355,11 @@ public class TelegramBot
             responseMessage.AppendLine($"{user.user_id}: *{user.full_name}* ({user.age}) - [{user.username}]({user.profile_url})");
         }
         
-        await bot.SendMessage(chatId: message.Chat.Id, text: responseMessage.ToString(), parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+        await bot.SendMessage(chatId: message.Chat.Id, text: responseMessage.ToString(), parseMode: ParseMode.Markdown, linkPreviewOptions: LinkPreviewOptions, cancellationToken: cancellationToken);
     }
 
     // Handle message: /sessions <userId> (responds with the user's sessions)
-    private async Task HandleMessageSessions(ITelegramBotClient bot, Message message, int userId, int maxSessions, CancellationToken cancellationToken)
+    private async Task HandleMessageSessions(ITelegramBotClient bot, Message message, int userId, int maxSessions, bool showAsTable, CancellationToken cancellationToken)
     {
         var firstPage = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, 0);
 
@@ -391,7 +398,7 @@ public class TelegramBot
                     var page = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, startFrom);
                     if (page.error || !page.success)
                     {
-                        return (StartFrom: startFrom, Sessions: (IReadOnlyList<SessionInfo>)Array.Empty<SessionInfo>());
+                        return (StartFrom: startFrom, Sessions: []);
                     }
 
                     var sessions = SessionBoxesParser.Parse(page.html, _appSettings).ToList();
@@ -417,9 +424,9 @@ public class TelegramBot
             }
         }
 
-        var responseMessage = MakeUserSessionsMessage(allSessions, firstPage.total, true);
+        var responseMessage = MakeUserSessionsMessage(allSessions, firstPage.total, showAsTable);
 
-        await bot.SendMessage(chatId: message.Chat.Id, text: responseMessage, parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
+        await bot.SendMessage(chatId: message.Chat.Id, text: responseMessage, parseMode: showAsTable ? ParseMode.Markdown : ParseMode.Html, linkPreviewOptions: LinkPreviewOptions, cancellationToken: cancellationToken);
     }
     
     private string MakeUserSessionsMessage(List<SessionInfo> allSessions, int total, bool showAsTable)
@@ -428,6 +435,9 @@ public class TelegramBot
         {
             return "No sessions found.";
         }
+
+        var boldStart = showAsTable ? "*" : "<b>";
+        var boldEnd = showAsTable ? "*" : "</b>";
 
         var username = allSessions[0].Username;
         var userFullName = allSessions[0].UserFullName;
@@ -450,7 +460,7 @@ public class TelegramBot
         // Last {N} sessions for user {username}:
         // 1. {date} at {time} - [{bestTime}]({sessionUrl})
         var responseMessage = new StringBuilder();
-        responseMessage.AppendLine($"*Last {allSessions.Count} of {total} sessions for {userFullName}:*");
+        responseMessage.AppendLine($"{boldStart}Last {allSessions.Count} of {total} sessions for {userFullName}:{boldEnd}");
 
         if (showAsTable)
         {
@@ -463,7 +473,8 @@ public class TelegramBot
             var session = allSessions[i];
             var reducedBestTime = session.BestTime.StartsWith("00:") ? session.BestTime[3..] : session.BestTime;
             var isBest = Math.Abs((TimeSpan.TryParseExact(session.BestTime, "mm\\:ss\\.fff", CultureInfo.InvariantCulture, out var ts) ? ts.TotalSeconds : double.MaxValue) - bestTimeSeconds) < 0.0001;
-            var isBestText = isBest ? "⏱️" : "";
+            var isBestIcon = showAsTable ? "⏱️" : " ⏱️";
+            var isBestText = isBest ? isBestIcon : "";
 
             if (showAsTable)
             {
@@ -472,19 +483,28 @@ public class TelegramBot
             else
             {
                 var sessionUrl = _appSettings.GetSessionUrl(username, session.SessionId);
-                responseMessage.AppendLine($"{session.Date:yy-MM-dd} {session.ClockText,-7} <a href=\"{sessionUrl}\">{reducedBestTime + isBestText,-8}</a> {session.ResultPositionText}");
+                responseMessage.AppendLine($"{boldStart}{(i + 1) + "."}{(isBest ? "" : boldEnd)} {session.Date:yy-MM-dd} {session.ClockText,-7} <a href=\"{sessionUrl}\">{reducedBestTime}</a> {session.ResultPositionText}{isBestText}{(isBest ? boldEnd : "")}");
             }
         }
         if (showAsTable)
         {
             responseMessage.AppendLine("```");
         }
+        else
+        {
+            responseMessage.AppendLine("");
+        }
 
         // Add the Best time, Average time and Average position to the message
-        responseMessage.AppendLine($"*Best Time:* {TimeSpan.FromSeconds(bestTimeSeconds):mm\\:ss\\.fff}");
-        responseMessage.AppendLine($"*Average Time:* {TimeSpan.FromSeconds(averageTimeSeconds):mm\\:ss\\.fff}");
-        responseMessage.AppendLine($"*Average Position:* {averagePosition:F2}");
-        
+        responseMessage.AppendLine($"{boldStart}Best Time:{boldEnd} {TimeSpan.FromSeconds(bestTimeSeconds):mm\\:ss\\.fff}");
+        responseMessage.AppendLine($"{boldStart}Average Best Time:{boldEnd} {TimeSpan.FromSeconds(averageTimeSeconds):mm\\:ss\\.fff}");
+        responseMessage.AppendLine($"{boldStart}Average Position:{boldEnd} {averagePosition:F2}");
+
+        if (!showAsTable && responseMessage.Length > MessageMaxLength)
+        {
+            return "Message too long, cannot display sessions, remove the html argument to show as table, or reduce the number of sessions. For example: /sessions 1234567 20 html";
+        }
+
         return responseMessage.ToString();
     }
 
@@ -536,15 +556,15 @@ public class TelegramBot
                     return $"{(isBest ? "*" : "")}{index + 1} - {TimeSpan.FromSeconds(time):mm\\:ss\\.fff}{(isBest ? "* ⏱️ (best)" : "")}";
                 })) + '\n';
 
-                var title = "*" + session.UserFullName + " - Session Details*";
+                var title = "*" + session.UserFullName + "*";
 
                 var responseMessage = title + "\n" +
-                                      $"*Session Data for {date:yyyy-MM-dd} {session.ClockText}*\n" +
+                                      $"*Session* [{date:yyyy-MM-dd} {session.ClockText}]({session.SessionUrl})\n" +
                                       $"Laps: {lapTimes.Count}\n" +
                                       laps +
                                       $"Average Time: {TimeSpan.FromSeconds(lapTimes.Average()):mm\\:ss\\.fff}\n";
-
-                var chartTitle = title[2..] + $" - {date:yyyy-MM-dd}";
+                
+                var chartTitle = $"{title} - {date:yyyy-MM-dd}";
                 await using var chart = _chart.Graph(lapTimes.ToArray(), true, chartTitle);
 
                 await bot.SendPhoto(chatId: message.Chat.Id, photo: InputFile.FromStream(chart, "laps_graph.png"), caption: responseMessage, ParseMode.Markdown, cancellationToken: cancellationToken);
@@ -612,7 +632,7 @@ public class TelegramBot
                                   $"Date: {date:yyyy-MM-dd}\n" +
                                   $"[{profileName ?? "Profile link"}]({best.data.profile_url})";
 
-            await bot.SendMessage(message.Chat.Id, responseMessage, ParseMode.Markdown, cancellationToken: cancellationToken);
+            await bot.SendMessage(message.Chat.Id, responseMessage, ParseMode.Markdown, linkPreviewOptions: LinkPreviewOptions, cancellationToken: cancellationToken);
         }
         else
         {
@@ -625,7 +645,7 @@ public class TelegramBot
     {
         var userId = int.Parse(args);
 
-        await HandleMessageSessions(bot, message, userId, 50, cancellationToken);
+        await HandleMessageSessions(bot, message, userId, 50, true, cancellationToken);
     }
 
     private static string GetFirstLine(string text)

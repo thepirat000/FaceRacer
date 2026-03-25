@@ -41,7 +41,7 @@ namespace FaceRacer.Services
             plt.Axes.Left.Label.FontSize = 14;
             plt.Axes.Bottom.TickLabelStyle.FontSize = 12;
             plt.Axes.Left.TickLabelStyle.FontSize = 12;
-            plt.Legend.FontSize = 12;
+            plt.Legend.FontSize = 18;
             
             var tickGenX = new ScottPlot.TickGenerators.NumericAutomatic() { IntegerTicksOnly = true };
             plt.Axes.Bottom.TickGenerator = tickGenX;
@@ -52,7 +52,7 @@ namespace FaceRacer.Services
             mainPlot.MarkerSize = 8;
             mainPlot.Color = Colors.DodgerBlue;
             mainPlot.MarkerShape = MarkerShape.FilledCircle;
-            //mainPlot.PathStrategy = new CubicSpline();
+            mainPlot.PathStrategy = new Straight();
 
             // axis labels and title
             plt.XLabel("Lap");
@@ -61,10 +61,8 @@ namespace FaceRacer.Services
 
             // Best / Worst / Average calculations
             var best = lapTimes.Min();
-            var bestTimeSpan = TimeSpan.FromSeconds(best);
 
             var worst = lapTimes.Max();
-            var worstTimeSpan = TimeSpan.FromSeconds(worst);
             var avg = lapTimes.Average();
 
             // indices for best/worst
@@ -73,16 +71,16 @@ namespace FaceRacer.Services
 
             // add colored markers
             var bestMarker = plt.Add.Scatter([xValues[bestIdx]], new[] { best }, color: Colors.LightGreen);
-            bestMarker.LegendText = $@"Fastest {bestTimeSpan:mm\:ss\.fff}";
+            bestMarker.LegendText = $"Fastest {best:F3}";
             bestMarker.MarkerSize = 8;
 
             var worstMarker = plt.Add.Scatter([xValues[worstIdx]], new[] { worst }, color: Colors.Red);
-            worstMarker.LegendText = $@"Slowest {worstTimeSpan:mm\:ss\.fff}";
+            worstMarker.LegendText = $"Slowest {worst:F3}";
             worstMarker.MarkerSize = 6;
             
             // add text near best marker
-            var lblBest = plt.Add.Text(text: $@"{bestTimeSpan:mm\:ss\.fff}", x: xValues[bestIdx], y: best); 
-            lblBest.LabelFontSize = 14;
+            var lblBest = plt.Add.Text(text: $"Best {best:F3}", x: xValues[bestIdx], y: best); 
+            lblBest.LabelFontSize = 18;
             lblBest.LabelFontColor = Colors.LightGreen;
             lblBest.LabelStyle.Bold = true;
             lblBest.LabelAlignment = Alignment.MiddleLeft;
@@ -98,12 +96,24 @@ namespace FaceRacer.Services
             }
 
             // average line
-            var avgLine = plt.Add.HorizontalLine(avg, color: Colors.DarkOrange);
-            avgLine.LineStyle = new LineStyle(3, Colors.LightGray, LinePattern.Dashed);
-            avgLine.LabelText = $"Avg: {avg:F2} sec";
-            avgLine.LabelAlignment = Alignment.MiddleRight;
-            avgLine.LabelOffsetX = 31; 
+            var avgLine = plt.Add.HorizontalLine(avg);
+            avgLine.LineStyle = new LineStyle(3, Colors.Orange, LinePattern.Dotted);
+            // disable the default label (otherwise it stays near the Y axis)
+            avgLine.LabelText = string.Empty;
+            // add a custom label at the right edge (last lap)
+            var avgLbl = plt.Add.Text($"Avg {avg:F3}", x: xValues[^1], y: avg);
+            avgLbl.LabelAlignment = Alignment.MiddleRight;
+            avgLbl.OffsetY = 15;
+            avgLbl.OffsetX = -6;
+            avgLbl.LabelFontColor = Colors.Orange;
+            avgLbl.LabelFontSize = 18;
+            avgLbl.LabelStyle.Bold = true;
 
+
+            // Horizontal line in the 32 mark:
+            var line32 = plt.Add.HorizontalLine(32);
+            line32.LineStyle = new LineStyle(2, Colors.LightGrey, LinePattern.DenselyDashed);
+            
             // legend
             plt.Legend.Alignment = Alignment.UpperRight;
 
