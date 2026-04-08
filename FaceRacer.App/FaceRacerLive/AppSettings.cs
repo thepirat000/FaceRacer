@@ -68,7 +68,7 @@
                 Math.Clamp(value, IntervalMillisecondsLiveMonitorMin, IntervalMillisecondsLiveMonitorMax));
         }
 
-        public static TimeSpan TimeoutForLiveRequest = TimeSpan.FromSeconds(10);
+        public static TimeSpan TimeoutForLiveRequest = TimeSpan.FromSeconds(120);
         public static string DefaultAutoTrackFullName = "Adriano Colombo";
 
         public static string AutoTrackFullName

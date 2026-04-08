@@ -1,9 +1,12 @@
-using FaceRacer.Services.Notifiers;
 using FaceRacer.DB;
 using FaceRacer.Services;
+using FaceRacer.Services.Notifiers;
 using FaceRacer.Settings;
 using FaceRacer.Shared;
+
 using Microsoft.Extensions.Configuration;
+using Polly;
+using Polly.Retry;
 
 namespace FaceRacer;
 
@@ -56,7 +59,8 @@ internal static class Program
             // Setup Telegram Bot
             Console.WriteLine("Setting up Telegram Bot...");
             var telegramBot = new TelegramBot(appSettings, api, chart);
-            await telegramBot.SetupBot(cts.Token);
+            var pipeline = new ResiliencePipelineBuilder().AddRetry(RetryOptions).Build();
+            await pipeline.ExecuteAsync(async ct => await telegramBot.SetupBot(ct), cts.Token);
         }
 
         // Setup Notifiers
@@ -75,13 +79,20 @@ internal static class Program
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Exception thrown during update:\n" + e);
+                    Console.WriteLine("##### Exception thrown during update:\n" + e);
                 }
                 
                 if (firstChangedDate.HasValue)
                 {
                     Console.WriteLine("Running notifications...");
-                    await bl.NotifyAsync(firstChangedDate.Value, notifiers, cts.Token);
+                    try
+                    {
+                        await bl.NotifyAsync(firstChangedDate.Value, notifiers, cts.Token);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("##### Exception thrown during notify:\n" + e);
+                    }
                 }
 
                 if (appSettings.RunOnce)
@@ -103,4 +114,15 @@ internal static class Program
 
         Console.WriteLine("Exited gracefully.");
     }
+
+    private static readonly RetryStrategyOptions RetryOptions = new()
+    {
+        Delay = TimeSpan.Zero,
+        MaxRetryAttempts = 4,
+        OnRetry = args =>
+        {
+            Console.WriteLine($"Retry #{args.AttemptNumber}");
+            return default;
+        }
+    };
 }
