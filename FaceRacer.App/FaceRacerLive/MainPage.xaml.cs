@@ -427,7 +427,9 @@ namespace FaceRacerLive
             AppendConsole("Live race: stopped.", Colors.LightGray);
         }
 
+        // ##################################################
         // Main loop for fetching and updating live race date
+        // ##################################################
         private async Task RunRaceLoopAsync(CancellationToken ct)
         {
             while (!ct.IsCancellationRequested)
