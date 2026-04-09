@@ -1,5 +1,7 @@
 using FaceRacer.Shared;
 using FaceRacer.Shared.Dto;
+
+using FaceRacerLive.Monitor;
 using FaceRacerLive.ViewModels;
 
 namespace FaceRacerLive;
@@ -9,6 +11,7 @@ public partial class NextSessionsPage
     private readonly NextSessionsPageViewModel _vm;
 
     private RaceMonitorApi? _raceMonitorApi;
+    private SampleRaceSimulator? _raceMonitorSimulator;
     private CancellationTokenSource? _pollCts;
 
     public NextSessionsPage()
@@ -17,6 +20,7 @@ public partial class NextSessionsPage
 
         _vm = new NextSessionsPageViewModel();
         BindingContext = _vm;
+        _raceMonitorSimulator = new SampleRaceSimulator();
     }
 
     protected override void OnAppearing()
@@ -85,7 +89,8 @@ public partial class NextSessionsPage
             {
                 if (_raceMonitorApi is not null)
                 {
-                    var payload = await _raceMonitorApi.GetNextSessionsAsync(ct);
+                    var hasSimulation = SimulationSessionStore.HasSimulation();
+                    var payload = hasSimulation ? await _raceMonitorSimulator!.GetNextSessionsAsync(ct) : await _raceMonitorApi!.GetNextSessionsAsync(AppSettings.NextSessionsMonitorUrl, ct);
 
                     if (payload?.success == true)
                     {
@@ -95,7 +100,6 @@ public partial class NextSessionsPage
                             _vm.UpdateSessions(sessions);
                         });
                     }
-                    // else: keep last data as requested
                 }
             }
             catch (TaskCanceledException)

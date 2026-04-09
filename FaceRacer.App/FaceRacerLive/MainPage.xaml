@@ -111,34 +111,47 @@
                 Margin="0,-10,0,0"
                 HorizontalOptions="Fill">
 
-            <Editor x:Name="InputTextEditor"
-                    Placeholder=""
-                    AutoSize="TextChanges"
-                    MaxLength="96"
-                    FontSize="16"
-                    HeightRequest="60"
-                    Margin="0"
-                    BackgroundColor="Transparent"
-                    HorizontalOptions="Fill"
-                    Unfocused="OnInputTextEditorUnfocused" />
+            <Grid ColumnDefinitions="*,Auto"
+                  ColumnSpacing="10">
+
+                <Editor x:Name="InputTextEditor"
+                        Grid.Column="0"
+                        Placeholder=""
+                        AutoSize="TextChanges"
+                        MaxLength="96"
+                        FontSize="16"
+                        HeightRequest="50"
+                        Margin="0"
+                        BackgroundColor="Transparent"
+                        HorizontalOptions="Fill"
+                        Unfocused="OnInputTextEditorUnfocused" />
+
+                <Button x:Name="SendTextBtn"
+                        Grid.Column="1"
+                        Text="Send"
+                        SemanticProperties.Hint="Send text"
+                        Clicked="OnSendTextClicked"
+                        Padding="15,0,15,0"
+                        MaximumHeightRequest="35"
+                        VerticalOptions="Center" />
+            </Grid>
         </Border>
 
         <!-- Buttons -->
         <Grid Grid.Row="1"
-              ColumnDefinitions="*,auto,auto,auto,auto,auto"
+              ColumnDefinitions="auto,auto,auto,auto,auto"
               ColumnSpacing="12">
-
-            <Button x:Name="SendTextBtn"
-                    Text="Send"
-                    Grid.Column="0"
-                    SemanticProperties.Hint="Send text"
-                    Clicked="OnSendTextClicked"
-                    HorizontalOptions="Fill" />
 
             <Button x:Name="TrackRacerBtn"
                     Text="Track"
-                    Grid.Column="1"
+                    Grid.Column="0"
                     Clicked="OnTrackClicked"
+                    HorizontalOptions="Fill" />
+
+            <Button x:Name="NextSessionsBtn"
+                    Text="Next"
+                    Grid.Column="1"
+                    Clicked="OnNextSessionsClicked"
                     HorizontalOptions="Fill" />
 
             <Button x:Name="ShowTextBtn"
@@ -150,21 +163,17 @@
             <Button x:Name="MicToggleBtn"
                     Grid.Column="3"
                     Text="Mic On"
-                    FontSize="11"
-                    Clicked="OnMicToggleClicked" />
-
-            <Button x:Name="NextSessionsBtn"
-                    Text="Next"
-                    Grid.Column="4"
-                    Clicked="OnNextSessionsClicked"
+                    FontSize="13"
+                    Clicked="OnMicToggleClicked"
                     HorizontalOptions="Fill" />
 
             <Button x:Name="PttBtn"
-                    Grid.Column="5"
+                    Grid.Column="4"
                     Text="PTT"
                     Pressed="OnPttPressed"
                     Released="OnPttReleased"
-                    IsVisible="False" />
+                    IsVisible="False" 
+                    />
         </Grid>
 
         <!-- Session header -->

@@ -4,6 +4,7 @@
     {
         private const string IntervalMillisecondsLiveMonitorKey = "AppSettings.IntervalMillisecondsLiveMonitor";
         private const string CurrentSessionMonitorUrlKey = "AppSettings.CurrentSessionMonitorUrl";
+        private const string NextSessionsMonitorUrlKey = "AppSettings.NextSessionsMonitorUrl";
         private const string AutoTrackFullNameKey = "AppSettings.AutoTrackFullName";
         private const string MonitorRankingUrlKey = "AppSettings.MonitorRankingUrl";
 
@@ -14,6 +15,7 @@
         public const string CurrentSessionMonitorUrlDefault = "http://192.168.10.174/ajax/monitors/current-session-monitor";
         public const string MonitorRankingUrlDefault = "http://192.168.10.174/es/monitors/monitor-ranking";
         public const string MonitorCurrentSessionsDefault = "http://192.168.10.174/es/monitors/monitor-current-sessions";
+        public const string NextSessionsMonitorUrlDefault = "http://192.168.10.174/ajax/monitors/next-sessions";
 
         private static string _bigTextTimeFormat = "0.0";
 
@@ -68,7 +70,7 @@
                 Math.Clamp(value, IntervalMillisecondsLiveMonitorMin, IntervalMillisecondsLiveMonitorMax));
         }
 
-        public static TimeSpan TimeoutForLiveRequest = TimeSpan.FromSeconds(120);
+        public static TimeSpan TimeoutForLiveRequest = TimeSpan.FromSeconds(60);
         public static string DefaultAutoTrackFullName = "Adriano Colombo";
 
         public static string AutoTrackFullName
@@ -81,6 +83,12 @@
         {
             get => Preferences.Default.Get(CurrentSessionMonitorUrlKey, CurrentSessionMonitorUrlDefault);
             set => Preferences.Default.Set(CurrentSessionMonitorUrlKey, value ?? string.Empty);
+        }
+
+        public static string NextSessionsMonitorUrl
+        {
+            get => Preferences.Default.Get(NextSessionsMonitorUrlKey, NextSessionsMonitorUrlDefault);
+            set => Preferences.Default.Set(NextSessionsMonitorUrlKey, value ?? string.Empty);
         }
 
         public static string MonitorRankingUrl
