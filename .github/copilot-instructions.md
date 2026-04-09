@@ -3,6 +3,7 @@
 ## General Guidelines
 - First general instruction
 - Second general instruction
+- When a user reports a fix/correction, verify the reported code issue directly in the workspace (e.g., property getter/setter bodies) before proposing larger refactors.
 
 ## Debugging Instructions
 - When diagnosing MAUI/Android crashes that appear without code changes, clean or delete the `bin/obj` directories as a first-line step. Stale generated Android resources/themes can cause runtime crashes.

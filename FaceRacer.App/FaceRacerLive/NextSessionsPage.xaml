@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:FaceRacerLive"
+             xmlns:viewmodels="clr-namespace:FaceRacerLive.ViewModels"
+             x:Class="FaceRacerLive.NextSessionsPage"
+             x:DataType="viewmodels:NextSessionsPageViewModel">
+
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="*"
+              ColumnSpacing="6"
+              Padding="8,0">
+            <Label Grid.Column="0"
+                   Margin="-8,0,0,0"
+                   Text="Next Sessions"
+                   TextColor="MediumPurple"
+                   VerticalOptions="Center"
+                   LineBreakMode="TailTruncation"
+                   FontAttributes="Bold" />
+        </Grid>
+    </Shell.TitleView>
+
+    <ScrollView Orientation="Vertical"
+                VerticalScrollBarVisibility="Default">
+
+        <Grid Padding="10,16,10,0"
+              RowDefinitions="Auto,Auto,Auto,*,Auto"
+              RowSpacing="2">
+
+            <!-- Summary -->
+            <Border Grid.Row="0"
+                    Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
+                    BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="10,8"
+                    Margin="0,-10,0,0"
+                    HorizontalOptions="Fill">
+
+                <Grid RowDefinitions="Auto,*"
+                      RowSpacing="8">
+
+                    <Grid Grid.Row="0"
+                          ColumnDefinitions="2*,*,*,*"
+                          ColumnSpacing="8">
+                        <Label Grid.Column="0" Text="Session" FontAttributes="Bold" FontSize="11" LineBreakMode="TailTruncation" TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+                        <Label Grid.Column="1" Text="At" FontAttributes="Bold" FontSize="11" HorizontalTextAlignment="End" TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+                        <Label Grid.Column="2" Text="In" FontAttributes="Bold" FontSize="11" HorizontalTextAlignment="End" TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+                        <Label Grid.Column="3" Text="Drivers" FontAttributes="Bold" FontSize="11" HorizontalTextAlignment="End" TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+                    </Grid>
+
+                    <CollectionView Grid.Row="1"
+                                    ItemsSource="{Binding Sessions}"
+                                    SelectionMode="None"
+                                    ItemSizingStrategy="MeasureFirstItem">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                        </CollectionView.ItemsLayout>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="viewmodels:NextSessionSummaryRowViewModel">
+                                <Border StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 6"
+                                        Padding="4,3"
+                                        BackgroundColor="Transparent">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FFF5CC, Dark=#011566}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="False">
+                                            <Setter Property="BackgroundColor" Value="Transparent" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+
+                                    <Grid ColumnDefinitions="2*,*,*,*"
+                                          ColumnSpacing="8">
+                                        <Label Grid.Column="0"
+                                               Text="{Binding SessionName}"
+                                               FontSize="12"
+                                               LineBreakMode="TailTruncation"
+                                               VerticalTextAlignment="Center" />
+                                        <Label Grid.Column="1"
+                                               Text="{Binding StartsAtText}"
+                                               FontSize="12"
+                                               HorizontalTextAlignment="End"
+                                               VerticalTextAlignment="Center" />
+                                        <Label Grid.Column="2"
+                                               Text="{Binding StartsInMinutesText}"
+                                               FontSize="12"
+                                               HorizontalTextAlignment="End"
+                                               VerticalTextAlignment="Center" />
+                                        <Label Grid.Column="3"
+                                               Text="{Binding DriversText}"
+                                               FontSize="12"
+                                               HorizontalTextAlignment="End"
+                                               VerticalTextAlignment="Center" />
+                                    </Grid>
+
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer NumberOfTapsRequired="2"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:NextSessionsPage}}, Path=BindingContext.SelectSessionCommand}"
+                                                              CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </Border>
+
+            <!-- Drivers header -->
+            <Border Grid.Row="1"
+                    Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
+                    BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="10,6"
+                    Margin="0,0,0,-5"
+                    HorizontalOptions="Fill">
+
+                <Label Text="{Binding SelectedSessionTitle}"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                       LineBreakMode="TailTruncation" />
+            </Border>
+
+            <!-- Drivers table -->
+            <Border Grid.Row="2"
+                    Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
+                    BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="10,8"
+                    Margin="0,0,0,0"
+                    HorizontalOptions="Fill">
+
+                <Grid RowDefinitions="Auto,*"
+                      RowSpacing="8">
+
+                    <Grid Grid.Row="0"
+                          ColumnDefinitions="2*,70,60"
+                          ColumnSpacing="8">
+                        <Label Grid.Column="0" Text="Name" FontAttributes="Bold" FontSize="11" LineBreakMode="TailTruncation" TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+                        <Label Grid.Column="1" Text="Best" FontAttributes="Bold" FontSize="11" HorizontalTextAlignment="End" TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+                        <Label Grid.Column="2" Text="Kart" FontAttributes="Bold" FontSize="11" HorizontalTextAlignment="End" TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+                    </Grid>
+
+                    <CollectionView Grid.Row="1"
+                                    ItemsSource="{Binding Drivers}"
+                                    SelectionMode="None"
+                                    ItemSizingStrategy="MeasureFirstItem">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                        </CollectionView.ItemsLayout>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="viewmodels:NextSessionDriverRowViewModel">
+                                <Grid ColumnDefinitions="2*,70,60"
+                                      ColumnSpacing="8">
+                                    <Label Grid.Column="0"
+                                           Text="{Binding FullName}"
+                                           FontSize="12"
+                                           LineBreakMode="TailTruncation"
+                                           VerticalTextAlignment="Center" />
+                                    <Label Grid.Column="1"
+                                           Text="{Binding BestTime}"
+                                           FontSize="12"
+                                           HorizontalTextAlignment="End"
+                                           VerticalTextAlignment="Center" />
+                                    <Label Grid.Column="2"
+                                           Text="{Binding Kart}"
+                                           FontSize="12"
+                                           TextColor="{Binding KartColor}"
+                                           HorizontalTextAlignment="End"
+                                           VerticalTextAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </Border>
+
+        </Grid>
+    </ScrollView>
+
+</ContentPage>

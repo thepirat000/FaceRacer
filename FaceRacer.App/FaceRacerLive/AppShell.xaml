@@ -27,6 +27,9 @@
               IconImageSource="ranking.png"
               Clicked="OnRankingClicked" />
 
+    <MenuItem Text="Next sessions"
+              Clicked="OnNextSessionsClicked" />
+
     <MenuItem Text="Settings"
               IconImageSource="settings.png"
               Clicked="OnSettingsClicked" />

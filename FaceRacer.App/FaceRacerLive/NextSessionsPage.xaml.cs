@@ -1,0 +1,233 @@
+using FaceRacer.Shared;
+using FaceRacer.Shared.Dto;
+using FaceRacerLive.ViewModels;
+
+namespace FaceRacerLive;
+
+public partial class NextSessionsPage
+{
+    private readonly NextSessionsPageViewModel _vm;
+
+    private RaceMonitorApi? _raceMonitorApi;
+    private CancellationTokenSource? _pollCts;
+
+    public NextSessionsPage()
+    {
+        InitializeComponent();
+
+        _vm = new NextSessionsPageViewModel();
+        BindingContext = _vm;
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        InitializeRaceMonitorApi();
+        StartPolling();
+    }
+
+    protected override void OnDisappearing()
+    {
+        StopPolling();
+
+        base.OnDisappearing();
+    }
+
+    private void InitializeRaceMonitorApi()
+    {
+        if (_raceMonitorApi != null)
+        {
+            return;
+        }
+
+        var services = Application.Current?.Handler?.MauiContext?.Services;
+        var httpClient = services?.GetService<HttpClient>();
+
+        if (httpClient is null)
+        {
+            return;
+        }
+
+        _raceMonitorApi = new RaceMonitorApi(httpClient, AppSettings.CurrentSessionMonitorUrl);
+    }
+
+    private void StartPolling()
+    {
+        if (_pollCts is { IsCancellationRequested: false })
+        {
+            return;
+        }
+
+        StopPolling();
+
+        _pollCts = new CancellationTokenSource();
+        _ = RunPollLoopAsync(_pollCts.Token);
+    }
+
+    private void StopPolling()
+    {
+        if (_pollCts is null)
+        {
+            return;
+        }
+
+        _pollCts.Cancel();
+        _pollCts.Dispose();
+        _pollCts = null;
+    }
+
+    private async Task RunPollLoopAsync(CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            try
+            {
+                if (_raceMonitorApi is not null)
+                {
+                    var payload = await _raceMonitorApi.GetNextSessionsAsync(ct);
+
+                    if (payload?.success == true)
+                    {
+                        var sessions = MapSessions(payload);
+                        await MainThread.InvokeOnMainThreadAsync(() =>
+                        {
+                            _vm.UpdateSessions(sessions);
+                        });
+                    }
+                    // else: keep last data as requested
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                break;
+            }
+            catch
+            {
+                // keep last data
+            }
+
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1), ct);
+            }
+            catch (TaskCanceledException)
+            {
+                break;
+            }
+        }
+    }
+
+    private static List<NextSessionSummaryRowViewModel> MapSessions(NextSessionsResponse payload)
+    {
+        var now = DateTime.Now;
+
+        var sessions = payload.data?.data ?? new List<NextSession>();
+
+        var mapped = new List<NextSessionSummaryRowViewModel>();
+
+        foreach (var s in sessions)
+        {
+            var runs = s.runs?.data ?? new List<NextSessionRun>();
+            if (runs.Count == 0)
+            {
+                continue;
+            }
+
+            var startTimeText = s.start_time;
+            var startsInText = "—";
+
+            if (TimeOnly.TryParseExact(startTimeText, "HH:mm", out var startTime))
+            {
+                var startDateTime = now.Date.Add(startTime.ToTimeSpan());
+                if (startDateTime < now)
+                {
+                    startDateTime = startDateTime.AddDays(1);
+                }
+
+                var remaining = startDateTime - now;
+                if (remaining < TimeSpan.Zero)
+                {
+                    remaining = TimeSpan.Zero;
+                }
+
+                var rounded = TimeSpan.FromSeconds(Math.Round(remaining.TotalSeconds, MidpointRounding.AwayFromZero));
+                startsInText = $"{(int)rounded.TotalMinutes:00}:{rounded.Seconds:00}";
+            }
+
+            var ind = runs.Count(r => string.Equals(r.kart_name, "Individual", StringComparison.OrdinalIgnoreCase));
+            var dbl = runs.Count(r => string.Equals(r.kart_name, "Doble", StringComparison.OrdinalIgnoreCase));
+
+            var driverRows = runs
+                .Select(r => new NextSessionDriverRowViewModel
+                {
+                    FullName = r.full_name ?? r.name ?? "—",
+                    BestTime = string.IsNullOrWhiteSpace(r.best_time) ? "-" : r.best_time,
+                    Kart = string.IsNullOrWhiteSpace(r.kart) ? "-" : r.kart,
+                    KartColor = ParseKartColor(r.kart_color)
+                })
+                .OrderBy(r => r.FullName)
+                .ToList();
+
+            mapped.Add(new NextSessionSummaryRowViewModel
+            {
+                Id = s.id,
+                SessionName = NormalizeSessionName(s.name ?? s.label ?? "—"),
+                StartsAtText = string.IsNullOrWhiteSpace(startTimeText) ? "—" : startTimeText,
+                StartsInMinutesText = startsInText,
+                DriversText = $"{ind + dbl}  ({ind}+{dbl})",
+                IndividualText = ind.ToString(),
+                DoubleText = dbl.ToString(),
+                Drivers = driverRows
+            });
+        }
+
+        return mapped.Take(4).ToList();
+    }
+
+    private static string NormalizeSessionName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return "—";
+        }
+
+        const string prefixEs = "Sesión ";
+        const string prefixEn = "Session ";
+
+        if (name.StartsWith(prefixEs, StringComparison.OrdinalIgnoreCase))
+        {
+            return name[prefixEs.Length..].TrimStart();
+        }
+
+        if (name.StartsWith(prefixEn, StringComparison.OrdinalIgnoreCase))
+        {
+            return name[prefixEn.Length..].TrimStart();
+        }
+
+        return name;
+    }
+
+    private static Color ParseKartColor(string? hexWithoutHash)
+    {
+        if (string.IsNullOrWhiteSpace(hexWithoutHash))
+        {
+            return Colors.LightGray;
+        }
+
+        var hex = hexWithoutHash.Trim();
+        if (!hex.StartsWith('#'))
+        {
+            hex = "#" + hex;
+        }
+
+        try
+        {
+            return Color.FromArgb(hex);
+        }
+        catch
+        {
+            return Colors.LightGray;
+        }
+    }
+}

@@ -682,6 +682,11 @@ namespace FaceRacerLive
             await Shell.Current.GoToAsync(nameof(TrackRacerPage));
         }
 
+        private async void OnNextSessionsClicked(object? sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync(nameof(NextSessionsPage));
+        }
+
         private async void OnShowTextClicked(object sender, EventArgs e)
         {
             string? text = null;

@@ -57,6 +57,9 @@
     <MauiXaml Update="BigLandscapeTextPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
+    <MauiXaml Update="NextSessionsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="SettingsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>

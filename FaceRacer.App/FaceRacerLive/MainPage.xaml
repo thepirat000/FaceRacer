@@ -125,7 +125,7 @@
 
         <!-- Buttons -->
         <Grid Grid.Row="1"
-              ColumnDefinitions="*,auto,auto,auto,auto"
+              ColumnDefinitions="*,auto,auto,auto,auto,auto"
               ColumnSpacing="12">
 
             <Button x:Name="SendTextBtn"
@@ -153,8 +153,14 @@
                     FontSize="11"
                     Clicked="OnMicToggleClicked" />
 
-            <Button x:Name="PttBtn"
+            <Button x:Name="NextSessionsBtn"
+                    Text="Next"
                     Grid.Column="4"
+                    Clicked="OnNextSessionsClicked"
+                    HorizontalOptions="Fill" />
+
+            <Button x:Name="PttBtn"
+                    Grid.Column="5"
                     Text="PTT"
                     Pressed="OnPttPressed"
                     Released="OnPttReleased"

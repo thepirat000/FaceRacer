@@ -9,6 +9,7 @@
             Routing.RegisterRoute(nameof(BigLandscapeTextPage), typeof(BigLandscapeTextPage));
             Routing.RegisterRoute(nameof(SettingsPage), typeof(SettingsPage));
             Routing.RegisterRoute(nameof(TrackRacerPage), typeof(TrackRacerPage));
+            Routing.RegisterRoute(nameof(NextSessionsPage), typeof(NextSessionsPage));
         }
 
 		private async void OnSettingsClicked(object? sender, EventArgs e)
@@ -40,6 +41,12 @@
 			FlyoutIsPresented = false;
 			await GoToAsync(nameof(TrackRacerPage));
 		}
+
+        private async void OnNextSessionsClicked(object? sender, EventArgs e)
+        {
+            FlyoutIsPresented = false;
+            await GoToAsync(nameof(NextSessionsPage));
+        }
 
         private void OnExitMenuItemClicked(object sender, EventArgs e)
         {
