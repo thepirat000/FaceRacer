@@ -66,7 +66,7 @@ public sealed class RaceMonitorApi
     {
         var url = $"{nextSessionsMonitorUrl}?from=0&limit=5";
 
-        var request = new HttpRequestMessage(HttpMethod.Get, nextSessionsMonitorUrl);
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
 
         using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 

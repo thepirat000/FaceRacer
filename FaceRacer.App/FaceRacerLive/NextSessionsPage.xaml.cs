@@ -10,6 +10,9 @@ public partial class NextSessionsPage
 {
     private readonly NextSessionsPageViewModel _vm;
 
+    private bool _consoleAutoScroll = true;
+    private int _consoleLineCount;
+
     private RaceMonitorApi? _raceMonitorApi;
     private SampleRaceSimulator? _raceMonitorSimulator;
     private CancellationTokenSource? _pollCts;
@@ -28,6 +31,7 @@ public partial class NextSessionsPage
         base.OnAppearing();
 
         InitializeRaceMonitorApi();
+
         StartPolling();
     }
 
@@ -38,6 +42,53 @@ public partial class NextSessionsPage
         base.OnDisappearing();
     }
 
+    private void OnConsoleScrolled(object? sender, ScrolledEventArgs e)
+    {
+        var scroll = (ScrollView?)sender;
+        if (scroll is null)
+        {
+            return;
+        }
+
+        var padding = 12;
+        _consoleAutoScroll = e.ScrollY >= (scroll.ContentSize.Height - scroll.Height - padding);
+    }
+
+    private void OnConsoleClearClicked(object? sender, EventArgs e)
+    {
+        ConsoleStack.Clear();
+        _consoleLineCount = 0;
+    }
+
+    public void AppendConsole(string message, Color? color = null, bool noDateTime = false)
+    {
+        color ??= Colors.White;
+
+        var label = new Label
+        {
+            Text = noDateTime ? message : $"[{DateTime.Now:HH\\:mm\\:ss}]: {message}",
+            TextColor = color,
+            FontSize = 9,
+            LineBreakMode = LineBreakMode.CharacterWrap
+        };
+
+        // Newest at bottom
+        ConsoleStack.Add(label);
+
+        if (_consoleAutoScroll)
+        {
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                await Task.Yield();
+
+                if (ConsoleStack.Count > 0)
+                {
+                    await ConsoleScrollView.ScrollToAsync(ConsoleStack[^1] as Label, ScrollToPosition.End, false);
+                }
+            });
+        }
+    }
+
     private void InitializeRaceMonitorApi()
     {
         if (_raceMonitorApi != null)
@@ -46,7 +97,8 @@ public partial class NextSessionsPage
         }
 
         var services = Application.Current?.Handler?.MauiContext?.Services;
-        var httpClient = services?.GetService<HttpClient>();
+        var factory = services?.GetService<IHttpClientFactory>();
+        var httpClient = factory?.CreateClient();
 
         if (httpClient is null)
         {
@@ -90,7 +142,23 @@ public partial class NextSessionsPage
                 if (_raceMonitorApi is not null)
                 {
                     var hasSimulation = SimulationSessionStore.HasSimulation();
-                    var payload = hasSimulation ? await _raceMonitorSimulator!.GetNextSessionsAsync(ct) : await _raceMonitorApi!.GetNextSessionsAsync(AppSettings.NextSessionsMonitorUrl, ct);
+                    var mode = hasSimulation ? "SIM" : "API";
+                    AppendConsole($"Poll next sessions ({mode})... " + (!hasSimulation ? AppSettings.NextSessionsMonitorUrl : ""));
+
+                    using var cts = new CancellationTokenSource(AppSettings.TimeoutForLiveRequest);
+
+                    var payload = hasSimulation
+                        ? await _raceMonitorSimulator!.GetNextSessionsAsync(cts.Token)
+                        : await _raceMonitorApi!.GetNextSessionsAsync(AppSettings.NextSessionsMonitorUrl, cts.Token);
+
+                    if (payload is null)
+                    {
+                        AppendConsole($"Poll result ({mode}): null payload");
+                    }
+                    else
+                    {
+                        AppendConsole($"Poll result ({mode}): success={payload.success}");
+                    }
 
                     if (payload?.success == true)
                     {
@@ -99,16 +167,38 @@ public partial class NextSessionsPage
                         {
                             _vm.UpdateSessions(sessions);
                         });
+
+                        AppendConsole($"Updated UI: sessions={sessions.Count}");
                     }
+                    else
+                    {
+                        AppendConsole($"Not success response");
+                    }
+                }
+                else
+                {
+                    AppendConsole("Poll skipped: RaceMonitorApi not initialized");
                 }
             }
             catch (TaskCanceledException)
             {
-                break;
+                AppendConsole("Task cancelled");
+                if (ct.IsCancellationRequested)
+                {
+                    break;
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                // keep last data
+                AppendConsole($"ERROR: {ex.GetType().Name}: {ex.Message}", Colors.Red);
+                if (!string.IsNullOrWhiteSpace(ex.StackTrace))
+                {
+                    var stackFirstLine = ex.StackTrace.Split('\n').FirstOrDefault()?.Trim();
+                    if (!string.IsNullOrWhiteSpace(stackFirstLine))
+                    {
+                        AppendConsole(stackFirstLine);
+                    }
+                }
             }
 
             try

@@ -24,19 +24,15 @@ public sealed class NextSession
 
     public string? label { get; set; }
 
-    public int? num { get; set; }
-
     public string? start_time { get; set; }
 
     public string? participants_text { get; set; }
 
     public string? start_after { get; set; }
 
-    public string? no_racers_text { get; set; }
-
     public string? checkin_time { get; set; }
 
-    public object? time_left { get; set; }
+    public string? time_left { get; set; }
 
     public NextSessionRuns? runs { get; set; }
 }

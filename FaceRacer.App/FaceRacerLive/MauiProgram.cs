@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Maui;
+﻿using System.Net;
+using CommunityToolkit.Maui;
 
 using FaceRacerLive.Monitor;
 using FaceRacerLive.Services;
@@ -39,6 +40,9 @@ public static class MauiProgram
         builder.Services.AddHttpClient(string.Empty, x =>
         {
             x.Timeout = AppSettings.TimeoutForLiveRequest;
+        }).ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+        {
+            ConnectTimeout = AppSettings.TimeoutForLiveRequest
         });
 
         builder.Services.AddSingleton<RaceMonitorState>();

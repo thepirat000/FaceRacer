@@ -180,6 +180,39 @@
                 </Grid>
             </Border>
 
+            <!--Console output-->
+            <Border Grid.Row="4"
+                    Stroke="{AppThemeBinding Light=#C8C8C8, Dark=#404040}"
+                    BackgroundColor="{AppThemeBinding Light=#111111, Dark=#111111}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="5,0,5,0"
+                    Margin="0,6,0,0"
+                    HorizontalOptions="Fill">
+
+                <Grid>
+                    <ScrollView x:Name="ConsoleScrollView"
+                                HeightRequest="185"
+                                Margin="0,0,0,0"
+                                Orientation="Vertical"
+                                Scrolled="OnConsoleScrolled">
+                        <VerticalStackLayout x:Name="ConsoleStack" Spacing="1" />
+                    </ScrollView>
+
+                    <Button Text="Clear"
+                            Padding="0,0"
+                            FontSize="12"
+                            HeightRequest="24"
+                            MinimumHeightRequest="24"
+                            WidthRequest="60"
+                            Clicked="OnConsoleClearClicked"
+                            HorizontalOptions="End"
+                            VerticalOptions="Start"
+                            Margin="0,4,0,0"
+                            ZIndex="10" />
+                </Grid>
+            </Border>
+
         </Grid>
     </ScrollView>
 
