@@ -97,8 +97,7 @@ public partial class NextSessionsPage
         }
 
         var services = Application.Current?.Handler?.MauiContext?.Services;
-        var factory = services?.GetService<IHttpClientFactory>();
-        var httpClient = factory?.CreateClient();
+        var httpClient = services?.GetService<HttpClient>();
 
         if (httpClient is null)
         {
@@ -145,11 +144,9 @@ public partial class NextSessionsPage
                     var mode = hasSimulation ? "SIM" : "API";
                     AppendConsole($"Poll next sessions ({mode})... " + (!hasSimulation ? AppSettings.NextSessionsMonitorUrl : ""));
 
-                    using var cts = new CancellationTokenSource(AppSettings.TimeoutForLiveRequest);
-
                     var payload = hasSimulation
-                        ? await _raceMonitorSimulator!.GetNextSessionsAsync(cts.Token)
-                        : await _raceMonitorApi!.GetNextSessionsAsync(AppSettings.NextSessionsMonitorUrl, cts.Token);
+                        ? await _raceMonitorSimulator!.GetNextSessionsAsync(ct)
+                        : await _raceMonitorApi!.GetNextSessionsAsync(AppSettings.NextSessionsMonitorUrl, ct);
 
                     if (payload is null)
                     {
