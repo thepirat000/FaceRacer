@@ -32,6 +32,8 @@ public partial class NextSessionsPage
 
         InitializeRaceMonitorApi();
 
+        AppendConsole("Starting poll loop...", Colors.LightGray);
+
         StartPolling();
     }
 
@@ -134,6 +136,7 @@ public partial class NextSessionsPage
 
     private async Task RunPollLoopAsync(CancellationToken ct)
     {
+        bool firstPass = true;
         while (!ct.IsCancellationRequested)
         {
             try
@@ -141,8 +144,14 @@ public partial class NextSessionsPage
                 if (_raceMonitorApi is not null)
                 {
                     var hasSimulation = SimulationSessionStore.HasSimulation();
-                    var mode = hasSimulation ? "SIM" : "API";
-                    AppendConsole($"Poll next sessions ({mode})... " + (!hasSimulation ? AppSettings.NextSessionsMonitorUrl : ""));
+
+                    if (firstPass)
+                    {
+                        var mode = hasSimulation ? "SIM" : "API";
+                        AppendConsole($"Poll next sessions ({mode})... " + (!hasSimulation ? AppSettings.NextSessionsMonitorUrl : ""));
+                    }
+
+                    firstPass = false;
 
                     var payload = hasSimulation
                         ? await _raceMonitorSimulator!.GetNextSessionsAsync(ct)
@@ -150,11 +159,11 @@ public partial class NextSessionsPage
 
                     if (payload is null)
                     {
-                        AppendConsole($"Poll result ({mode}): null payload");
+                        AppendConsole($"Poll result: null payload");
                     }
-                    else
+                    else if (!payload.success)
                     {
-                        AppendConsole($"Poll result ({mode}): success={payload.success}");
+                        AppendConsole($"Poll result: not success", Colors.OrangeRed);
                     }
 
                     if (payload?.success == true)
@@ -165,36 +174,21 @@ public partial class NextSessionsPage
                             _vm.UpdateSessions(sessions);
                         });
 
-                        AppendConsole($"Updated UI: sessions={sessions.Count}");
-                    }
-                    else
-                    {
-                        AppendConsole($"Not success response");
+                        AppendConsole($"Updated UI: sessions={sessions.Count}", Colors.LightGreen);
                     }
                 }
                 else
                 {
-                    AppendConsole("Poll skipped: RaceMonitorApi not initialized");
-                }
-            }
-            catch (TaskCanceledException)
-            {
-                AppendConsole("Task cancelled");
-                if (ct.IsCancellationRequested)
-                {
-                    break;
+                    AppendConsole("Poll skipped: RaceMonitorApi not initialized", Colors.Yellow);
                 }
             }
             catch (Exception ex)
             {
-                AppendConsole($"ERROR: {ex.GetType().Name}: {ex.Message}", Colors.Red);
-                if (!string.IsNullOrWhiteSpace(ex.StackTrace))
+                AppendConsole($"ERROR: {ex.GetType().Name}: {ex.Message}", Colors.OrangeRed);
+
+                if (ct.IsCancellationRequested)
                 {
-                    var stackFirstLine = ex.StackTrace.Split('\n').FirstOrDefault()?.Trim();
-                    if (!string.IsNullOrWhiteSpace(stackFirstLine))
-                    {
-                        AppendConsole(stackFirstLine);
-                    }
+                    break;
                 }
             }
 
