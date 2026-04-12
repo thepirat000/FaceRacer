@@ -20,7 +20,7 @@ namespace FaceRacer.Settings
         public int Pause { get; set; } = 60;
 
         // Max position to notify about (1-100)
-        public int TelegramMaxPosition { get; set; } = 10; 
+        public int TelegramMaxPosition { get; set; } = 3; 
 
         public string SessionUrl { get; set; }
 

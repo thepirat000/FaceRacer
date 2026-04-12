@@ -16,7 +16,7 @@ public sealed class NextSessionsOuterData
 
 public sealed class NextSession
 {
-    public int id { get; set; }
+    public int? id { get; set; }
 
     public string? name { get; set; }
 

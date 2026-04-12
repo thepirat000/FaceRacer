@@ -5,6 +5,7 @@ using FaceRacer.Settings;
 using FaceRacer.Shared;
 
 using Microsoft.Extensions.Configuration;
+
 using Polly;
 using Polly.Retry;
 

@@ -99,7 +99,7 @@ internal sealed class NextSessionSummaryRowViewModel : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public int Id { get; init; }
+    public int? Id { get; init; }
 
     public string SessionName { get; init; } = "—";
 
