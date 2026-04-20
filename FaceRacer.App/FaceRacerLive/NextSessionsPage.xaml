@@ -76,7 +76,7 @@
                                           ColumnSpacing="8">
                                         <Label Grid.Column="0"
                                                Text="{Binding SessionName}"
-                                               FontSize="12"
+                                               FontSize="14"
                                                LineBreakMode="TailTruncation"
                                                VerticalTextAlignment="Center" />
                                         <Label Grid.Column="1"
@@ -91,7 +91,7 @@
                                                VerticalTextAlignment="Center" />
                                         <Label Grid.Column="3"
                                                Text="{Binding DriversText}"
-                                               FontSize="12"
+                                               FontSize="14"
                                                HorizontalTextAlignment="End"
                                                VerticalTextAlignment="Center" />
                                     </Grid>
@@ -159,17 +159,17 @@
                                       ColumnSpacing="8">
                                     <Label Grid.Column="0"
                                            Text="{Binding FullName}"
-                                           FontSize="12"
+                                           FontSize="15"
                                            LineBreakMode="TailTruncation"
                                            VerticalTextAlignment="Center" />
                                     <Label Grid.Column="1"
                                            Text="{Binding BestTime}"
-                                           FontSize="12"
+                                           FontSize="15"
                                            HorizontalTextAlignment="End"
                                            VerticalTextAlignment="Center" />
                                     <Label Grid.Column="2"
                                            Text="{Binding Kart}"
-                                           FontSize="12"
+                                           FontSize="15"
                                            TextColor="{Binding KartColor}"
                                            HorizontalTextAlignment="End"
                                            VerticalTextAlignment="Center" />
@@ -192,7 +192,7 @@
 
                 <Grid>
                     <ScrollView x:Name="ConsoleScrollView"
-                                HeightRequest="185"
+                                HeightRequest="65"
                                 Margin="0,0,0,0"
                                 Orientation="Vertical"
                                 Scrolled="OnConsoleScrolled">

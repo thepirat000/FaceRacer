@@ -173,8 +173,6 @@ public partial class NextSessionsPage
                         {
                             _vm.UpdateSessions(sessions);
                         });
-
-                        AppendConsole($"Updated UI: sessions={sessions.Count}", Colors.LightGreen);
                     }
                 }
                 else
@@ -260,7 +258,7 @@ public partial class NextSessionsPage
                 SessionName = NormalizeSessionName(s.name ?? s.label ?? "—"),
                 StartsAtText = string.IsNullOrWhiteSpace(startTimeText) ? "—" : startTimeText,
                 StartsInMinutesText = startsInText,
-                DriversText = $"{ind + dbl}  ({ind}+{dbl})",
+                DriversText = $"{ind + dbl}",
                 IndividualText = ind.ToString(),
                 DoubleText = dbl.ToString(),
                 Drivers = driverRows
