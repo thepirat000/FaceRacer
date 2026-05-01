@@ -49,81 +49,9 @@ internal static class Program
             cts.Cancel();
         };
 
-        // Setup Business Logic
-        var httpClient = new HttpClient();
-        var api = new RaceFacerApi(httpClient);
-        var chart = new ChartLaps(httpClient);
-        var bl = new Services.FaceRacer(appSettings, api);
+        var faceRacerJob = new FaceRacerJob(appSettings, Console.WriteLine, cts);
 
-        if (!appSettings.BotDisabled)
-        {
-            // Setup Telegram Bot
-            Console.WriteLine("Setting up Telegram Bot...");
-            var telegramBot = new TelegramBot(appSettings, api, chart);
-            var pipeline = new ResiliencePipelineBuilder().AddRetry(RetryOptions).Build();
-            await pipeline.ExecuteAsync(async ct => await telegramBot.SetupBot(ct), cts.Token);
-        }
-
-        // Setup Notifiers
-        var notifiers = new List<INotifier> { new ConsoleNotifier(), new TelegramNotifier(appSettings) };
-
-        try
-        {
-            while (!cts.IsCancellationRequested)
-            {
-                DateTime? firstChangedDate = null;
-
-                // Update & Notify
-                try
-                {
-                    firstChangedDate = await bl.RunUpdateAsync(cancellationToken: cts.Token);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("##### Exception thrown during update:\n" + e);
-                }
-                
-                if (firstChangedDate.HasValue)
-                {
-                    Console.WriteLine("Running notifications...");
-                    try
-                    {
-                        await bl.NotifyAsync(firstChangedDate.Value, notifiers, cts.Token);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("##### Exception thrown during notify:\n" + e);
-                    }
-                }
-
-                if (appSettings.RunOnce)
-                {
-                    cts.Cancel(false);
-                }
-                else
-                {
-                    Console.WriteLine($"Wait for {appSettings.Pause} secs...\n");
-                    await Task.Delay(appSettings.Pause * 1000, cts.Token);
-                }
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // token triggered cancellation
-            Console.WriteLine("Operation canceled.");
-        }
-
-        Console.WriteLine("Exited gracefully.");
+        await faceRacerJob.ExecuteFaceRacerLoopAsync();
     }
 
-    private static readonly RetryStrategyOptions RetryOptions = new()
-    {
-        Delay = TimeSpan.Zero,
-        MaxRetryAttempts = 4,
-        OnRetry = args =>
-        {
-            Console.WriteLine($"Retry #{args.AttemptNumber}");
-            return default;
-        }
-    };
 }
