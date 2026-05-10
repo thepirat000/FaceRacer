@@ -90,10 +90,15 @@
                                                HorizontalTextAlignment="End"
                                                VerticalTextAlignment="Center" />
                                         <Label Grid.Column="3"
-                                               Text="{Binding DriversText}"
-                                               FontSize="14"
                                                HorizontalTextAlignment="End"
-                                               VerticalTextAlignment="Center" />
+                                               VerticalTextAlignment="Center">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="{Binding DriversText}" FontSize="14" />
+                                                    <Span Text="{Binding DetailsText, StringFormat=' {0}'}" FontSize="10" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
                                     </Grid>
 
                                     <Border.GestureRecognizers>

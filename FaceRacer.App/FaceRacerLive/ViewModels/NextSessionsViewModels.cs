@@ -130,6 +130,8 @@ internal sealed class NextSessionSummaryRowViewModel : INotifyPropertyChanged
         }
     }
 
+    public string DetailsText { get; set; }
+
     private bool _isSelected;
 }
 

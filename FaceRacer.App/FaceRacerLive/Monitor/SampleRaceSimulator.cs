@@ -192,10 +192,10 @@ public class SampleRaceSimulator
                         name = "Sesión #131",
                         plain_name = "SIGUIENTE SESION",
                         label = "Sesión #131",
-                        start_time = DateTime.Now.AddMinutes(5).ToString("HH:mm"),
+                        start_time = DateTime.Now.AddMinutes(-5).ToString("HH:mm"),
                         participants_text = $"Conductores: {session131Runs.Count}",
                         start_after = "Después 5",
-                        checkin_time = DateTime.Now.AddMinutes(-5).ToString("HH:mm"),
+                        checkin_time = DateTime.Now.AddMinutes(-15).ToString("HH:mm"),
                         time_left = null,
                         runs = new NextSessionRuns { data = session131Runs }
                     },

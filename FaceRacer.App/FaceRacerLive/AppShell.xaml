@@ -28,7 +28,8 @@
               Clicked="OnRankingClicked" />
 
     <MenuItem Text="Next sessions"
-              Clicked="OnNextSessionsClicked" />
+              Clicked="OnNextSessionsClicked" 
+              IconImageSource="upcoming.png"/>
 
     <MenuItem Text="Settings"
               IconImageSource="settings.png"

@@ -1,7 +1,6 @@
 ﻿#if ANDROID
 using Android.Content;
 using Android.Views.InputMethods;
-
 #endif
 using FaceRacerLive.Monitor;
 using FaceRacerLive.Services;

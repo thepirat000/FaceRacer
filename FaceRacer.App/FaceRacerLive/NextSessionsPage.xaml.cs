@@ -223,10 +223,6 @@ public partial class NextSessionsPage
             if (TimeOnly.TryParseExact(startTimeText, "HH:mm", out var startTime))
             {
                 var startDateTime = now.Date.Add(startTime.ToTimeSpan());
-                if (startDateTime < now)
-                {
-                    startDateTime = startDateTime.AddDays(1);
-                }
 
                 var remaining = startDateTime - now;
                 if (remaining < TimeSpan.Zero)
@@ -261,6 +257,7 @@ public partial class NextSessionsPage
                 DriversText = $"{ind + dbl}",
                 IndividualText = ind.ToString(),
                 DoubleText = dbl.ToString(),
+                DetailsText = $"({ind}+{dbl})",
                 Drivers = driverRows
             });
         }
