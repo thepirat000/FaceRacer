@@ -1,5 +1,6 @@
 ﻿using FaceRacer.Shared.Dto;
 
+using System.Text;
 using System.Text.Json;
 
 namespace FaceRacer.Shared;
@@ -24,15 +25,17 @@ public class RaceFacerApi
     public async Task<List<Ranking>> GetRankingByTimeAsync(int kartId, int trackId, Period period, CancellationToken cancellationToken)
     {
         var url = $"https://www.racefacer.com/ajax/user-ranking-by-time-box?track_configuration_id={trackId}&kart_id={kartId}&period={period.ToString().ToLowerInvariant()}";
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
 
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        var origin = Encoding.UTF8.GetString(Convert.FromBase64String("aHR0cHM6Ly93d3cucmFjZWZhY2VyLmNvbQ=="));
+        request.Headers.Add("Origin", origin);
+        request.Headers.Add("Referer", origin);
         request.Headers.Add("X-Requested-With", "XMLHttpRequest");
         request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome");
         
-        var response = await _httpClient.SendAsync(request, cancellationToken);
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
         response.EnsureSuccessStatusCode();
-
         var json = await response.Content.ReadAsStringAsync(cancellationToken);
 
         var jsonDoc = JsonDocument.Parse(json);
@@ -61,11 +64,11 @@ public class RaceFacerApi
 
     public async Task<UserBestRankingByTimeResult> GetUserBestRankingByTime(int kartId, int trackId, int userId)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"https://www.racefacer.com/ajax/user-best-ranking-by-time?user_id={userId}&track_configuration_id={trackId}&kart_id={kartId}");
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"https://www.racefacer.com/ajax/user-best-ranking-by-time?user_id={userId}&track_configuration_id={trackId}&kart_id={kartId}");
 
         request.Headers.Add("X-Requested-With", "XMLHttpRequest");
 
-        var response = await _httpClient.SendAsync(request);
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
         response.EnsureSuccessStatusCode();
 
@@ -78,11 +81,11 @@ public class RaceFacerApi
 
     public async Task<SessionChartData?> GetSessionChartData(int userId, string sessionId)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"https://www.racefacer.com/ajax/session/chart-data?user_id={userId}&session_id={sessionId}");
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"https://www.racefacer.com/ajax/session/chart-data?user_id={userId}&session_id={sessionId}");
 
         request.Headers.Add("X-Requested-With", "XMLHttpRequest");
 
-        var response = await _httpClient.SendAsync(request);
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
         response.EnsureSuccessStatusCode();
 
@@ -96,9 +99,9 @@ public class RaceFacerApi
     public async Task<SessionBoxResponse> GetUserSessionsAsync(int kartId, int trackId, int userId, int startFrom = 0)
     {
         var url = $"https://www.racefacer.com/ajax/sessions-boxes?user_id={userId}&track_configuration_id={trackId}&period=all&start_from={startFrom}&only_victories=0&only_best_time_sessions=0&kart_id={kartId}";
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add("X-Requested-With", "XMLHttpRequest");
-        var response = await _httpClient.SendAsync(request);
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
         var responseJson = await response.Content.ReadAsStringAsync();
 

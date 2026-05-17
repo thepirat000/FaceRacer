@@ -53,6 +53,7 @@ public class FaceRacerJob
             _logger.Invoke("Setting up Telegram Bot...");
             var pipeline = new ResiliencePipelineBuilder().AddRetry(RetryOptions).Build();
             await pipeline.ExecuteAsync(async ct => await _telegramBot.SetupBot(ct), _cts.Token);
+            _logger.Invoke("Telegram Bot setup complete.");
         }
 
         // Setup Notifiers

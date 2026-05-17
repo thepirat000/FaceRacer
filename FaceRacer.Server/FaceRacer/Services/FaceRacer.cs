@@ -1,20 +1,37 @@
 ﻿using FaceRacer.DB.Entities;
 using FaceRacer.Services.Notifiers;
-
-using Microsoft.EntityFrameworkCore;
-
-using System.Globalization;
 using FaceRacer.Settings;
 using FaceRacer.Shared;
 using FaceRacer.Shared.Dto;
+
+using Microsoft.EntityFrameworkCore;
+
+using Polly;
+using Polly.Retry;
+
+using Serilog;
+
+using System.Globalization;
 
 namespace FaceRacer.Services;
 
 public class FaceRacer
 {
     public readonly RaceFacerApi _raceFacerApi;
-
     private AppSettings _appSettings;
+
+    private static readonly RetryStrategyOptions RetryOptions = new()
+    {
+        Delay = TimeSpan.Zero,
+        MaxRetryAttempts = 4,
+        OnRetry = args =>
+        {
+            var period = args.Context.Properties.GetValue(PeriodPropertyKey, default);
+            Console.WriteLine($"Error when getting {period}: {args.Outcome.Exception?.Message} - Retrying #{args.AttemptNumber + 1}...");
+            return default;
+        }
+    };
+    private static readonly ResiliencePropertyKey<Period> PeriodPropertyKey = new(nameof(Period));
 
     public FaceRacer(AppSettings appSettings, RaceFacerApi raceFacerApi)
     {
@@ -155,31 +172,39 @@ public class FaceRacer
 
     public async Task<Dictionary<Period, List<Ranking>>> GetRankingsFromApi(CancellationToken cancellationToken)
     {
-        var tasks = new[]
-        {
-            _raceFacerApi.GetRankingByTimeAsync(_appSettings.KartId, _appSettings.TrackId, Period.Day, cancellationToken),
-            _raceFacerApi.GetRankingByTimeAsync(_appSettings.KartId, _appSettings.TrackId, Period.Week, cancellationToken),
-            _raceFacerApi.GetRankingByTimeAsync(_appSettings.KartId, _appSettings.TrackId, Period.Month, cancellationToken),
-            _raceFacerApi.GetRankingByTimeAsync(_appSettings.KartId, _appSettings.TrackId, Period.Year, cancellationToken),
-            _raceFacerApi.GetRankingByTimeAsync(_appSettings.KartId, _appSettings.TrackId, Period.All, cancellationToken)
-        };
-            
-        var results = await Task.WhenAll(tasks);
+        var results = new Dictionary<Period, List<Ranking>>();
 
-        var dayResults = results[0];
-        var weekResults = results[1];
-        var monthResults = results[2];
-        var yearResults = results[3];
-        var allResults = results[4];
-            
-        return new Dictionary<Period, List<Ranking>>()
+        await TryGetRanking(results, Period.Day, cancellationToken);
+        await TryGetRanking(results, Period.Week, cancellationToken);
+        await TryGetRanking(results, Period.Month, cancellationToken);
+        await TryGetRanking(results, Period.Year, cancellationToken);
+        await TryGetRanking(results, Period.All, cancellationToken);
+        
+        return results;
+    }
+
+    private async Task TryGetRanking(Dictionary<Period, List<Ranking>>  results, Period period, CancellationToken cancellationToken)
+    {
+        var pipeline = new ResiliencePipelineBuilder().AddRetry(RetryOptions).Build();
+        try
         {
-            { Period.Day, dayResults },
-            { Period.Week, weekResults },
-            { Period.Month, monthResults },
-            { Period.Year, yearResults },
-            { Period.All, allResults }
-        };
+            Log($"Getting ranking for {period} from API...");
+
+            var context = ResilienceContextPool.Shared.Get(cancellationToken);
+
+            results[period] = await pipeline.ExecuteAsync(
+                async ctx =>
+                {
+                    ctx.Properties.Set(PeriodPropertyKey, period);
+
+                    return await _raceFacerApi.GetRankingByTimeAsync(_appSettings.KartId, _appSettings.TrackId, period, ctx.CancellationToken);
+                },
+                context);
+        }
+        catch (Exception ex)
+        {
+            Log($"Error getting ranking for {period}: {ex.Message}");
+        }
     }
 
     private RankingData CreateRankingDataEntity(int trackId, Period period, DateOnly periodDate, List<Ranking> ranking)
