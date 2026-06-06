@@ -26,6 +26,8 @@ public static class SessionBoxesParser
         return sessionNodes
             .Select(sessionNode =>
             {
+                var userId = int.Parse(sessionNode.GetAttributeValue("data-user-id", "0").Trim());
+
                 var sessionId = sessionNode.GetAttributeValue("data-session-uuid", "").Trim();
 
                 var bestTime = sessionNode
@@ -77,6 +79,7 @@ public static class SessionBoxesParser
                     ResultPositionText: resultPos,
                     Position: resultPosNumber,
                     SessionUrl: sessionUrl,
+                    UserId: userId,
                     Username: username,
                     UserFullName: userFullName
                 );

@@ -1,10 +1,4 @@
-﻿using ScottPlot.Palettes;
-
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace FaceRacer.Settings
+﻿namespace FaceRacer.Settings
 {
     public class AppSettings
     {
@@ -24,9 +18,17 @@ namespace FaceRacer.Settings
 
         public string SessionUrl { get; set; }
 
+        public WatchRacersSettings WatchRacers { get; set; } = new();
+
         internal string GetSessionUrl(string username, string sessionId)
         {
             return SessionUrl == null ? null : string.Format(SessionUrl, username, sessionId);
         }
+    }
+
+    public class WatchRacersSettings
+    {
+        public List<int> UserIds { get; set; } = [];
+        public int MaxDays { get; set; }
     }
 }

@@ -361,7 +361,7 @@ public class TelegramBot
     // Handle message: /sessions <userId> (responds with the user's sessions)
     private async Task HandleMessageSessions(ITelegramBotClient bot, Message message, int userId, int maxSessions, bool showAsTable, CancellationToken cancellationToken)
     {
-        var firstPage = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, 0);
+        var firstPage = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, 0, cancellationToken);
 
         if (firstPage.error || !firstPage.success)
         {
@@ -395,7 +395,7 @@ public class TelegramBot
 
                 var tasks = offsets.Select(async startFrom =>
                 {
-                    var page = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, startFrom);
+                    var page = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, startFrom, cancellationToken);
                     if (page.error || !page.success)
                     {
                         return (StartFrom: startFrom, Sessions: []);
@@ -524,7 +524,7 @@ public class TelegramBot
             sessionPosition = Math.Max(0, sp - 1);
         }
 
-        var sessionData = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, sessionPosition);
+        var sessionData = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, sessionPosition, cancellationToken);
 
         if (sessionData.error || !sessionData.success)
         {

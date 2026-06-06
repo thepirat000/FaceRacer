@@ -19,7 +19,7 @@ public class TelegramNotifier : INotifier
         _botClient = new TelegramBotClient(_appSettings.TelegramBotToken);
     }
 
-    public async Task NotifyAsync(List<RecordChange> changes, CancellationToken cancellationToken)
+    public async Task NotifyUpdateAsync(List<RecordChange> changes, CancellationToken cancellationToken)
     {
         // Only notify about sessions in the last 7 days. The RaceFacer API often returns old data...
         var minDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-7));

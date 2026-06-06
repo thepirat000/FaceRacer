@@ -14,7 +14,7 @@ public class FaceRacerJob
     private readonly Action<string> _logger;
     private readonly CancellationTokenSource _cts;
 
-    private readonly Services.FaceRacer _faceRacerService;
+    private readonly Services.FaceRacerService _faceRacerService;
     private readonly TelegramBot _telegramBot = null;
 
     public FaceRacerJob(AppSettings serverSettings, Action<string> logger, CancellationTokenSource cts)
@@ -26,7 +26,7 @@ public class FaceRacerJob
         var httpClient = new HttpClient();
         var api = new RaceFacerApi(httpClient);
         var chart = new ChartLaps(httpClient);
-        _faceRacerService = new Services.FaceRacer(_serverSettings, api);
+        _faceRacerService = new Services.FaceRacerService(_serverSettings, api);
         if (!_serverSettings.BotDisabled)
         {
             _telegramBot = new TelegramBot(_serverSettings, api, chart);
@@ -80,7 +80,7 @@ public class FaceRacerJob
                     _logger.Invoke("Running notifications...");
                     try
                     {
-                        await _faceRacerService.NotifyAsync(firstChangedDate.Value, notifiers, _cts.Token);
+                        await _faceRacerService.NotifyUpdateAsync(firstChangedDate.Value, notifiers, _cts.Token);
                     }
                     catch (Exception e)
                     {
@@ -88,6 +88,10 @@ public class FaceRacerJob
                     }
                 }
 
+                // Check for racer alerts & Notify
+                var userIds = _serverSettings.WatchRacers.UserIds;
+                _ = userIds.Count > 0 ? await _faceRacerService.GetUsersLastSessionAndNotifyAsync(userIds, notifiers, _cts.Token) : [];
+                
                 if (_serverSettings.RunOnce)
                 {
                     _cts.Cancel(false);

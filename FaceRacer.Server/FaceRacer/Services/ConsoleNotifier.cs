@@ -4,7 +4,7 @@ namespace FaceRacer.Services.Notifiers;
 
 public class ConsoleNotifier : INotifier
 {
-    public Task NotifyAsync(List<RecordChange> changes, CancellationToken cancellationToken)
+    public Task NotifyUpdateAsync(List<RecordChange> changes, CancellationToken cancellationToken)
     {
         foreach (var change in changes)
         {

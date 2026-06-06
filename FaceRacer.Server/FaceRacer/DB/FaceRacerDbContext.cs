@@ -11,6 +11,8 @@ public class FaceRacerDbContext : DbContext
 
     public DbSet<RecordChange> RecordChanges { get; set; }
 
+    public DbSet<RacerLastSession> RacerLastSessions { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlite("Data Source=ranking.db");

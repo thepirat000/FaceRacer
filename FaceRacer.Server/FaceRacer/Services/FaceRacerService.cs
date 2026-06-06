@@ -9,13 +9,14 @@ using Microsoft.EntityFrameworkCore;
 using Polly;
 using Polly.Retry;
 
-using Serilog;
+using ScottPlot.Statistics;
 
+using System.Collections.Concurrent;
 using System.Globalization;
 
 namespace FaceRacer.Services;
 
-public class FaceRacer
+public class FaceRacerService
 {
     public readonly RaceFacerApi _raceFacerApi;
     private AppSettings _appSettings;
@@ -33,7 +34,7 @@ public class FaceRacer
     };
     private static readonly ResiliencePropertyKey<Period> PeriodPropertyKey = new(nameof(Period));
 
-    public FaceRacer(AppSettings appSettings, RaceFacerApi raceFacerApi)
+    public FaceRacerService(AppSettings appSettings, RaceFacerApi raceFacerApi)
     {
         _raceFacerApi = raceFacerApi;
         _appSettings = appSettings;
@@ -110,7 +111,7 @@ public class FaceRacer
         return hasDiffs ? now : null;
     }
 
-    public async Task NotifyAsync(DateTime firstChangeDate, List<INotifier> notifiers, CancellationToken cancellationToken)
+    public async Task NotifyUpdateAsync(DateTime firstChangeDate, List<INotifier> notifiers, CancellationToken cancellationToken)
     {
         List<RecordChange> changes;
 
@@ -136,7 +137,7 @@ public class FaceRacer
 
         foreach (var notifier in notifiers)
         {
-            await notifier.NotifyAsync(changes, cancellationToken);
+            await notifier.NotifyUpdateAsync(changes, cancellationToken);
         }
     }
 
@@ -172,18 +173,22 @@ public class FaceRacer
 
     public async Task<Dictionary<Period, List<Ranking>>> GetRankingsFromApi(CancellationToken cancellationToken)
     {
-        var results = new Dictionary<Period, List<Ranking>>();
+        var results = new ConcurrentDictionary<Period, List<Ranking>>();
 
-        await TryGetRanking(results, Period.Day, cancellationToken);
-        await TryGetRanking(results, Period.Week, cancellationToken);
-        await TryGetRanking(results, Period.Month, cancellationToken);
-        await TryGetRanking(results, Period.Year, cancellationToken);
-        await TryGetRanking(results, Period.All, cancellationToken);
-        
-        return results;
+        var options = new ParallelOptions { MaxDegreeOfParallelism = 5, CancellationToken = cancellationToken };
+
+        var periods = Enum.GetValues<Period>();
+
+        await Parallel.ForEachAsync(periods, options,
+            async (period, ct) =>
+            {
+                await TryGetRanking(results, period, ct);
+            });
+
+        return results.ToDictionary();
     }
 
-    private async Task TryGetRanking(Dictionary<Period, List<Ranking>>  results, Period period, CancellationToken cancellationToken)
+    private async Task TryGetRanking(IDictionary<Period, List<Ranking>>  results, Period period, CancellationToken cancellationToken)
     {
         var pipeline = new ResiliencePipelineBuilder().AddRetry(RetryOptions).Build();
         try
@@ -251,6 +256,54 @@ public class FaceRacer
             username = r.username,
             age_group = r.age_group
         });
+    }
+
+    public async Task<Dictionary<int, SessionInfo>> GetUsersLastSessionAndNotifyAsync(List<int> userIds, List<INotifier> notifiers, CancellationToken cancellationToken)
+    {
+        var options = new ParallelOptions { MaxDegreeOfParallelism = 5, CancellationToken = cancellationToken };
+
+        var usersLastSession = new ConcurrentDictionary<int, SessionInfo>();
+
+        await Parallel.ForEachAsync(userIds, options,
+            async (userId, ct) =>
+            {
+                var userSessionsResponse = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, 0, ct);
+
+                if (userSessionsResponse.error || userSessionsResponse.total == 0)
+                {
+                    return;
+                }
+
+                var lastUserSession = (SessionBoxesParser.Parse(userSessionsResponse.html, _appSettings)).FirstOrDefault();
+
+                if (lastUserSession != null)
+                {
+                    usersLastSession[userId] = lastUserSession;
+                }
+            });
+
+        if (!usersLastSession.IsEmpty)
+        {
+            Log("Running racer alerts...");
+
+            foreach (var userId in userIds)
+            {
+                if (usersLastSession.TryGetValue(userId, out var session))
+                {
+                    var daysAgo = Math.Abs((DateTime.Today - session.Date.ToDateTime(TimeOnly.MinValue)).Days);
+                    
+                    if (daysAgo < _appSettings.WatchRacers.MaxDays)
+                    {
+                        // TODO: Notify new sessions. Blocked by RaceFacer API not returning new sessions since May 2026 
+                        //notifiers.ForEach(notifier => notifier.NotifyLastSessionAsync(session, cancellationToken));
+                        // Log the data
+                        Log($"User {session.UserFullName} ({session.UserId}) - Last session: {session.Date} - Best time: {session.BestTime} - Session ID: {session.SessionId}");
+                    }
+                }
+            }
+        }
+        
+        return usersLastSession.ToDictionary();
     }
 
     private static void Log(string log)

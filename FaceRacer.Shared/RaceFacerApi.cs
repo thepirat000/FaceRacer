@@ -96,14 +96,14 @@ public class RaceFacerApi
         return result?.data;
     }
 
-    public async Task<SessionBoxResponse> GetUserSessionsAsync(int kartId, int trackId, int userId, int startFrom = 0)
+    public async Task<SessionBoxResponse> GetUserSessionsAsync(int kartId, int trackId, int userId, int startFrom, CancellationToken cancellationToken)
     {
         var url = $"https://www.racefacer.com/ajax/sessions-boxes?user_id={userId}&track_configuration_id={trackId}&period=all&start_from={startFrom}&only_victories=0&only_best_time_sessions=0&kart_id={kartId}";
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add("X-Requested-With", "XMLHttpRequest");
-        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         response.EnsureSuccessStatusCode();
-        var responseJson = await response.Content.ReadAsStringAsync();
+        var responseJson = await response.Content.ReadAsStringAsync(cancellationToken);
 
         var responseObject = JsonSerializer.Deserialize<SessionBoxResponse>(responseJson, SerializerOptions);
         
