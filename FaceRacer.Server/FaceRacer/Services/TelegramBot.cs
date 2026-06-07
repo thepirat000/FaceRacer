@@ -82,13 +82,17 @@ public class TelegramBot
     // Handle normal messages
     private async Task HandleMessageAsync(ITelegramBotClient bot, Message message, CancellationToken cancellationToken)
     {
-        var msg = message.Text;
+        var msg = message.Text?.ToLowerInvariant() ?? "";
 
         Console.WriteLine($"Message received: {msg}");
 
         if (msg == "/start")
         {
             await bot.SendMessage(chatId: message.Chat.Id, text: "*Hello!*", parseMode: ParseMode.Markdown, linkPreviewOptions: LinkPreviewOptions, cancellationToken: cancellationToken);
+        }
+        else if (msg == "ping")
+        {
+            await bot.SendMessage(chatId: message.Chat.Id, text: "*Pong!*", parseMode: ParseMode.Markdown, linkPreviewOptions: LinkPreviewOptions, cancellationToken: cancellationToken);
         }
         else if (msg.StartsWith("/top", StringComparison.OrdinalIgnoreCase) || msg.StartsWith("top", StringComparison.OrdinalIgnoreCase))
         {

@@ -84,13 +84,21 @@ public class FaceRacerJob
                     }
                     catch (Exception e)
                     {
-                        _logger.Invoke("##### Exception thrown during notify:\n" + e);
+                        _logger.Invoke("##### Exception thrown during update notify:\n" + e);
                     }
                 }
 
                 // Check for racer alerts & Notify
                 var userIds = _serverSettings.WatchRacers.UserIds;
-                _ = userIds.Count > 0 ? await _faceRacerService.GetUsersLastSessionAndNotifyAsync(userIds, notifiers, _cts.Token) : [];
+                try
+                {
+                    _ = userIds.Count > 0 ? await _faceRacerService.GetUsersLastSessionAndNotifyAsync(userIds, notifiers, _cts.Token) : [];
+                }
+                catch (Exception e)
+                {
+                    _logger.Invoke("##### Exception thrown during racers notify:\n" + e);
+                }
+
                 
                 if (_serverSettings.RunOnce)
                 {
