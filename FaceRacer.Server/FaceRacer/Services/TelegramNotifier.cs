@@ -1,6 +1,9 @@
-﻿using System.Text;
-using FaceRacer.DB.Entities;
+﻿using FaceRacer.DB.Entities;
 using FaceRacer.Settings;
+using FaceRacer.Shared.Dto;
+
+using System.Text;
+
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types.Enums;
@@ -91,5 +94,25 @@ public class TelegramNotifier : INotifier
             }
             
         }
+    }
+
+    public async Task NotifyLastSessionAsync(SessionInfo session, CancellationToken cancellationToken)
+    {
+        var keyboard = new InlineKeyboardMarkup(new[]
+        {
+            new[]
+            {
+                InlineKeyboardButton.WithCallbackData("Session", $"S:{session.UserId},{session.SessionId},{session.Date}"),
+                InlineKeyboardButton.WithCallbackData("Racer", $"R:{session.UserId}"),
+                InlineKeyboardButton.WithCallbackData("Sessions", $"L:{session.UserId}")
+            }
+        });
+
+        var message = $"🏁 New session for [{session.UserFullName}] !!!\n" +
+                      $"Best lap: *{session.BestTime}*\n" +
+                      $"Session: [{session.Date:yyyy-MM-dd} {session.ClockText}]({_appSettings.GetSessionUrl(session.Username, session.SessionId)})\n" +
+                      $"Pos: {session.ResultPositionText}";
+
+        await _botClient.SendMessage(chatId: _appSettings.TelegramChatId, text: message, parseMode: ParseMode.Markdown, replyMarkup: keyboard, cancellationToken: cancellationToken);
     }
 }

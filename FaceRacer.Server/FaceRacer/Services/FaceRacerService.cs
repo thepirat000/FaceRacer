@@ -258,6 +258,8 @@ public class FaceRacerService
         });
     }
 
+    private static readonly Dictionary<int, string> UserLastSessionCache = new();
+
     public async Task<Dictionary<int, SessionInfo>> GetUsersLastSessionAndNotifyAsync(List<int> userIds, List<INotifier> notifiers, CancellationToken cancellationToken)
     {
         var options = new ParallelOptions { MaxDegreeOfParallelism = 5, CancellationToken = cancellationToken };
@@ -292,12 +294,15 @@ public class FaceRacerService
                 {
                     var daysAgo = Math.Abs((DateTime.Today - session.Date.ToDateTime(TimeOnly.MinValue)).Days);
                     
-                    if (daysAgo < _appSettings.WatchRacers.MaxDays)
+                    if (daysAgo < _appSettings.WatchRacers.MaxDays && (!UserLastSessionCache.TryGetValue(userId, out var lastSessionId) || lastSessionId != session.SessionId))
                     {
-                        // TODO: Notify new sessions. Blocked by RaceFacer API not returning new sessions since May 2026 
-                        //notifiers.ForEach(notifier => notifier.NotifyLastSessionAsync(session, cancellationToken));
-                        // Log the data
-                        Log($"User {session.UserFullName} ({session.UserId}) - Last session: {session.Date} - Best time: {session.BestTime} - Session ID: {session.SessionId}");
+                        // Notify new sessions. 
+                        foreach (var notifier in notifiers)
+                        {
+                            await notifier.NotifyLastSessionAsync(session, cancellationToken);
+                        }
+
+                        UserLastSessionCache[userId] = session.SessionId;
                     }
                 }
             }

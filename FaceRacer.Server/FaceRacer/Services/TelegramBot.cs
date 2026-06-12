@@ -599,7 +599,7 @@ public class TelegramBot
                 return $"{(isBest ? "*" : "")}{index + 1} - {TimeSpan.FromSeconds(time):mm\\:ss\\.fff}{(isBest ? "* ⏱️ (best)" : "")}";
             })) + '\n';
 
-            var title = GetFirstLine(message.Caption);
+            var title = GetFirstLine(message.Caption ?? message.Text);
 
             var responseMessage = title + "\n" +
                                   $"*Session Data for {date:yyyy-MM-dd}*\n" +
