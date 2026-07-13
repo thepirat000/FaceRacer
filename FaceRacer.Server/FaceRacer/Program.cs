@@ -1,13 +1,6 @@
 using FaceRacer.DB;
-using FaceRacer.Services;
-using FaceRacer.Services.Notifiers;
 using FaceRacer.Settings;
-using FaceRacer.Shared;
-
 using Microsoft.Extensions.Configuration;
-
-using Polly;
-using Polly.Retry;
 
 namespace FaceRacer;
 

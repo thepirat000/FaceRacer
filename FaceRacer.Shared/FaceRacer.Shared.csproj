@@ -9,5 +9,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Polly" Version="8.6.6" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+		<PackageReference Include="HtmlAgilityPack.CssSelectors.NetCore" Version="1.2.1" />
 	</ItemGroup>
 </Project>

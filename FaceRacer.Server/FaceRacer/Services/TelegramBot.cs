@@ -1,5 +1,4 @@
 ﻿using FaceRacer.DB;
-using FaceRacer.Settings;
 using FaceRacer.Shared;
 using FaceRacer.Shared.Dto;
 
@@ -8,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-
+using FaceRacer.Settings;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
@@ -365,70 +364,21 @@ public class TelegramBot
     // Handle message: /sessions <userId> (responds with the user's sessions)
     private async Task HandleMessageSessions(ITelegramBotClient bot, Message message, int userId, int maxSessions, bool showAsTable, CancellationToken cancellationToken)
     {
-        var firstPage = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, 0, cancellationToken);
+        var sessionsData = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, _appSettings.SessionUrl, userId, maxSessions, cancellationToken);
 
-        if (firstPage.error || !firstPage.success)
+        if (sessionsData.Error || !sessionsData.Success)
         {
             await bot.SendMessage(chatId: message.Chat.Id, text: $"Error when getting sessions for user '{userId}'.", cancellationToken: cancellationToken);
             return;
         }
 
-        if (firstPage.total <= 0)
+        if (sessionsData.Total <= 0)
         {
             await bot.SendMessage(chatId: message.Chat.Id, text: $"No sessions for user '{userId}'.", cancellationToken: cancellationToken);
             return;
         }
 
-        var total = Math.Min(maxSessions, firstPage.total);
-
-        var firstSessions = SessionBoxesParser.Parse(firstPage.html, _appSettings);
-        var allSessions = firstSessions.ToList();
-
-        if (allSessions.Count < total)
-        {
-            // Fetch remaining pages in parallel.
-            var pageSize = firstSessions.Count;
-
-            if (pageSize > 0)
-            {
-                var offsets = Enumerable
-                    .Range(1, (int)Math.Ceiling((total - pageSize) / (double)pageSize))
-                    .Select(i => i * pageSize)
-                    .Where(offset => offset < total)
-                    .ToArray();
-
-                var tasks = offsets.Select(async startFrom =>
-                {
-                    var page = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, startFrom, cancellationToken);
-                    if (page.error || !page.success)
-                    {
-                        return (StartFrom: startFrom, Sessions: []);
-                    }
-
-                    var sessions = SessionBoxesParser.Parse(page.html, _appSettings).ToList();
-                    return (StartFrom: startFrom, Sessions: (IReadOnlyList<SessionInfo>)sessions);
-                });
-
-                var results = await Task.WhenAll(tasks);
-
-                foreach (var result in results.OrderBy(r => r.StartFrom))
-                {
-                    allSessions.AddRange(result.Sessions);
-
-                    if (allSessions.Count >= total)
-                    {
-                        break;
-                    }
-                }
-
-                if (allSessions.Count > total)
-                {
-                    allSessions = allSessions.Take(total).ToList();
-                }
-            }
-        }
-
-        var responseMessage = MakeUserSessionsMessage(allSessions, firstPage.total, showAsTable);
+        var responseMessage = MakeUserSessionsMessage(sessionsData.Sessions, sessionsData.Total, showAsTable);
 
         await bot.SendMessage(chatId: message.Chat.Id, text: responseMessage, parseMode: showAsTable ? ParseMode.Markdown : ParseMode.Html, linkPreviewOptions: LinkPreviewOptions, cancellationToken: cancellationToken);
     }
@@ -528,21 +478,21 @@ public class TelegramBot
             sessionPosition = Math.Max(0, sp - 1);
         }
 
-        var sessionData = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, sessionPosition, cancellationToken);
+        var sessionData = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, _appSettings.SessionUrl, userId, sessionPosition + 1, cancellationToken);
 
-        if (sessionData.error || !sessionData.success)
+        if (sessionData.Error || !sessionData.Success)
         {
             await bot.SendMessage(chatId: message.Chat.Id, text: $"Error when getting sessions for user '{userId}'.", cancellationToken: cancellationToken);
             return;
         }
 
-        if (sessionData.total <= 0)
+        if (sessionData.Total <= 0)
         {
             await bot.SendMessage(chatId: message.Chat.Id, text: $"No sessions for user '{userId}'.", cancellationToken: cancellationToken);
             return;
         }
 
-        var session = SessionBoxesParser.Parse(sessionData.html, _appSettings).FirstOrDefault();
+        var session = sessionData.Sessions.Skip(sessionPosition).FirstOrDefault();
 
         if (session != null)
         {
@@ -567,11 +517,11 @@ public class TelegramBot
                                       $"Laps: {lapTimes.Count}\n" +
                                       laps +
                                       $"Average Time: {TimeSpan.FromSeconds(lapTimes.Average()):mm\\:ss\\.fff}\n";
-                
+            
                 var chartTitle = $"{title} - {date:yyyy-MM-dd}";
                 await using var chart = _chart.Graph(lapTimes.ToArray(), true, chartTitle);
 
-                await bot.SendPhoto(chatId: message.Chat.Id, photo: InputFile.FromStream(chart, "laps_graph.png"), caption: responseMessage, ParseMode.Markdown, cancellationToken: cancellationToken);
+                await bot.SendPhoto(chatId: message.Chat.Id, photo: InputFile.FromStream(chart, "laps_graph.png"), caption: responseMessage, parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
             }
             else
             {
@@ -610,7 +560,7 @@ public class TelegramBot
             var chartTitle = title[2..] + $" - {date:yyyy-MM-dd}";
             await using var chart = _chart.Graph(lapTimes.ToArray(), true, chartTitle);
 
-            await bot.SendPhoto(chatId: message.Chat.Id, photo: InputFile.FromStream(chart, "laps_graph.png"), caption: responseMessage, ParseMode.Markdown, cancellationToken: cancellationToken);
+            await bot.SendPhoto(chatId: message.Chat.Id, photo: InputFile.FromStream(chart, "laps_graph.png"), caption: responseMessage, parseMode: ParseMode.Markdown, cancellationToken: cancellationToken);
         }
         else
         {

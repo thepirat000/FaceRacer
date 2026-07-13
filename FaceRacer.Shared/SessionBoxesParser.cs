@@ -1,21 +1,24 @@
-﻿using FaceRacer.Settings;
-
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
 
 using System.Globalization;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack.CssSelectors.NetCore;
 using FaceRacer.Shared.Dto;
 
-namespace FaceRacer.Services;
+namespace FaceRacer.Shared;
 
-public static class SessionBoxesParser
+internal static class SessionBoxesParser
 {
     private static readonly Regex ClockRegex = new Regex(@"\d{2}:\d{2}");
     private static readonly Regex ProfileNameMatchRegex = new Regex(@"/profile/([^/?#]+)");
 
-    public static List<SessionInfo> Parse(string html, AppSettings appSettings)
+    public static List<SessionInfo> Parse(string html, string? sessionUrlFormat)
     {
+        if (string.IsNullOrWhiteSpace(html))
+        {
+            return new List<SessionInfo>();
+        }
+
         var doc = new HtmlDocument();
         doc.LoadHtml(html);
 
@@ -69,7 +72,7 @@ public static class SessionBoxesParser
 
                 var resultPosNumber = resultPos.StartsWith("#") && resultPos.Contains("/") ? int.Parse(resultPos.Substring(1).Split('/')[0]) : int.MaxValue;
 
-                var sessionUrl = appSettings.GetSessionUrl(username, sessionId);
+                var sessionUrl = sessionUrlFormat == null ? null : string.Format(sessionUrlFormat, username, sessionId);
 
                 return new SessionInfo(
                     SessionId: sessionId,

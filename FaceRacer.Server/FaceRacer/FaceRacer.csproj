@@ -40,9 +40,6 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="10.0.1" />
 
 		<PackageReference Include="ScottPlot" Version="5.1.57" />
-
-		<PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
-		<PackageReference Include="HtmlAgilityPack.CssSelectors.NetCore" Version="1.2.1" />
 	</ItemGroup>
 
 	<ItemGroup>

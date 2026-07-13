@@ -1,9 +1,8 @@
 ﻿using FaceRacer.DB.Entities;
-using FaceRacer.Settings;
 using FaceRacer.Shared.Dto;
 
 using System.Text;
-
+using FaceRacer.Settings;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types.Enums;

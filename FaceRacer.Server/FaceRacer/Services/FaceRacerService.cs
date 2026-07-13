@@ -1,6 +1,5 @@
 ﻿using FaceRacer.DB.Entities;
 using FaceRacer.Services.Notifiers;
-using FaceRacer.Settings;
 using FaceRacer.Shared;
 using FaceRacer.Shared.Dto;
 
@@ -9,10 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Polly;
 using Polly.Retry;
 
-using ScottPlot.Statistics;
-
 using System.Collections.Concurrent;
 using System.Globalization;
+using FaceRacer.Settings;
 
 namespace FaceRacer.Services;
 
@@ -269,14 +267,14 @@ public class FaceRacerService
         await Parallel.ForEachAsync(userIds, options,
             async (userId, ct) =>
             {
-                var userSessionsResponse = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, userId, 0, ct);
+                var userSessionsResponse = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, _appSettings.SessionUrl, userId, 1, ct);
 
-                if (userSessionsResponse.error || userSessionsResponse.total == 0)
+                if (userSessionsResponse.Error || userSessionsResponse.Total == 0)
                 {
                     return;
                 }
 
-                var lastUserSession = (SessionBoxesParser.Parse(userSessionsResponse.html, _appSettings)).FirstOrDefault();
+                var lastUserSession = userSessionsResponse.Sessions.FirstOrDefault();
 
                 if (lastUserSession != null)
                 {
