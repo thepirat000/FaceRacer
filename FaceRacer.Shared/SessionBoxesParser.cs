@@ -72,6 +72,7 @@ internal static class SessionBoxesParser
                 }
 
                 var resultPosNumber = resultPos.StartsWith("#") && resultPos.Contains("/") ? int.Parse(resultPos.Substring(1).Split('/')[0]) : int.MaxValue;
+                var racerCount = resultPos.Contains("/") ? int.Parse(resultPos.Split('/')[1]) : 0;
 
                 var sessionUrl = sessionUrlFormat == null ? null : string.Format(sessionUrlFormat, username, sessionId);
                 var lapDetails = includeLapDetails ? ExtractLapDetails(sessionNode) : null;
@@ -83,6 +84,7 @@ internal static class SessionBoxesParser
                     ClockText: clockText,
                     ResultPositionText: resultPos,
                     Position: resultPosNumber,
+                    RacerCount: racerCount,
                     SessionUrl: sessionUrl,
                     UserId: userId,
                     Username: username,
@@ -135,6 +137,7 @@ internal static class SessionBoxesParser
         return 0;
     }
 
+    // TODO: Review this, it's extracting the wrong username sometimes
     private static string? ExtractUsername(HtmlDocument doc)
     {
         // Expected: <a href="https://www.racefacer.com/en/profile/{USER_NAME}" class="first">

@@ -8,6 +8,7 @@ public sealed record SessionInfo
     string ClockText, 
     string ResultPositionText, 
     int Position, 
+    int RacerCount,
     string? SessionUrl, 
     int UserId,
     string? Username, 
