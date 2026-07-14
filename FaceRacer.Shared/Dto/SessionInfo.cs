@@ -8,8 +8,9 @@ public sealed record SessionInfo
     string ClockText, 
     string ResultPositionText, 
     int Position, 
-    string SessionUrl, 
+    string? SessionUrl, 
     int UserId,
-    string Username, 
-    string UserFullName
+    string? Username, 
+    string UserFullName,
+    List<SessionLapInfo>? LapDetails
 );

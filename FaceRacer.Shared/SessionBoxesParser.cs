@@ -11,8 +11,9 @@ internal static class SessionBoxesParser
 {
     private static readonly Regex ClockRegex = new Regex(@"\d{2}:\d{2}");
     private static readonly Regex ProfileNameMatchRegex = new Regex(@"/profile/([^/?#]+)");
+    private static readonly Regex LapNumberRegex = new Regex(@"\d+");
 
-    public static List<SessionInfo> Parse(string html, string? sessionUrlFormat)
+    public static List<SessionInfo> Parse(string html, string? sessionUrlFormat, bool includeLapDetails)
     {
         if (string.IsNullOrWhiteSpace(html))
         {
@@ -73,6 +74,7 @@ internal static class SessionBoxesParser
                 var resultPosNumber = resultPos.StartsWith("#") && resultPos.Contains("/") ? int.Parse(resultPos.Substring(1).Split('/')[0]) : int.MaxValue;
 
                 var sessionUrl = sessionUrlFormat == null ? null : string.Format(sessionUrlFormat, username, sessionId);
+                var lapDetails = includeLapDetails ? ExtractLapDetails(sessionNode) : null;
 
                 return new SessionInfo(
                     SessionId: sessionId,
@@ -84,11 +86,53 @@ internal static class SessionBoxesParser
                     SessionUrl: sessionUrl,
                     UserId: userId,
                     Username: username,
-                    UserFullName: userFullName
+                    UserFullName: userFullName,
+                    LapDetails: lapDetails
                 );
             })
             .Where(s => !string.IsNullOrWhiteSpace(s.SessionId))
             .ToList();
+    }
+
+    private static List<SessionLapInfo> ExtractLapDetails(HtmlNode sessionNode)
+    {
+        return sessionNode
+            .QuerySelectorAll(".tab_laps .table_content.session_content .row")
+            .Select(row =>
+            {
+                var lapName = row.QuerySelector(".lap-name")?.InnerText.Trim() ?? string.Empty;
+                var lapTimeNode = row.QuerySelector("a.time_laps.first");
+
+                if (string.IsNullOrWhiteSpace(lapName) || lapTimeNode == null)
+                {
+                    return null;
+                }
+
+                var lapNumber = ParseLapNumber(
+                    row.QuerySelector(".position")?.InnerText.Trim() ?? string.Empty,
+                    lapName);
+
+                return new SessionLapInfo(Lap: lapNumber, Time: lapTimeNode.InnerText.Trim());
+            })
+            .Where(lap => lap != null)
+            .Cast<SessionLapInfo>()
+            .ToList();
+    }
+
+    private static int ParseLapNumber(string positionText, string lapName)
+    {
+        if (int.TryParse(positionText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var lapNumber))
+        {
+            return lapNumber;
+        }
+
+        var match = LapNumberRegex.Match(lapName);
+        if (match.Success && int.TryParse(match.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out lapNumber))
+        {
+            return lapNumber;
+        }
+
+        return 0;
     }
 
     private static string? ExtractUsername(HtmlDocument doc)

@@ -69,9 +69,10 @@ public class TelegramNotifier : INotifier
             {
                 new[]
                 {
-                    InlineKeyboardButton.WithCallbackData("Session", $"S:{last.Diff.user_id},{mostRecentSessionUuid},{last.Diff.date}"),
+                    InlineKeyboardButton.WithCallbackData("Laps", $"S:{last.Diff.user_id},{mostRecentSessionUuid},{last.Diff.date}"),
                     InlineKeyboardButton.WithCallbackData("Racer", $"R:{last.Diff.user_id}"),
-                    InlineKeyboardButton.WithCallbackData("Sessions", $"L:{last.Diff.user_id}")
+                    InlineKeyboardButton.WithCallbackData("Sessions", $"L:{last.Diff.user_id}"),
+                    InlineKeyboardButton.WithCallbackData("CSV", $"LCSV:{last.Diff.user_id}")
                 }
             });
 
@@ -101,13 +102,15 @@ public class TelegramNotifier : INotifier
         {
             new[]
             {
-                InlineKeyboardButton.WithCallbackData("Session", $"S:{session.UserId},{session.SessionId},{session.Date}"),
+                InlineKeyboardButton.WithCallbackData("Laps", $"S:{session.UserId},{session.SessionId},{session.Date}"),
                 InlineKeyboardButton.WithCallbackData("Racer", $"R:{session.UserId}"),
-                InlineKeyboardButton.WithCallbackData("Sessions", $"L:{session.UserId}")
+                InlineKeyboardButton.WithCallbackData("Sessions", $"L:{session.UserId}"),
+                InlineKeyboardButton.WithCallbackData("CSV", $"LCSV:{session.UserId}")
             }
         });
-
-        var message = $"🏁 New session for [{session.UserFullName}] !!!\n" +
+        
+        var message = $"🏁 New session for [{session.UserFullName}]\n" +
+                      $"User Id: {session.UserId}\n" +
                       $"Best lap: *{session.BestTime}*\n" +
                       $"Session: [{session.Date:yyyy-MM-dd} {session.ClockText}]({_appSettings.GetSessionUrl(session.Username, session.SessionId)})\n" +
                       $"Pos: {session.ResultPositionText}";

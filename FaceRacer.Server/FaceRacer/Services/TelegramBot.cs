@@ -1,4 +1,5 @@
 ﻿using FaceRacer.DB;
+using FaceRacer.Settings;
 using FaceRacer.Shared;
 using FaceRacer.Shared.Dto;
 
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-using FaceRacer.Settings;
+
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
@@ -21,8 +22,9 @@ public class TelegramBot
 {
     private static readonly Regex ProfileNameMatchRegex = new Regex(@"/profile/([^/?#]+)");
     private static readonly LinkPreviewOptions LinkPreviewOptions = new LinkPreviewOptions() { IsDisabled = true };
+    private const string MessageTooLongText = "Message too long, cannot display sessions, remove the html argument to show as table, or reduce the number of sessions. For example: /sessions 1234567 20 html";
 
-    private const int MessageMaxLength = 8300;
+    private const int MessageMaxLength = 4150;
 
     private readonly RaceFacerApi _raceFacerApi;
     private readonly AppSettings _appSettings;
@@ -56,8 +58,8 @@ public class TelegramBot
         [
             new BotCommand { Command = "top", Description = "Returns the top X for given period Y. Format: /top {N} {Period} (e.g. top 10 day)" },
             new BotCommand { Command = "pos", Description = "Returns the racer at position X for given period Y. Format: /pos {N} {Period} (e.g. pos 5 week)" },
-            new BotCommand { Command = "racer", Description = "Returns info about racer with given ID or name. Format: /racer {ID|Name} (e.g. racer 12345 or racer JohnDoe)" },
-            new BotCommand { Command = "sessions", Description = "Returns the last sessions for given user ID. Format: /sessions {UserID} [{MaxSessions}] [html] (e.g. sessions 12345 50 html)" },
+            new BotCommand { Command = "racer", Description = "Returns info about racer with given ID or name. Format: /racer {ID|Name} (e.g. racer 17111753 or racer John Doe)" },
+            new BotCommand { Command = "sessions", Description = "Returns the last sessions for given user ID. Format: /sessions {UserID} [{MaxSessions}] [{OutputFormat}] (e.g. sessions 17111753 csv). OutputFormats: html, csv, table" },
             new BotCommand { Command = "session", Description = "Returns details about a session for given user ID and session position. Format: /session {UserID} [{SessionPosition}] (e.g. session 12345 1)" }
         ], cancellationToken: cancellationToken);
 
@@ -114,15 +116,17 @@ public class TelegramBot
             var data = message.Text!.Split(' ', 4);
             if (data.Length < 2 || !int.TryParse(data[1], out int userId))
             {
-                await bot.SendMessage(chatId: message.Chat.Id, text: "Usage: /sessions <userId>", cancellationToken: cancellationToken);
+                await bot.SendMessage(chatId: message.Chat.Id, text: "Usage: /sessions {UserID} [{MaxSessions}] [{OutputFormat}]\nOutputFormat: html, csv or table", cancellationToken: cancellationToken);
                 return;
             }
             var isHtml = (data.Length > 3 && data[3].Equals("html", StringComparison.OrdinalIgnoreCase))
                 || (data.Length > 2 && data[2].Equals("html", StringComparison.OrdinalIgnoreCase));
-            int defaultMax = isHtml ? 50 : 100;
+            var isCsv = (data.Length > 3 && data[3].Equals("csv", StringComparison.OrdinalIgnoreCase))
+                || (data.Length > 2 && data[2].Equals("csv", StringComparison.OrdinalIgnoreCase));
+            int defaultMax = isCsv ? 500 : isHtml ? 50 : 100;
             var maxSessions = data.Length > 2 && int.TryParse(data[2], out int max) ? max : defaultMax;
-            var showAsTable = !isHtml;
-            await HandleMessageSessions(bot, message, userId, maxSessions, showAsTable, cancellationToken);
+            var format = isHtml ? SessionsMessageFormat.Html : isCsv ? SessionsMessageFormat.Csv : SessionsMessageFormat.Table;
+            await HandleMessageSessions(bot, message, userId, maxSessions, format, cancellationToken);
         }
         else if (msg.StartsWith("/session", StringComparison.OrdinalIgnoreCase) || msg.StartsWith("session", StringComparison.OrdinalIgnoreCase))
         {
@@ -169,7 +173,11 @@ public class TelegramBot
         }
         else if (action == "L") // Last sessions
         {
-            await HandleCommandSessions(args, bot, message, cancellationToken);
+            await HandleCommandSessions(args, bot, message, 100, SessionsMessageFormat.Table, cancellationToken);
+        }
+        else if (action == "LCSV") // Last sessions
+        {
+            await HandleCommandSessions(args, bot, message, 500, SessionsMessageFormat.Csv, cancellationToken);
         }
     }
 
@@ -309,7 +317,8 @@ public class TelegramBot
         {
             new[]
             {
-                InlineKeyboardButton.WithCallbackData("Sessions", $"L:{userId}")
+                InlineKeyboardButton.WithCallbackData("Sessions", $"L:{userId}"),
+                InlineKeyboardButton.WithCallbackData("CSV", $"LCSV:{userId}")
             }
         });
 
@@ -362,9 +371,9 @@ public class TelegramBot
     }
 
     // Handle message: /sessions <userId> (responds with the user's sessions)
-    private async Task HandleMessageSessions(ITelegramBotClient bot, Message message, int userId, int maxSessions, bool showAsTable, CancellationToken cancellationToken)
+    private async Task HandleMessageSessions(ITelegramBotClient bot, Message message, int userId, int maxSessions, SessionsMessageFormat format, CancellationToken cancellationToken)
     {
-        var sessionsData = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, _appSettings.SessionUrl, userId, maxSessions, cancellationToken);
+        var sessionsData = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, _appSettings.SessionUrl, userId, maxSessions, includeLapDetails: true, cancellationToken);
 
         if (sessionsData.Error || !sessionsData.Success)
         {
@@ -378,20 +387,36 @@ public class TelegramBot
             return;
         }
 
-        var responseMessage = MakeUserSessionsMessage(sessionsData.Sessions, sessionsData.Total, showAsTable);
+        var responseMessage = MakeUserSessionsMessage(sessionsData.Sessions, sessionsData.Total, format);
 
-        await bot.SendMessage(chatId: message.Chat.Id, text: responseMessage, parseMode: showAsTable ? ParseMode.Markdown : ParseMode.Html, linkPreviewOptions: LinkPreviewOptions, cancellationToken: cancellationToken);
+        if (format is SessionsMessageFormat.Csv)
+        {
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(responseMessage));
+            var userFullName = sessionsData.Sessions[0].UserFullName;
+            
+            await bot.SendDocument(
+                chatId: message.Chat.Id,
+                caption: $"Last *{sessionsData.Sessions.Count}* sessions for *{userFullName}*",
+                parseMode: ParseMode.Markdown,
+                document: InputFile.FromStream(stream, $"{userFullName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd}.csv"), 
+                cancellationToken: cancellationToken);
+        }
+        else
+        {
+            await bot.SendMessage(chatId: message.Chat.Id, text: responseMessage, parseMode: format == SessionsMessageFormat.Table ? ParseMode.Markdown : ParseMode.Html, linkPreviewOptions: LinkPreviewOptions, cancellationToken: cancellationToken);
+
+        }
     }
     
-    private string MakeUserSessionsMessage(List<SessionInfo> allSessions, int total, bool showAsTable)
+    private string MakeUserSessionsMessage(List<SessionInfo> allSessions, int total, SessionsMessageFormat format)
     {
         if (allSessions == null || allSessions.Count == 0)
         {
             return "No sessions found.";
         }
 
-        var boldStart = showAsTable ? "*" : "<b>";
-        var boldEnd = showAsTable ? "*" : "</b>";
+        var boldStart = format == SessionsMessageFormat.Table ? "*" : "<b>";
+        var boldEnd = format == SessionsMessageFormat.Table ? "*" : "</b>";
 
         var username = allSessions[0].Username;
         var userFullName = allSessions[0].UserFullName;
@@ -403,44 +428,60 @@ public class TelegramBot
             .ToList();
 
         var bestTimeSeconds = times.DefaultIfEmpty(double.MaxValue).Min();
-        var averageTimeSeconds = times.DefaultIfEmpty(0).Average();
+        var averageBestTimeSeconds = times.DefaultIfEmpty(0).Average();
 
         // Get the average position
         var positions = allSessions.Select(s => s.Position).Where(p => p != int.MaxValue).ToList();
         var averagePosition = positions.DefaultIfEmpty(0).Average();
-
-
+        
         // Create a string with the following format:
         // Last {N} sessions for user {username}:
         // 1. {date} at {time} - [{bestTime}]({sessionUrl})
         var responseMessage = new StringBuilder();
-        responseMessage.AppendLine($"{boldStart}Last {allSessions.Count} of {total} sessions for {userFullName}:{boldEnd}");
 
-        if (showAsTable)
+        if (format is SessionsMessageFormat.Table or SessionsMessageFormat.Html)
+        {
+            responseMessage.AppendLine($"{boldStart}Last {allSessions.Count} of {total} sessions for {userFullName}:{boldEnd}");
+        }
+
+        if (format is SessionsMessageFormat.Table)
         {
             responseMessage.AppendLine("```");
             responseMessage.AppendLine("#   Date               Best     Pos");
             responseMessage.AppendLine("-------------------------------------");
         }
+        else if (format is SessionsMessageFormat.Csv)
+        {
+            responseMessage.AppendLine("#,Date,Time,Best Time,Average Time,Laps,Position,Session URL");
+        }
+
         for (int i = 0; i < allSessions.Count; i++)
         {
             var session = allSessions[i];
             var reducedBestTime = session.BestTime.StartsWith("00:") ? session.BestTime[3..] : session.BestTime;
             var isBest = Math.Abs((TimeSpan.TryParseExact(session.BestTime, "mm\\:ss\\.fff", CultureInfo.InvariantCulture, out var ts) ? ts.TotalSeconds : double.MaxValue) - bestTimeSeconds) < 0.0001;
-            var isBestIcon = showAsTable ? "⏱️" : " ⏱️";
+            var isBestIcon = format == SessionsMessageFormat.Table ? "⏱️" : " ⏱️";
             var isBestText = isBest ? isBestIcon : "";
 
-            if (showAsTable)
+            var averageLapTimeSeconds = session.LapDetails?.Average(l => TimeSpan.TryParseExact(l.Time, "mm\\:ss\\.fff", CultureInfo.InvariantCulture, out var ts) ? ts.TotalSeconds : double.MaxValue) ?? 0;
+
+            if (format == SessionsMessageFormat.Table)
             {
                 responseMessage.AppendLine($"{(i + 1) + ".",-3} {session.Date:yyyy-MM-dd} {session.ClockText,-7} {reducedBestTime + isBestText,-8} {session.ResultPositionText}");
             }
-            else
+            else if(format == SessionsMessageFormat.Html)
             {
                 var sessionUrl = _appSettings.GetSessionUrl(username, session.SessionId);
                 responseMessage.AppendLine($"{boldStart}{(i + 1) + "."}{(isBest ? "" : boldEnd)} {session.Date:yy-MM-dd} {session.ClockText,-7} <a href=\"{sessionUrl}\">{reducedBestTime}</a> {session.ResultPositionText}{isBestText}{(isBest ? boldEnd : "")}");
             }
+            else if(format == SessionsMessageFormat.Csv)
+            {
+                var sessionUrl = _appSettings.GetSessionUrl(username, session.SessionId);
+                responseMessage.AppendLine($"{i+1},{session.Date:yyyy-MM-dd},{session.ClockText},{reducedBestTime},{averageLapTimeSeconds:F3},{session.LapDetails?.Count ?? 0},{session.ResultPositionText},{sessionUrl}");
+            }
         }
-        if (showAsTable)
+
+        if (format == SessionsMessageFormat.Table)
         {
             responseMessage.AppendLine("```");
         }
@@ -449,14 +490,18 @@ public class TelegramBot
             responseMessage.AppendLine("");
         }
 
-        // Add the Best time, Average time and Average position to the message
-        responseMessage.AppendLine($"{boldStart}Best Time:{boldEnd} {TimeSpan.FromSeconds(bestTimeSeconds):mm\\:ss\\.fff}");
-        responseMessage.AppendLine($"{boldStart}Average Best Time:{boldEnd} {TimeSpan.FromSeconds(averageTimeSeconds):mm\\:ss\\.fff}");
-        responseMessage.AppendLine($"{boldStart}Average Position:{boldEnd} {averagePosition:F2}");
-
-        if (!showAsTable && responseMessage.Length > MessageMaxLength)
+        if (format != SessionsMessageFormat.Csv)
         {
-            return "Message too long, cannot display sessions, remove the html argument to show as table, or reduce the number of sessions. For example: /sessions 1234567 20 html";
+            // Add the Best time, Average time and Average position to the message
+            responseMessage.AppendLine($"{boldStart}Sessions:{boldEnd} {allSessions.Count}");
+            responseMessage.AppendLine($"{boldStart}Best Time:{boldEnd} {TimeSpan.FromSeconds(bestTimeSeconds):mm\\:ss\\.fff}");
+            responseMessage.AppendLine($"{boldStart}Average Best Time:{boldEnd} {TimeSpan.FromSeconds(averageBestTimeSeconds):mm\\:ss\\.fff}");
+            responseMessage.AppendLine($"{boldStart}Average Position:{boldEnd} {averagePosition:F2}");
+        }
+
+        if (format != SessionsMessageFormat.Csv && responseMessage.Length > MessageMaxLength)
+        {
+            return MessageTooLongText;
         }
 
         return responseMessage.ToString();
@@ -478,7 +523,7 @@ public class TelegramBot
             sessionPosition = Math.Max(0, sp - 1);
         }
 
-        var sessionData = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, _appSettings.SessionUrl, userId, sessionPosition + 1, cancellationToken);
+        var sessionData = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, _appSettings.SessionUrl, userId, sessionPosition + 1, includeLapDetails: false, cancellationToken);
 
         if (sessionData.Error || !sessionData.Success)
         {
@@ -575,7 +620,7 @@ public class TelegramBot
         var best = await _raceFacerApi.GetUserBestRankingByTime(_appSettings.KartId, _appSettings.TrackId, userId);
         var profileNameMatch = ProfileNameMatchRegex.Match(best.data.profile_url);
         var profileName = profileNameMatch.Success ? profileNameMatch.Groups[1].Value : null;
-
+        
         if (best.success)
         {
             var date = DateTime.ParseExact(best.data.date, "dd.MM.yyyy", CultureInfo.InvariantCulture);
@@ -595,11 +640,11 @@ public class TelegramBot
     }
 
     // Handle command: sessions
-    private async Task HandleCommandSessions(string args, ITelegramBotClient bot, Message message, CancellationToken cancellationToken)
+    private async Task HandleCommandSessions(string args, ITelegramBotClient bot, Message message, int maxSessions, SessionsMessageFormat format, CancellationToken cancellationToken)
     {
         var userId = int.Parse(args);
 
-        await HandleMessageSessions(bot, message, userId, 50, true, cancellationToken);
+        await HandleMessageSessions(bot, message, userId, maxSessions, format, cancellationToken);
     }
 
     private static string GetFirstLine(string text)
@@ -620,5 +665,12 @@ public class TelegramBot
     {
         Console.WriteLine($"Error: {exception.Message}");
         return Task.CompletedTask;
+    }
+
+    public enum SessionsMessageFormat
+    {
+        Table,
+        Html,
+        Csv
     }
 }

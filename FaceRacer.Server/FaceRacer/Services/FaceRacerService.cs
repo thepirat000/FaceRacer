@@ -18,7 +18,7 @@ public class FaceRacerService
 {
     public readonly RaceFacerApi _raceFacerApi;
     private AppSettings _appSettings;
-
+    private static readonly Dictionary<int, string> UserLastSessionCache = new();
     private static readonly RetryStrategyOptions RetryOptions = new()
     {
         Delay = TimeSpan.Zero,
@@ -256,8 +256,6 @@ public class FaceRacerService
         });
     }
 
-    private static readonly Dictionary<int, string> UserLastSessionCache = new();
-
     public async Task<Dictionary<int, SessionInfo>> GetUsersLastSessionAndNotifyAsync(List<int> userIds, List<INotifier> notifiers, CancellationToken cancellationToken)
     {
         var options = new ParallelOptions { MaxDegreeOfParallelism = 5, CancellationToken = cancellationToken };
@@ -267,7 +265,7 @@ public class FaceRacerService
         await Parallel.ForEachAsync(userIds, options,
             async (userId, ct) =>
             {
-                var userSessionsResponse = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, _appSettings.SessionUrl, userId, 1, ct);
+                var userSessionsResponse = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, _appSettings.SessionUrl, userId, 1, includeLapDetails: false, ct);
 
                 if (userSessionsResponse.Error || userSessionsResponse.Total == 0)
                 {

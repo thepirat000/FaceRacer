@@ -62,7 +62,7 @@ public class RaceFacerApi
         return result.data.ranking.Values.OrderBy(r => r.pos).ToList();
     }
 
-    public async Task<UserBestRankingByTimeResult> GetUserBestRankingByTime(int kartId, int trackId, int userId)
+    public async Task<UserBestRankingByTimeResult?> GetUserBestRankingByTime(int kartId, int trackId, int userId)
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, $"https://www.racefacer.com/ajax/user-best-ranking-by-time?user_id={userId}&track_configuration_id={trackId}&kart_id={kartId}");
 
@@ -96,9 +96,9 @@ public class RaceFacerApi
         return result?.data;
     }
 
-    public async Task<SessionBoxResponse> GetUserSessionsAsync(int kartId, int trackId, string? sessionUrlFormat, int userId, int maxSessions, CancellationToken cancellationToken)
+    public async Task<SessionBoxResponse> GetUserSessionsAsync(int kartId, int trackId, string? sessionUrlFormat, int userId, int maxSessions, bool includeLapDetails, CancellationToken cancellationToken)
     {
-        var firstPage = await GetUserSessionsPageAsync(kartId, trackId, sessionUrlFormat, userId, 0, cancellationToken);
+        var firstPage = await GetUserSessionsPageAsync(kartId, trackId, sessionUrlFormat, userId, 0, includeLapDetails, cancellationToken);
 
         if (firstPage.Error || !firstPage.Success)
         {
@@ -128,7 +128,7 @@ public class RaceFacerApi
 
                 var tasks = offsets.Select(async startFrom =>
                 {
-                    var page = await GetUserSessionsPageAsync(kartId, trackId, sessionUrlFormat, userId, startFrom, cancellationToken);
+                    var page = await GetUserSessionsPageAsync(kartId, trackId, sessionUrlFormat, userId, startFrom, includeLapDetails, cancellationToken);
                     return (StartFrom: startFrom, Page: page);
                 });
 
@@ -171,7 +171,7 @@ public class RaceFacerApi
         };
     }
 
-    private async Task<SessionBoxResponse> GetUserSessionsPageAsync(int kartId, int trackId, string? sessionUrlFormat, int userId, int startFrom, CancellationToken cancellationToken)
+    private async Task<SessionBoxResponse> GetUserSessionsPageAsync(int kartId, int trackId, string? sessionUrlFormat, int userId, int startFrom, bool includeLapDetails, CancellationToken cancellationToken)
     {
         var url = $"https://www.racefacer.com/ajax/sessions-boxes?user_id={userId}&track_configuration_id={trackId}&period=all&start_from={startFrom}&only_victories=0&only_best_time_sessions=0&kart_id={kartId}";
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -182,7 +182,7 @@ public class RaceFacerApi
 
         var responseObject = JsonSerializer.Deserialize<SessionBoxResponse>(responseJson, SerializerOptions);
 
-        responseObject!.Sessions = responseObject.Success ? SessionBoxesParser.Parse(responseObject.Html, sessionUrlFormat) : [];
+        responseObject!.Sessions = responseObject.Success ? SessionBoxesParser.Parse(responseObject.Html, sessionUrlFormat, includeLapDetails) : [];
 
         return responseObject;
     }
