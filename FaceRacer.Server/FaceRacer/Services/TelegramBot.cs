@@ -636,23 +636,39 @@ public class TelegramBot
 
     private Stream MakeCsvStreamUserSessions(List<SessionInfo> allSessions)
     {
-        // Return a memory stream with the CSV content: UserId,#,Name,DateTime,BestTime,Position,Racers,Laps,AverageTime,SessionUrl
+        // Return a memory stream with the CSV content
         var memoryStream = new MemoryStream();
         using var writer = new StreamWriter(memoryStream, leaveOpen: true);
-        writer.WriteLine("UserId,#,Name,DateTime,BestTime,Position,Racers,Laps,AverageTime,SessionUrl");
-        var userCount = new Dictionary<int, int>(); // UserId -> Count
+        writer.WriteLine("UserId,#,Name,DateTime,BestTime,AverageLapTime,Position,Racers,Laps,RunningAverageBestTime,RunningAverageAverageTime,PersonalBestTime,PersonalBestAverageLapTime,SessionUrl");
+        var userCount = new Dictionary<int, RacerStats>(); // UserId -> RacerStats
         
-        allSessions = allSessions.FindAll(s => s.BestTime != "-" && s.LapDetails is { Count: > 0 });
+        allSessions = allSessions
+            .Where(s => s.BestTime != "-" && s.LapDetails is { Count: > 0 })
+            .OrderBy(s => s.UserId)
+            .ThenBy(s => s.Date)
+            .ThenBy(s => s.ClockText)
+            .ToList();
 
         foreach (var session in allSessions)
         {
             var averageLapTimeSeconds = session.LapDetails?.Average(l => TimeSpan.TryParseExact(l.Time, "mm\\:ss\\.fff", CultureInfo.InvariantCulture, out var ts) ? ts.TotalSeconds : double.MaxValue) ?? 0;
             var bestTimeSeconds = TimeSpan.TryParseExact(session.BestTime, "mm\\:ss\\.fff", CultureInfo.InvariantCulture, out var tsBest) ? tsBest.TotalSeconds : double.MaxValue;
-            userCount.TryAdd(session.UserId, 0);
-            userCount[session.UserId]++;
-            var sessionNumber = userCount[session.UserId];
 
-            writer.WriteLine($"{session.UserId},{sessionNumber},{session.UserFullName},{session.Date:yyyy-MM-dd} {session.ClockText},{bestTimeSeconds:F3},{session.Position},{session.RacerCount},{session.LapDetails?.Count ?? 0},{averageLapTimeSeconds:F3},{session.SessionUrl}");
+            userCount.TryAdd(session.UserId, new RacerStats());
+            userCount[session.UserId].SessionCount++;
+            var sessionNumber = userCount[session.UserId].SessionCount;
+
+            // calculate the running values
+            var runningAverageBestTime = (userCount[session.UserId].RunningAverageBestTime * (sessionNumber - 1) + bestTimeSeconds) / sessionNumber;
+            userCount[session.UserId].RunningAverageBestTime = runningAverageBestTime;
+            var runningAverageAverageTime = (userCount[session.UserId].RunningAverageAverageTime * (sessionNumber - 1) + averageLapTimeSeconds) / sessionNumber;
+            userCount[session.UserId].RunningAverageAverageTime = runningAverageAverageTime;
+            var personalBestTime = userCount[session.UserId].PersonalBestTime == 0 ? bestTimeSeconds : Math.Min(userCount[session.UserId].PersonalBestTime, bestTimeSeconds);
+            userCount[session.UserId].PersonalBestTime = personalBestTime;
+            var personalBestAverageLapTime = userCount[session.UserId].PersonalBestAverageLapTime == 0 ? averageLapTimeSeconds : Math.Min(userCount[session.UserId].PersonalBestAverageLapTime, averageLapTimeSeconds);
+            userCount[session.UserId].PersonalBestAverageLapTime = personalBestAverageLapTime;
+            
+            writer.WriteLine($"{session.UserId},{sessionNumber},{session.UserFullName},{session.Date:yyyy-MM-dd} {session.ClockText},{bestTimeSeconds:F3},{averageLapTimeSeconds:F3},{session.Position},{session.RacerCount},{session.LapDetails?.Count ?? 0},{runningAverageBestTime:F3},{runningAverageAverageTime:F3},{personalBestTime:F3},{personalBestAverageLapTime:F3},{session.SessionUrl}");
         }
         writer.Close();
         memoryStream.Position = 0;
@@ -770,5 +786,26 @@ public class TelegramBot
         Table,
         Html,
         Csv
+    }
+
+    /// <summary>
+    /// Represents the racer running stats, including session count, running averages, and personal bests.
+    /// </summary>
+    private sealed record RacerStats
+    {
+        /// <summary>Counter per user session, starting on 1 on the earliest session</summary>
+        public int SessionCount { get; set; }
+
+        /// <summary>Running average of the best times for the user</summary>
+        public double RunningAverageBestTime { get; set; }
+
+        /// <summary>Running average of the average lap times for the user</summary>
+        public double RunningAverageAverageTime { get; set; }
+
+        /// <summary>The personal best time for the user</summary>
+        public double PersonalBestTime { get; set; }
+
+        /// <summary>The personal best average lap time for the user</summary>
+        public double PersonalBestAverageLapTime { get; set; }
     }
 }

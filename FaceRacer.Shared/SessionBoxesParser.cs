@@ -140,10 +140,12 @@ internal static class SessionBoxesParser
     // TODO: Review this, it's extracting the wrong username sometimes
     private static string? ExtractUsername(HtmlDocument doc)
     {
-        // Expected: <a href="https://www.racefacer.com/en/profile/{USER_NAME}" class="first">
         var href = doc.DocumentNode
-            .QuerySelector("a.first[href*='/profile/']")
-            ?.GetAttributeValue("href", null);
+            .QuerySelector("div.session-result-container .tab_ranking_container .table_content.session_content .row.active a.name_content[href*='/profile/']")
+            ?.GetAttributeValue("href", null)
+            ?? doc.DocumentNode
+                .QuerySelector("a.first[href*='/profile/']")
+                ?.GetAttributeValue("href", null);
 
         if (string.IsNullOrWhiteSpace(href))
         {
