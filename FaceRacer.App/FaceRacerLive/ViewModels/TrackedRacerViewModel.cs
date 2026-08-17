@@ -492,7 +492,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         Lap = $"{racer.passed}";
         TotalLaps = $"{racer.total}";
         LapProgress = ComputeLapProgress(racer.percentage);
-        PassedTimeText = racer.passed_time.HasValue ? TimeSpan.FromMilliseconds(racer.passed_time.Value).ToString("m\\:ss") : "";
+        PassedTimeText = racer.passed_time.HasValue ? TimeSpan.FromMilliseconds(racer.passed_time.Value).ToString("m\\:ss\\.fff") : "";
         var best = racer.best_time ?? "-";
         var last = racer.last_time ?? "-";
 

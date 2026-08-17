@@ -9,7 +9,7 @@
         private const string MonitorRankingUrlKey = "AppSettings.MonitorRankingUrl";
 
         public const int IntervalMillisecondsLiveMonitorDefault = 700;
-        public const int IntervalMillisecondsLiveMonitorMin = 1;
+        public const int IntervalMillisecondsLiveMonitorMin = 0;
         public const int IntervalMillisecondsLiveMonitorMax = 10000;
 
         public const string CurrentSessionMonitorUrlDefault = "http://192.168.10.174/ajax/monitors/current-session-monitor";
