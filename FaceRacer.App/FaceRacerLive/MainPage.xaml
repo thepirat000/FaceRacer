@@ -9,7 +9,7 @@
     <!-- Title toolbar -->
     <Shell.TitleView>
         <Grid ColumnDefinitions="*,Auto,Auto,Auto"
-              ColumnSpacing="6"
+              ColumnSpacing="10"
               Padding="6,0">
 
             <!-- Title text  -->
@@ -22,19 +22,17 @@
                    FontAttributes="Bold" />
 
             <!-- Auto-track toggle -->
-            <HorizontalStackLayout Grid.Column="1"
-                                   Spacing="2"
-                                   VerticalOptions="Center">
-
-                <CheckBox x:Name="AutoTrackCheckBox"
-                          VerticalOptions="Center"
-                          Margin="-6,0,0,0"
-                          CheckedChanged="OnAutoTrackCheckedChanged" />
+            <VerticalStackLayout Grid.Column="1"
+                                 Spacing="0"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center">
 
                 <Label x:Name="AutoTrackLabel"
-                       Margin="-10,0,0,0"
                        Text="Auto"
-                       FontSize="12"
+                       FontSize="10"
+                       Margin="0,3,0,0"
+                       HorizontalTextAlignment="Center"
+                       HorizontalOptions="Center"
                        VerticalOptions="Center"
                        TextColor="MediumPurple">
 
@@ -42,23 +40,26 @@
                         <TapGestureRecognizer Tapped="OnAutoTrackLabelTapped" />
                     </Label.GestureRecognizers>
                 </Label>
-            </HorizontalStackLayout>
+
+                <CheckBox x:Name="AutoTrackCheckBox"
+                          HorizontalOptions="Center"
+                          VerticalOptions="Center"
+                          Margin="0,-10,0,0"
+                          CheckedChanged="OnAutoTrackCheckedChanged" />
+            </VerticalStackLayout>
 
             <!-- Rec. toggle -->
-            <HorizontalStackLayout Grid.Column="2"
-                                   Spacing="2"
-                                   VerticalOptions="Center">
-
-                <CheckBox x:Name="SnifferCheckBox"
-                          VerticalOptions="Center"
-                          CheckedChanged="OnSnifferCheckedChanged"
-                          Margin="-6,0,0,0">
-                </CheckBox>
+            <VerticalStackLayout Grid.Column="2"
+                                 Spacing="0"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center">
 
                 <Label x:Name="SnifferLabel"
-                       Margin="-10,0,0,0"
                        Text="Rec."
-                       FontSize="12"
+                       FontSize="10"
+                       Margin="0,3,0,0"
+                       HorizontalTextAlignment="Center"
+                       HorizontalOptions="Center"
                        VerticalOptions="Center"
                        TextColor="MediumPurple">
 
@@ -67,22 +68,26 @@
                     </Label.GestureRecognizers>
                 </Label>
 
-            </HorizontalStackLayout>
+                <CheckBox x:Name="SnifferCheckBox"
+                          HorizontalOptions="Center"
+                          VerticalOptions="Center"
+                          Margin="0,-10,0,0"
+                          CheckedChanged="OnSnifferCheckedChanged" />
+
+            </VerticalStackLayout>
 
             <!-- Live toggle -->
-            <HorizontalStackLayout Grid.Column="3"
-                                   Spacing="2"
-                                   VerticalOptions="Center">
-
-                <CheckBox x:Name="LiveRaceCheckBox"
-                          VerticalOptions="Center"
-                          CheckedChanged="OnLiveRaceCheckedChanged"
-                          Margin="-6,0,0,0" />
+            <VerticalStackLayout Grid.Column="3"
+                                 Spacing="0"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center">
 
                 <Label x:Name="LiveLabel"
                        Text="Live"
-                       FontSize="12"
-                       Margin="-10,0,0,0"
+                       FontSize="10"
+                       Margin="0,4,0,0"
+                       HorizontalTextAlignment="Center"
+                       HorizontalOptions="Center"
                        VerticalOptions="Center"
                        TextColor="MediumPurple">
 
@@ -91,7 +96,17 @@
                     </Label.GestureRecognizers>
                 </Label>
 
-            </HorizontalStackLayout>
+                <Switch x:Name="LiveRaceCheckBox"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                        Margin="0,-10,0,0"
+                        Scale="0.90"
+                        OnColor="#4F46E5"
+                        ThumbColor="#F8FAFC"
+                        Toggled="OnLiveRaceCheckedChanged"
+                        IsToggled="True" />
+
+            </VerticalStackLayout>
 
         </Grid>
     </Shell.TitleView>
@@ -306,24 +321,29 @@
 
         <!-- Buttons -->
         <Grid Grid.Row="4"
-              ColumnDefinitions="auto,auto,auto,auto,auto"
-              ColumnSpacing="12"
-              Padding="0,0,0,8">
+              ColumnDefinitions="*,*,*,*"
+              ColumnSpacing="10"
+              Padding="0,0,0,5">
 
             <Button x:Name="TrackRacerBtn"
                     Text="Track"
+                    FontSize="14"
                     Grid.Column="0"
                     Clicked="OnTrackClicked"
-                    HorizontalOptions="Fill" />
+                    HorizontalOptions="Fill"
+                    Padding="10"
+                    />
 
             <Button x:Name="NextSessionsBtn"
                     Text="Next"
+                    FontSize="14"
                     Grid.Column="1"
                     Clicked="OnNextSessionsClicked"
                     HorizontalOptions="Fill" />
 
             <Button x:Name="ShowTextBtn"
                     Text="Show"
+                    FontSize="14"
                     Grid.Column="2"
                     Clicked="OnShowTextClicked"
                     HorizontalOptions="Fill" />
@@ -331,16 +351,10 @@
             <Button x:Name="MicToggleBtn"
                     Grid.Column="3"
                     Text="Mic On"
-                    FontSize="13"
+                    FontSize="12"
                     Clicked="OnMicToggleClicked"
                     HorizontalOptions="Fill" />
-
-            <Button x:Name="PttBtn"
-                    Grid.Column="4"
-                    Text="PTT"
-                    Pressed="OnPttPressed"
-                    Released="OnPttReleased"
-                    IsVisible="False" />
+            
         </Grid>
 
         <!--Console output-->
@@ -364,14 +378,14 @@
 
                 <Button Text="Clear"
                         Padding="0,0"
-                        FontSize="12"
-                        HeightRequest="24"
-                        MinimumHeightRequest="24"
+                        FontSize="11"
+                        HeightRequest="20"
+                        MinimumHeightRequest="20"
                         WidthRequest="60"
                         Clicked="OnConsoleClearClicked"
                         HorizontalOptions="End"
                         VerticalOptions="Start"
-                        Margin="0,4,0,0"
+                        Margin="0,3,0,0"
                         ZIndex="10" />
             </Grid>
         </Border>

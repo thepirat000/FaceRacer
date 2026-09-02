@@ -1,10 +1,14 @@
-﻿using System.Net;
+﻿using Android.Views;
+
 using CommunityToolkit.Maui;
 
 using FaceRacerLive.Monitor;
 using FaceRacerLive.Services;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Handlers;
+
+using System.Net;
 
 
 namespace FaceRacerLive;
@@ -31,6 +35,12 @@ public static class MauiProgram
 #if ANDROID
         builder.Services.AddSingleton<IMicToSpeakerService, MicToSpeakerService>();
         Platforms.Android.MonitorRankingWebViewHandler.EnableZoom();
+        ButtonHandler.Mapper.AppendToMapping("MultiLine", (handler, view) =>
+        {
+            handler.PlatformView.SetSingleLine(false);
+            handler.PlatformView.SetMaxLines(2);
+            handler.PlatformView.SetForegroundGravity(GravityFlags.Center);
+        });
 #endif
 
 #if DEBUG

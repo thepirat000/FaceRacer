@@ -8,7 +8,7 @@ internal sealed class RaceMonitorState
     public RaceMonitorPanelViewModel Panel { get; } = new();
     public TrackedRacerViewModel Tracked { get; }
 
-    private bool _isLive;
+    private bool _isLive = true;
     public bool IsLive
     {
         get => _isLive;
@@ -49,6 +49,7 @@ internal sealed class RaceMonitorState
     public RaceMonitorState()
     {
         Tracked = new TrackedRacerViewModel(this);
+        Tracked.IsLiveEnabled = _isLive;
     }
 
     public void UpdateSessionLaps(SessionData sessionData)

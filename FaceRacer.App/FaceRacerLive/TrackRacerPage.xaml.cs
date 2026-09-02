@@ -1,5 +1,5 @@
-
 using FaceRacerLive.Services;
+using Microsoft.Maui.Controls;
 using System.Windows.Input;
 using System.Web;
 
@@ -67,7 +67,7 @@ public partial class TrackRacerPage : ContentPage
         base.OnAppearing();
 
         _syncingLive = true;
-        LiveCheckBox.IsChecked = _state.IsLive;
+        LiveCheckBox.IsToggled = _state.IsLive;
         _syncingLive = false;
 
         _syncingAuto = true;
@@ -103,7 +103,7 @@ public partial class TrackRacerPage : ContentPage
         });
     }
 
-    private void OnLiveCheckedChanged(object? sender, CheckedChangedEventArgs e)
+    private void OnLiveCheckedChanged(object? sender, ToggledEventArgs e)
     {
         if (_syncingLive)
         {
@@ -115,7 +115,7 @@ public partial class TrackRacerPage : ContentPage
 
     private void OnLiveLabelTapped(object? sender, TappedEventArgs e)
     {
-        LiveCheckBox.IsChecked = !LiveCheckBox.IsChecked;
+        LiveCheckBox.IsToggled = !LiveCheckBox.IsToggled;
     }
 
     private void OnAutoTrackCheckedChanged(object? sender, CheckedChangedEventArgs e)

@@ -55,7 +55,7 @@ namespace FaceRacerLive
             {
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    LiveRaceCheckBox.IsChecked = isLive;
+                    LiveRaceCheckBox.IsToggled = isLive;
                 });
             };
             _state.AutoTrackChanged = isAuto =>
@@ -75,7 +75,6 @@ namespace FaceRacerLive
             {
                 AppendConsole("Mic → Speaker not available on this platform.");
                 MicToggleBtn.IsEnabled = false;
-                PttBtn.IsEnabled = false;
             }
 
             _vm = _state.Panel;
@@ -94,7 +93,7 @@ namespace FaceRacerLive
         {
             AutoTrackLabel.TextColor = AutoTrackCheckBox.IsChecked ? Color.FromArgb("#ba0d0d") : Colors.MediumPurple;
             SnifferLabel.TextColor = SnifferCheckBox.IsChecked ? Color.FromArgb("#ba0d0d") : Colors.MediumPurple;
-            LiveLabel.TextColor = LiveRaceCheckBox.IsChecked ? Color.FromArgb("#27ba0d") : Colors.MediumPurple;
+            LiveLabel.TextColor = LiveRaceCheckBox.IsToggled ? Color.FromArgb("#27ba0d") : Colors.MediumPurple;
         }
 
         protected override void OnAppearing()
@@ -193,8 +192,6 @@ namespace FaceRacerLive
             _isToggling = true;
             MicToggleBtn.IsEnabled = false;
             
-            PttBtn.IsEnabled = false;
-
             try
             {
                 if (_micToSpeaker.IsRunning)
@@ -217,62 +214,10 @@ namespace FaceRacerLive
             finally
             {
                 MicToggleBtn.IsEnabled = true;
-                PttBtn.IsEnabled = true;
                 _isToggling = false;
             }
         }
-
-        private async void OnPttPressed(object? sender, EventArgs e)
-        {
-            if (_micToSpeaker is null || _isToggling)
-            {
-                return;
-            }
-
-            // If toggle-mode is already running, do nothing; PTT is "momentary" start/stop.
-            if (_micToSpeaker.IsRunning)
-            {
-                return;
-            }
-
-            MicToggleBtn.IsEnabled = false;
-
-            try
-            {
-                await _micToSpeaker.StartAsync(CancellationToken.None);
-                UpdateMicButtons();
-            }
-            catch (Exception ex)
-            {
-                UpdateMicButtons();
-                MicToggleBtn.IsEnabled = true;
-            }
-        }
-
-        private async void OnPttReleased(object? sender, EventArgs e)
-        {
-            if (_micToSpeaker is null || _isToggling)
-            {
-                return;
-            }
-
-            // Only stop if PTT started it (i.e., we're running and user released).
-            if (!_micToSpeaker.IsRunning)
-            {
-                return;
-            }
-
-            try
-            {
-                await _micToSpeaker.StopAsync();
-                UpdateMicButtons();
-            }
-            finally
-            {
-                MicToggleBtn.IsEnabled = true;
-            }
-        }
-
+        
         private void UpdateMicButtons()
         {
             if (_micToSpeaker is null)
@@ -281,7 +226,6 @@ namespace FaceRacerLive
             }
 
             MicToggleBtn.Text = _micToSpeaker.IsRunning ? "Mic Off" : "Mic On";
-            PttBtn.BackgroundColor = _micToSpeaker.IsRunning ? Colors.LightCoral : Color.FromArgb("#ac99ea");
         }
 
         private async Task SpeakTextAndClearAsync(string? text)
@@ -361,15 +305,13 @@ namespace FaceRacerLive
 
         private void OnLiveLabelTapped(object? sender, TappedEventArgs e)
         {
-            LiveRaceCheckBox.IsChecked = !LiveRaceCheckBox.IsChecked;
+            LiveRaceCheckBox.IsToggled = !LiveRaceCheckBox.IsToggled;
             UpdateToggleLabelColors();
         }
 
-        private async void OnLiveRaceCheckedChanged(object? sender, CheckedChangedEventArgs e)
+        private async void OnLiveRaceCheckedChanged(object? sender, ToggledEventArgs e)
         {
             await Task.Yield();
-
-            UpdateToggleLabelColors();
 
             _state.IsLive = e.Value;
             _state.LiveChanged?.Invoke(e.Value);
@@ -380,7 +322,7 @@ namespace FaceRacerLive
                 if (_raceMonitorApi is null)
                 {
                     AppendConsole("Live race: cannot start (race monitor not initialized).", Colors.OrangeRed);
-                    LiveRaceCheckBox.IsChecked = false;
+                    LiveRaceCheckBox.IsToggled = false;
                     return;
                 }
 
@@ -390,6 +332,8 @@ namespace FaceRacerLive
             {
                 StopRaceLoop();
             }
+
+            UpdateToggleLabelColors();
         }
 
         private void StartRaceLoop()
@@ -442,7 +386,7 @@ namespace FaceRacerLive
                     {
                         AppendConsole("Live race simulation ended.", Colors.LightYellow);
                         _state.Tracked.IsLiveEnabled = false;
-                        LiveRaceCheckBox.IsChecked = false;
+                        LiveRaceCheckBox.IsToggled = false;
                         return;
                     }
 
@@ -726,6 +670,8 @@ namespace FaceRacerLive
             {
                 _state.IsAutoTrackEnabled = e.Value;
             }
+
+            UpdateToggleLabelColors();
         }
     }
 }

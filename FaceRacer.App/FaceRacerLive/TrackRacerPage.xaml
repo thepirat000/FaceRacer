@@ -45,42 +45,47 @@
     </ContentPage.Resources>
 
     <Shell.TitleView>
-        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6" Padding="8,0" >
-            <Label Grid.Column="0"
-                   Margin="-8,0,0,0"
-                   Text="Track"
-                   TextColor="{StaticResource AccentPurple}"
-                   VerticalOptions="Center"
-                   LineBreakMode="TailTruncation"
-                   FontAttributes="Bold" />
+    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Padding="8,0" >
+        <Label Grid.Column="0"
+               Margin="-8,0,0,0"
+               Text="Track"
+               TextColor="{StaticResource AccentPurple}"
+               VerticalOptions="Center"
+               LineBreakMode="TailTruncation"
+               FontAttributes="Bold" />
 
-            <HorizontalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
-                <CheckBox x:Name="AutoTrackCheckBox" 
-                          VerticalOptions="Center" 
-                          CheckedChanged="OnAutoTrackCheckedChanged" 
-                          Margin="-6,0,0,0" />
-                <Label x:Name="AutoTrackLabel" Text="Auto" FontSize="12" Margin="-10,0,0,0" VerticalOptions="Center" TextColor="#9CA3AF" >
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnAutoTrackLabelTapped" />
-                    </Label.GestureRecognizers>
-                </Label>
-            </HorizontalStackLayout>
+        <VerticalStackLayout Grid.Column="1" Spacing="0" HorizontalOptions="Center" VerticalOptions="Center">
+                <Label x:Name="AutoTrackLabel" Text="Auto" FontSize="10" HorizontalTextAlignment="Center" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#9CA3AF" Margin="0,4,0,0" >
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnAutoTrackLabelTapped" />
+                </Label.GestureRecognizers>
+            </Label>
+            <CheckBox x:Name="AutoTrackCheckBox" 
+                      HorizontalOptions="Center"
+                      VerticalOptions="Center" 
+                      Margin="0,-9,0,0"
+                      CheckedChanged="OnAutoTrackCheckedChanged" />
+        </VerticalStackLayout>
 
-            <HorizontalStackLayout Grid.Column="2" Spacing="6" VerticalOptions="Center">
-                <CheckBox x:Name="LiveCheckBox" 
-                          VerticalOptions="Center" 
-                          CheckedChanged="OnLiveCheckedChanged" 
-                          Margin="-6,0,0,0"
-                          IsChecked="{Binding IsLiveEnabled, Mode=TwoWay}"/>
-                <Label x:Name="LiveLabel" Text="Live" FontSize="12" Margin="-10,0,0,0" VerticalOptions="Center" TextColor="#9CA3AF" >
-                    <Label.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnLiveLabelTapped" />
-                    </Label.GestureRecognizers>
-                </Label>
-            </HorizontalStackLayout>
+        <VerticalStackLayout Grid.Column="2" Spacing="0" HorizontalOptions="Center" VerticalOptions="Center">
+                <Label x:Name="LiveLabel" Text="Live" FontSize="10" HorizontalTextAlignment="Center" HorizontalOptions="Center" VerticalOptions="Center" TextColor="#9CA3AF" Margin="0,4,0,0" >
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnLiveLabelTapped" />
+                </Label.GestureRecognizers>
+            </Label>
+            <Switch x:Name="LiveCheckBox" 
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" 
+                    Margin="0,-10,0,0"
+                    Scale="0.82"
+                    OnColor="#4F46E5"
+                    ThumbColor="#F8FAFC"
+                    Toggled="OnLiveCheckedChanged" 
+                    IsToggled="{Binding IsLiveEnabled, Mode=TwoWay}"/>
+        </VerticalStackLayout>
 
-        </Grid>
-    </Shell.TitleView>
+    </Grid>
+</Shell.TitleView>
 
     <ScrollView x:Name="RootScroll"
                 Orientation="Vertical"
