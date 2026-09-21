@@ -1,0 +1,1 @@
+dotnet publish FaceRacerLive\FaceRacerLive.csproj -c Release -f net10.0-android

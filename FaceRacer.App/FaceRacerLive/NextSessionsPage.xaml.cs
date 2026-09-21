@@ -236,6 +236,7 @@ public partial class NextSessionsPage
 
             var ind = runs.Count(r => string.Equals(r.kart_name, "Individual", StringComparison.OrdinalIgnoreCase));
             var dbl = runs.Count(r => string.Equals(r.kart_name, "Doble", StringComparison.OrdinalIgnoreCase));
+            var total = runs.Count;
 
             var driverRows = runs
                 .Select(r => new NextSessionDriverRowViewModel
@@ -254,7 +255,7 @@ public partial class NextSessionsPage
                 SessionName = NormalizeSessionName(s.name ?? s.label ?? "—"),
                 StartsAtText = string.IsNullOrWhiteSpace(startTimeText) ? "—" : startTimeText,
                 StartsInMinutesText = startsInText,
-                DriversText = $"{ind + dbl}",
+                DriversText = $"{total}",
                 IndividualText = ind.ToString(),
                 DoubleText = dbl.ToString(),
                 DetailsText = $"({ind}+{dbl})",
