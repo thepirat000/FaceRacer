@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net10.0-android;net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
@@ -12,7 +12,7 @@
     <Nullable>enable</Nullable>
 
     <ApplicationTitle>FaceRacerLive</ApplicationTitle>
-    <ApplicationId>com.thepirat.face_racer</ApplicationId>
+    <ApplicationId>com.thepirat.face-racer</ApplicationId>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
 

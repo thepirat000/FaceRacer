@@ -429,3 +429,4 @@ FodyWeavers.xsd
 *.msm
 *.msp
 /FaceRacer.Server/FaceRacer/appsettings.json
+.DS_Store
