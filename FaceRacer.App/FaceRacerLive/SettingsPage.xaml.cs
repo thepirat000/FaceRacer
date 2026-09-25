@@ -109,6 +109,8 @@ public partial class SettingsPage : ContentPage
             {
                 { DevicePlatform.Android, new[] { "application/zip" } },
                 { DevicePlatform.WinUI, new[] { ".zip" } },
+                { DevicePlatform.iOS, new[] { "public.zip-archive", "com.pkware.zip-archive" } },
+                { DevicePlatform.MacCatalyst, new[] { "public.zip-archive", "com.pkware.zip-archive" } },
             });
 
             var result = await FilePicker.Default.PickAsync(new PickOptions
