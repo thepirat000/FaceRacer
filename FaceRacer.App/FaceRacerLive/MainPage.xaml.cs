@@ -397,8 +397,11 @@ namespace FaceRacerLive
                     {
                         _vm.UpdateFromSession(session!);
 
-                        // Keep tracked racer page state in sync with the same session updates.
-                        _state.Tracked.UpdateFromSession(session!, _vm.TrackedRacerFullName);
+                        // Keep tracked racer page state in sync only when the page is visible.
+                        if (_state.IsTrackRacerPageVisible)
+                        {
+                            _state.Tracked.UpdateFromSession(session!, _vm.TrackedRacerFullName);
+                        }
                     });
 
                     if (SnifferCheckBox.IsChecked)

@@ -66,6 +66,8 @@ public partial class TrackRacerPage : ContentPage
     {
         base.OnAppearing();
 
+        _state.IsTrackRacerPageVisible = true;
+
         _syncingLive = true;
         LiveCheckBox.IsToggled = _state.IsLive;
         _syncingLive = false;
@@ -86,6 +88,7 @@ public partial class TrackRacerPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
+        _state.IsTrackRacerPageVisible = false;
         _state.AutoTrackChanged -= OnAutoTrackChangedFromState;
     }
 

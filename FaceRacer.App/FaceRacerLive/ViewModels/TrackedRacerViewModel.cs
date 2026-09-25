@@ -18,6 +18,11 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
     private readonly ObservableCollection<MiniRacerRowViewModel> _miniRacers = new();
     public ObservableCollection<MiniRacerRowViewModel> MiniRacers => _miniRacers;
 
+    private static readonly TimeSpan MiniRacersRefreshMinInterval = TimeSpan.FromMilliseconds(AppSettings.IntervalMillisecondsLiveMonitor);
+    private DateTime _lastMiniRacersRefreshUtc = DateTime.MinValue;
+    private int _miniRacersRefreshVersion;
+    private bool _miniRacersRefreshPending;
+
     public ICommand ClearLapsCommand { get; }
 
     private string _bestDeltaNextText = "-";
@@ -100,7 +105,8 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         {
             racer.PropertyChanged += OnPanelRacerPropertyChanged;
         }
-        RefreshMiniRacers();
+
+        RequestMiniRacersRefresh(immediate: true);
     }
 
     private void OnPanelRacersChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -127,7 +133,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
             }
         }
 
-        RefreshMiniRacers();
+        RequestMiniRacersRefresh(immediate: true);
     }
 
     private void OnPanelRacerPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -135,8 +141,55 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
         if (string.Equals(e.PropertyName, nameof(RacerRowViewModel.BestTime), StringComparison.Ordinal) ||
             string.Equals(e.PropertyName, nameof(RacerRowViewModel.PositionText), StringComparison.Ordinal))
         {
-            RefreshMiniRacers();
+            RequestMiniRacersRefresh();
         }
+    }
+
+    private void RequestMiniRacersRefresh(bool immediate = false)
+    {
+        var now = DateTime.UtcNow;
+        var elapsed = now - _lastMiniRacersRefreshUtc;
+
+        if (immediate || elapsed >= MiniRacersRefreshMinInterval)
+        {
+            _miniRacersRefreshPending = false;
+            _lastMiniRacersRefreshUtc = now;
+            RefreshMiniRacers();
+            return;
+        }
+
+        _miniRacersRefreshPending = true;
+        var refreshVersion = ++_miniRacersRefreshVersion;
+        var delay = MiniRacersRefreshMinInterval - elapsed;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(delay);
+            }
+            catch
+            {
+                return;
+            }
+
+            if (refreshVersion != _miniRacersRefreshVersion)
+            {
+                return;
+            }
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                if (!_miniRacersRefreshPending)
+                {
+                    return;
+                }
+
+                _miniRacersRefreshPending = false;
+                _lastMiniRacersRefreshUtc = DateTime.UtcNow;
+                RefreshMiniRacers();
+            });
+        });
     }
 
     private void RefreshMiniRacers()
@@ -148,7 +201,7 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
             .Take(TopRacersCount)
             .ToList();
 
-        _miniRacers.Clear();
+        var nextRows = new List<MiniRacerRowViewModel>(top.Count);
         for (var i = 0; i < top.Count; i++)
         {
             var delta = "";
@@ -157,7 +210,33 @@ internal sealed class TrackedRacerViewModel : INotifyPropertyChanged
                 delta = (curr - prev).ToString("+0.000", System.Globalization.CultureInfo.InvariantCulture);
             }
 
-            _miniRacers.Add(new MiniRacerRowViewModel(top[i], delta));
+            nextRows.Add(new MiniRacerRowViewModel(top[i], delta));
+        }
+
+        if (_miniRacers.Count == nextRows.Count)
+        {
+            var isUnchanged = true;
+            for (var i = 0; i < nextRows.Count; i++)
+            {
+                var existing = _miniRacers[i];
+                var next = nextRows[i];
+                if (!ReferenceEquals(existing.Racer, next.Racer) || !string.Equals(existing.BestDeltaPrev, next.BestDeltaPrev, StringComparison.Ordinal))
+                {
+                    isUnchanged = false;
+                    break;
+                }
+            }
+
+            if (isUnchanged)
+            {
+                return;
+            }
+        }
+
+        _miniRacers.Clear();
+        foreach (var row in nextRows)
+        {
+            _miniRacers.Add(row);
         }
 
         OnChanged(nameof(MiniRacers));

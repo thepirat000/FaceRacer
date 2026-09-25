@@ -8,6 +8,12 @@ internal sealed class RaceMonitorState
     public RaceMonitorPanelViewModel Panel { get; } = new();
     public TrackedRacerViewModel Tracked { get; }
 
+    public bool IsTrackRacerPageVisible
+    {
+        get;
+        set;
+    }
+
     private bool _isLive = true;
     public bool IsLive
     {
