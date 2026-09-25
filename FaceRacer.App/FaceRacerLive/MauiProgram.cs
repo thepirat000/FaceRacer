@@ -1,4 +1,6 @@
-﻿using Android.Views;
+﻿#if ANDROID
+using Android.Views;
+#endif
 
 using CommunityToolkit.Maui;
 
@@ -7,9 +9,6 @@ using FaceRacerLive.Services;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Handlers;
-
-using System.Net;
-
 
 namespace FaceRacerLive;
 
