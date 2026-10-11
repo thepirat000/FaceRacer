@@ -18,7 +18,6 @@ public class FaceRacerService
 {
     public readonly RaceFacerApi _raceFacerApi;
     private AppSettings _appSettings;
-    private static readonly Dictionary<int, string> UserLastSessionCache = new();
     private static readonly RetryStrategyOptions RetryOptions = new()
     {
         Delay = TimeSpan.Zero,
@@ -258,14 +257,15 @@ public class FaceRacerService
 
     public async Task<Dictionary<int, SessionInfo>> GetUsersLastSessionAndNotifyAsync(List<int> userIds, List<INotifier> notifiers, CancellationToken cancellationToken)
     {
+        var distinctUserIds = userIds.Distinct().ToList();
         var options = new ParallelOptions { MaxDegreeOfParallelism = 5, CancellationToken = cancellationToken };
 
         var usersLastSession = new ConcurrentDictionary<int, SessionInfo>();
 
-        await Parallel.ForEachAsync(userIds, options,
+        await Parallel.ForEachAsync(distinctUserIds, options,
             async (userId, ct) =>
             {
-                var userSessionsResponse = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, _appSettings.SessionUrl, userId, 1, includeLapDetails: false, ct);
+                var userSessionsResponse = await _raceFacerApi.GetUserSessionsAsync(_appSettings.KartId, _appSettings.TrackId, _appSettings.SessionUrl, userId, maxSessions: 1, includeLapDetails: false, ct);
 
                 if (userSessionsResponse.Error || userSessionsResponse.Total == 0)
                 {
@@ -280,30 +280,60 @@ public class FaceRacerService
                 }
             });
 
-        if (!usersLastSession.IsEmpty)
+        if (usersLastSession.IsEmpty)
         {
-            Log("Running racer alerts...");
+            return usersLastSession.ToDictionary();
+        }
 
-            foreach (var userId in userIds)
+        Log("Running racer alerts...");
+
+        await using var dbContext = new DB.FaceRacerDbContext();
+        var storedLastSessions = await dbContext.RacerLastSessions
+            .Where(x => distinctUserIds.Contains(x.UserId))
+            .ToDictionaryAsync(x => x.UserId, cancellationToken);
+
+        var now = DateTime.Now;
+
+        foreach (var userId in distinctUserIds)
+        {
+            if (!usersLastSession.TryGetValue(userId, out var session))
             {
-                if (usersLastSession.TryGetValue(userId, out var session))
-                {
-                    var daysAgo = Math.Abs((DateTime.Today - session.Date.ToDateTime(TimeOnly.MinValue)).Days);
-                    
-                    if (daysAgo < _appSettings.WatchRacers.MaxDays && (!UserLastSessionCache.TryGetValue(userId, out var lastSessionId) || lastSessionId != session.SessionId))
-                    {
-                        // Notify new sessions. 
-                        foreach (var notifier in notifiers)
-                        {
-                            await notifier.NotifyLastSessionAsync(session, cancellationToken);
-                        }
+                continue;
+            }
 
-                        UserLastSessionCache[userId] = session.SessionId;
-                    }
-                }
+            if (storedLastSessions.TryGetValue(userId, out var storedSession) && storedSession.SessionId == session.SessionId)
+            {
+                continue;
+            }
+
+            foreach (var notifier in notifiers)
+            {
+                await notifier.NotifyLastSessionAsync(session, cancellationToken);
+            }
+
+            if (storedSession == null)
+            {
+                storedSession = new RacerLastSession
+                {
+                    UserId = userId,
+                    SessionId = session.SessionId,
+                    SessionDate = session.Date,
+                    LastUpdateDateTime = now
+                };
+
+                await dbContext.RacerLastSessions.AddAsync(storedSession, cancellationToken);
+                storedLastSessions[userId] = storedSession;
+            }
+            else
+            {
+                storedSession.SessionId = session.SessionId;
+                storedSession.SessionDate = session.Date;
+                storedSession.LastUpdateDateTime = now;
             }
         }
-        
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
         return usersLastSession.ToDictionary();
     }
 

@@ -92,7 +92,10 @@ public class FaceRacerJob
                 var userIds = _serverSettings.WatchRacers.UserIds;
                 try
                 {
-                    _ = userIds.Count > 0 ? await _faceRacerService.GetUsersLastSessionAndNotifyAsync(userIds, notifiers, _cts.Token) : [];
+                    if (userIds.Count > 0)
+                    {
+                        await _faceRacerService.GetUsersLastSessionAndNotifyAsync(userIds, notifiers, _cts.Token);
+                    }
                 }
                 catch (Exception e)
                 {
