@@ -8,7 +8,7 @@
 
     <!-- Title toolbar -->
     <Shell.TitleView>
-        <Grid ColumnDefinitions="*,Auto,Auto,Auto"
+        <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto"
               ColumnSpacing="10"
               Padding="6,0">
 
@@ -21,8 +21,20 @@
                    LineBreakMode="TailTruncation"
                    FontAttributes="Bold" />
 
+            <Border Grid.Column="1"
+                    Margin="0,4,10,0"
+                    WidthRequest="12"
+                    HeightRequest="12"
+                    BackgroundColor="{Binding ConnectionStatusColor}"
+                    Stroke="{AppThemeBinding Light=#1F2937, Dark=#E5E7EB}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 10"
+                    SemanticProperties.Description="Connection status indicator"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+
             <!-- Auto-track toggle -->
-            <VerticalStackLayout Grid.Column="1"
+            <VerticalStackLayout Grid.Column="2"
                                  Spacing="0"
                                  HorizontalOptions="Center"
                                  VerticalOptions="Center">
@@ -49,7 +61,7 @@
             </VerticalStackLayout>
 
             <!-- Rec. toggle -->
-            <VerticalStackLayout Grid.Column="2"
+            <VerticalStackLayout Grid.Column="3"
                                  Spacing="0"
                                  HorizontalOptions="Center"
                                  VerticalOptions="Center">
@@ -77,7 +89,7 @@
             </VerticalStackLayout>
 
             <!-- Live toggle -->
-            <VerticalStackLayout Grid.Column="3"
+            <VerticalStackLayout Grid.Column="4"
                                  Spacing="0"
                                  HorizontalOptions="Center"
                                  VerticalOptions="Center">

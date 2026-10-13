@@ -89,6 +89,12 @@ namespace FaceRacerLive.ViewModels
             set => Set(ref field, value);
         } = Colors.LimeGreen;
 
+        public Color ConnectionStatusColor
+        {
+            get;
+            set => Set(ref field, value);
+        } = Color.FromArgb("#6B7280");
+
         public void ClearRace()
         {
             Racers.Clear();

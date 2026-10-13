@@ -34,6 +34,12 @@ namespace FaceRacerLive
         private readonly RaceMonitorState _state;
         private readonly RaceMonitorPanelViewModel _vm;
 
+        private static readonly Color ConnectionStatusDefaultColor = Color.FromArgb("#6B7280");
+        private static readonly Color ConnectionStatusRequestColor = Color.FromArgb("#FFEB3B");
+        private static readonly Color ConnectionStatusSuccessColor = Color.FromArgb("#16A34A");
+        private static readonly Color ConnectionStatusErrorColor = Color.FromArgb("#DC2626");
+        private static readonly Color ConnectionStatusSimulationColor = Color.FromArgb("#7C3AED");
+
         private RaceMonitorApi? _raceMonitorApi;
 
         private SampleRaceSimulator? _raceMonitorSimulator;
@@ -321,6 +327,7 @@ namespace FaceRacerLive
             {
                 if (_raceMonitorApi is null)
                 {
+                    SetConnectionStatusColor(ConnectionStatusErrorColor);
                     AppendConsole("Live race: cannot start (race monitor not initialized).", Colors.OrangeRed);
                     LiveRaceCheckBox.IsToggled = false;
                     return;
@@ -357,6 +364,7 @@ namespace FaceRacerLive
             _previousSession = null;
 
             _raceMonitorSimulator?.ResetSimulation();
+            SetConnectionStatusColor(ConnectionStatusDefaultColor);
 
             if (_raceLoopCts is null)
             {
@@ -370,6 +378,14 @@ namespace FaceRacerLive
             AppendConsole("Live race: stopped.", Colors.LightGray);
         }
 
+        private void SetConnectionStatusColor(Color color)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                _vm.ConnectionStatusColor = color;
+            });
+        }
+
         // ##################################################
         // Main loop for fetching and updating live race date
         // ##################################################
@@ -380,6 +396,16 @@ namespace FaceRacerLive
                 try
                 {
                     var hasSimulation = SimulationSessionStore.HasSimulation();
+
+                    if (hasSimulation)
+                    {
+                        SetConnectionStatusColor(ConnectionStatusSimulationColor);
+                    }
+                    else
+                    {
+                        SetConnectionStatusColor(ConnectionStatusRequestColor);
+                    }
+
                     var session = hasSimulation ? _raceMonitorSimulator!.GetCurrentSession() : await _raceMonitorApi!.GetCurrentSession(ct);
 
                     if (hasSimulation && session == null)
@@ -388,6 +414,11 @@ namespace FaceRacerLive
                         _state.Tracked.IsLiveEnabled = false;
                         LiveRaceCheckBox.IsToggled = false;
                         return;
+                    }
+
+                    if (!hasSimulation)
+                    {
+                        SetConnectionStatusColor(ConnectionStatusSuccessColor);
                     }
 
                     // Update centralized lap history for all racers
@@ -414,8 +445,14 @@ namespace FaceRacerLive
                         await AutoCommandSession(session!);
                     }
                 }
+                catch (OperationCanceledException) when (ct.IsCancellationRequested)
+                {
+                    break;
+                }
                 catch (Exception ex)
                 {
+                    SetConnectionStatusColor(ConnectionStatusErrorColor);
+
                     await MainThread.InvokeOnMainThreadAsync(() =>
                     {
                         AppendConsole($"Race monitor {ex.GetType().Name}: {ex.Message}", Colors.OrangeRed);
