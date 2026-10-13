@@ -34,11 +34,11 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         set => Set(ref _intervalMillisecondsLiveMonitorText, value);
     }
 
-    private string _currentSessionMonitorUrl = string.Empty;
-    public string CurrentSessionMonitorUrl
+    private string _serverBaseUrl = string.Empty;
+    public string ServerBaseUrl
     {
-        get => _currentSessionMonitorUrl;
-        set => Set(ref _currentSessionMonitorUrl, value);
+        get => _serverBaseUrl;
+        set => Set(ref _serverBaseUrl, value);
     }
 
     private string _autoTrackFullName = string.Empty;
@@ -46,13 +46,6 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
     {
         get => _autoTrackFullName;
         set => Set(ref _autoTrackFullName, value);
-    }
-
-    private string _monitorRankingUrl = string.Empty;
-    public string MonitorRankingUrl
-    {
-        get => _monitorRankingUrl;
-        set => Set(ref _monitorRankingUrl, value);
     }
 
     private string? _validationError;
@@ -75,9 +68,8 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         MoveTrackedRacerToTheTop = AppSettings.MoveTrackedRacerToTheTop;
         IntervalMillisecondsLiveMonitorText = AppSettings.IntervalMillisecondsLiveMonitor.ToString();
         BigTextTimeFormat = AppSettings.BigTextTimeFormat;
-        CurrentSessionMonitorUrl = AppSettings.CurrentSessionMonitorUrl;
+        ServerBaseUrl = AppSettings.ServerBaseUrl;
         AutoTrackFullName = AppSettings.AutoTrackFullName;
-        MonitorRankingUrl = AppSettings.MonitorRankingUrl;
         SimulationZipStatus = IsSimulation
             ? FaceRacerLive.Monitor.SimulationSessionStore.TryGetZipFileName()
             : null;
@@ -104,9 +96,8 @@ internal sealed class SettingsViewModel : INotifyPropertyChanged
         AppSettings.MoveTrackedRacerToTheTop = MoveTrackedRacerToTheTop;
         AppSettings.IntervalMillisecondsLiveMonitor = ms;
         AppSettings.BigTextTimeFormat = BigTextTimeFormat?.Trim() ?? "0.0";
-        AppSettings.CurrentSessionMonitorUrl = (CurrentSessionMonitorUrl ?? string.Empty).Trim();
+        AppSettings.ServerBaseUrl = (ServerBaseUrl ?? string.Empty).Trim();
         AppSettings.AutoTrackFullName = (AutoTrackFullName ?? string.Empty).Trim();
-        AppSettings.MonitorRankingUrl = (MonitorRankingUrl ?? string.Empty).Trim();
 
         // Update the shared RaceMonitorPanelViewModel
         var state = Application.Current!.Handler!.MauiContext!.Services.GetService<RaceMonitorState>();

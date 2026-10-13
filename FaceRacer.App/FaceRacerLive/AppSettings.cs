@@ -3,19 +3,19 @@
     public class AppSettings
     {
         private const string IntervalMillisecondsLiveMonitorKey = "AppSettings.IntervalMillisecondsLiveMonitor";
-        private const string CurrentSessionMonitorUrlKey = "AppSettings.CurrentSessionMonitorUrl";
-        private const string NextSessionsMonitorUrlKey = "AppSettings.NextSessionsMonitorUrl";
         private const string AutoTrackFullNameKey = "AppSettings.AutoTrackFullName";
-        private const string MonitorRankingUrlKey = "AppSettings.MonitorRankingUrl";
+        private const string ServerBaseUrlKey = "AppSettings.ServerBaseUrl";
+
+        private const string CurrentSessionMonitorPath = "/ajax/monitors/current-session-monitor";
+        private const string NextSessionsMonitorPath = "/ajax/monitors/next-sessions";
+        private const string MonitorRankingPath = "/es/monitors/monitor-ranking";
+        private const string MonitorCurrentSessionsPath = "/es/monitors/monitor-current-sessions";
 
         public const int IntervalMillisecondsLiveMonitorDefault = 700;
         public const int IntervalMillisecondsLiveMonitorMin = 0;
         public const int IntervalMillisecondsLiveMonitorMax = 10000;
 
-        public const string CurrentSessionMonitorUrlDefault = "http://192.168.10.174/ajax/monitors/current-session-monitor";
-        public const string MonitorRankingUrlDefault = "http://192.168.10.174/es/monitors/monitor-ranking";
-        public const string MonitorCurrentSessionsDefault = "http://192.168.10.174/es/monitors/monitor-current-sessions";
-        public const string NextSessionsMonitorUrlDefault = "http://192.168.10.174/ajax/monitors/next-sessions";
+        public const string ServerBaseUrlDefault = "http://192.168.10.174";
 
         private static string _bigTextTimeFormat = "0.0";
 
@@ -80,22 +80,55 @@
             set => Preferences.Default.Set(AutoTrackFullNameKey, (value ?? string.Empty).Trim());
         }
 
+        public static string ServerBaseUrl
+        {
+            get => NormalizeBaseUrl(Preferences.Default.Get(ServerBaseUrlKey, ServerBaseUrlDefault));
+            set => Preferences.Default.Set(ServerBaseUrlKey, NormalizeBaseUrl(value));
+        }
+
         public static string CurrentSessionMonitorUrl
         {
-            get => Preferences.Default.Get(CurrentSessionMonitorUrlKey, CurrentSessionMonitorUrlDefault);
-            set => Preferences.Default.Set(CurrentSessionMonitorUrlKey, value ?? string.Empty);
+            get => BuildUrl(ServerBaseUrl, CurrentSessionMonitorPath);
+            set => ServerBaseUrl = value;
         }
 
         public static string NextSessionsMonitorUrl
         {
-            get => Preferences.Default.Get(NextSessionsMonitorUrlKey, NextSessionsMonitorUrlDefault);
-            set => Preferences.Default.Set(NextSessionsMonitorUrlKey, value ?? string.Empty);
+            get => BuildUrl(ServerBaseUrl, NextSessionsMonitorPath);
+            set => ServerBaseUrl = value;
         }
 
         public static string MonitorRankingUrl
         {
-            get => Preferences.Default.Get(MonitorRankingUrlKey, MonitorRankingUrlDefault);
-            set => Preferences.Default.Set(MonitorRankingUrlKey, value ?? string.Empty);
+            get => BuildUrl(ServerBaseUrl, MonitorRankingPath);
+            set => ServerBaseUrl = value;
         }
+
+        public static string MonitorCurrentSessionsUrl => BuildUrl(ServerBaseUrl, MonitorCurrentSessionsPath);
+
+        private static string NormalizeBaseUrl(string? serverBaseUrl)
+        {
+            var trimmed = (serverBaseUrl ?? string.Empty).Trim();
+
+            if (trimmed.Length == 0)
+            {
+                return ServerBaseUrlDefault;
+            }
+
+            if (Uri.TryCreate(trimmed, UriKind.Absolute, out var uri))
+            {
+                return uri.GetLeftPart(UriPartial.Authority).TrimEnd('/');
+            }
+
+            return trimmed.TrimEnd('/');
+        }
+
+        private static string BuildUrl(string serverBaseUrl, string relativePath)
+        {
+            var baseUrl = NormalizeBaseUrl(serverBaseUrl);
+            var path = relativePath.TrimStart('/');
+            return $"{baseUrl}/{path}";
+        }
+
     }
 }

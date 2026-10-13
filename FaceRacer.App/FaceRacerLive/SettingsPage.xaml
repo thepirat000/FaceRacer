@@ -96,9 +96,9 @@
                     Background="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
 
                 <VerticalStackLayout Style="{StaticResource FormSectionStyle}">
-                    <Label Text="Monitor URL" Style="{StaticResource FormLabelStyle}" />
+                    <Label Text="Server base URL" Style="{StaticResource FormLabelStyle}" />
 
-                    <Editor Text="{Binding CurrentSessionMonitorUrl}"
+                    <Editor Text="{Binding ServerBaseUrl}"
                             Keyboard="Url"
                             Style="{StaticResource FormEditorStyle}"
                             IsEnabled="True">
@@ -111,20 +111,6 @@
                             </DataTrigger>
                         </Editor.Triggers>
                     </Editor>
-                </VerticalStackLayout>
-            </Border>
-
-            <Border Padding="10,4,10,4"
-                    StrokeShape="RoundRectangle 12"
-                    Stroke="{AppThemeBinding Light=#E5E7EB, Dark=#374151}"
-                    Background="{AppThemeBinding Light=#FFFFFF, Dark=#111827}">
-
-                <VerticalStackLayout Style="{StaticResource FormSectionStyle}">
-                    <Label Text="Ranking URL" Style="{StaticResource FormLabelStyle}" />
-
-                    <Editor Text="{Binding MonitorRankingUrl}"
-                            Keyboard="Url"
-                            Style="{StaticResource FormEditorStyle}" />
                 </VerticalStackLayout>
             </Border>
 

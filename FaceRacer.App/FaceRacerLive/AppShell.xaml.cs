@@ -31,7 +31,7 @@
         {
             FlyoutIsPresented = false;
 
-            var url = AppSettings.MonitorCurrentSessionsDefault;
+            var url = AppSettings.MonitorCurrentSessionsUrl;
 
             await Launcher.Default.OpenAsync(url);
         }
