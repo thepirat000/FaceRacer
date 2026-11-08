@@ -55,11 +55,17 @@ public sealed class RaceMonitorApi
 
         using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
+        var timestamp = DateTime.Now;
+
         response.EnsureSuccessStatusCode();
 
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
-        return await JsonSerializer.DeserializeAsync<SessionData>(stream, SerializerOptions, cancellationToken);
+        var sessionData = await JsonSerializer.DeserializeAsync<SessionData>(stream, SerializerOptions, cancellationToken);
+
+        sessionData?.Timestamp = timestamp;
+
+        return sessionData;
     }
 
     public async Task<NextSessionsResponse?> GetNextSessionsAsync(string nextSessionsMonitorUrl, CancellationToken cancellationToken)

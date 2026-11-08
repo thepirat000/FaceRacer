@@ -46,4 +46,6 @@ public class SessionData
     /// Total laps for the session shared by all racers (when lap-based sessions are used).
     /// </summary>
     public int? total_laps_for_all { get; set; }
+
+    public DateTime? Timestamp { get; set; }
 }
